@@ -57,7 +57,7 @@ _EOUSAGE_
 my $WORKING_DIR = cwd();				# current folder : working folder
 my $BIN_DIR = ${FindBin::RealBin};			# bin folder
 my $result_dir = $WORKING_DIR."/result";		# result folder
-my $tf = $WORKING_DIR."\temp";				# temp folder
+my $tf = $WORKING_DIR."/temp";				# temp folder
 
 my $DATABASE_DIR = ${FindBin::RealBin}."/../databases";	# database folder
 my $seq_info  = $DATABASE_DIR."/vrl_genbank.info.gz";	# virus sequence info
@@ -88,13 +88,13 @@ my $novel_check = 1;			# enable novel check (this parameter is fixed)
 my $word_size = 11;
 my $cpu_num = 8;				# megablast: thread number
 my $mis_penalty = -3;			# megablast: penalty for mismatch
-my $gap_cost = -1;				# megablast: penalty for gap open
-my $gap_extension = -1;			# megablast: penalty for gap extension
+my $gap_cost = 1;				# megablast: penalty for gap open
+my $gap_extension = 1;			# megablast: penalty for gap extension
 my $exp_value = 1e-5;			# for blastn
 my $exp_valuex = 1e-2;			# for blastx
 my $identity_percen = 25;		# for blastx: hsp_identity cutoff for protein blast
 
-my $filter_query = "F";			# megablast: F - disable remove simple sequence
+my $filter_query = "no";			# megablast: F - disable remove simple sequence
 my $hits_return = 500;			# megablast: hit number
 my $input_suffix = '';
 my $siRNA_percent = 0.5;		#
@@ -154,12 +154,13 @@ main: {
 	die "[ERROR]undef input reads: $sample\n$usage" unless -s $sample;
 	die "[ERROR]undef input contig: $contig\n$usage" unless -s $contig;
 
-	Util::process_cmd("$BIN_DIR/formatdb -i $reference -p F") unless (-e "$reference.nhr");
+	Util::process_cmd("$BIN_DIR/makeblastdb -in $reference -dbtype nucl -logfile makeblastdb.log") unless (-e "$reference.nhr");
 	# create result folder according to sample name, copy contig to result folder
 	my $sample_base = basename($sample);
-	my $sample_dir = $result_dir."_".$sample_base; print $sample_dir . "\n" . $result_dir . " " .$sample_base;
+	my $sample_dir = $result_dir."_".$sample_base;
+	$sample_dir =~ s/\//\\/g; 
 	Util::process_cmd("mkdir $sample_dir", $debug) unless -e $sample_dir;
-	Util::process_cmd("cp $contig $sample_dir/contig_sequences.fa", $debug);
+	Util::process_cmd("copy $contig $sample_dir\\contig_sequences.fa", $debug);
 
 	# load contig info to hash; 
 	# key1: seqID, 
@@ -197,10 +198,11 @@ main: {
 	#    4. get know blast result with known contigs
 	#
 	# 3. exit if known contig identified
-	my $blast_program = $BIN_DIR."/megablast";
+	my $blast_program = $BIN_DIR."/blastn";
 	my $blast_output  = "$contig.blastn.paired";
-	my $blast_param   = "-F $filter_query -a $cpu_num -W $word_size -q $mis_penalty -G $gap_cost -E $gap_extension -b $hits_return -e $exp_value";
-	Util::process_cmd("$blast_program -i $contig -d $reference -o $blast_output $blast_param", $debug) unless -s $blast_output;
+	#my $blast_param   = "-F $filter_query -a $cpu_num -W $word_size -q $mis_penalty -G $gap_cost -E $gap_extension -b $hits_return -e $exp_value";
+	my $blast_param = "-dust $filter_query -num_threads $cpu_num -word_size $word_size -penalty $mis_penalty -gapopen $gap_cost -gapextend $gap_extension -num_alignments $hits_return -evalue $exp_value";
+	Util::process_cmd("$blast_program -query $contig -db $reference -out $blast_output $blast_param", $debug) unless -s $blast_output; print "\n\n$blast_output\n\n";
 	my $blast_table  = Util::parse_blast_to_table($blast_output, $blast_program);
 	my $raw_blast_table = $blast_table;
 
@@ -321,7 +323,7 @@ main: {
 	else
 	{ 
 		# create file 'no_known_virus_detected' if there is no contig meet cutoff of known virus
-		Util::process_cmd("touch $sample_dir/no_virus_detected_by_blastn", $debug);
+		Util::process_cmd("echo.> $sample_dir/no_virus_detected_by_blastn", $debug);
 		Util::print_user_submessage("No virus was identified by nucleotide similarity (BLASTN)");	
 	}
 	############################################
@@ -353,12 +355,14 @@ main: {
 	{
 		# compare noval contigs against virus database using tblastx
 		$blast_output = "$sample.novel.paired";
-		$blast_program = $BIN_DIR."/blastall -p blastx";
-		$blast_param = "-F $filter_query -a $cpu_num -e $exp_valuex"; # change back to setting evalue as user suggest
+		#$blast_param = "-F $filter_query -a $cpu_num -e $exp_valuex"; # change back to setting evalue as user suggest
+		$blast_program = $BIN_DIR."/blastx";
+		$blast_param = "-num_threads $cpu_num -evalue $exp_valuex"; # change back to setting evalue as user suggest
 																	  # the default, 1e-2 for sRNA, 1e-5 for mRNA
 		#$blast_param = "-F $filter_query -a $cpu_num -e 1e-2"; # change as Fei suggestion Feb 05				
 		my $reference_prot = $reference."_prot"; 
-		Util::process_cmd("$blast_program -i $novel_contig -d $reference_prot -o $blast_output $blast_param", $debug) unless -s $blast_output;
+		#Util::process_cmd("$blast_program -i $novel_contig -d $reference_prot -o $blast_output $blast_param", $debug) unless -s $blast_output;
+		Util::process_cmd("$blast_program -query $novel_contig -db $reference_prot -out $blast_output $blast_param", $debug) unless -s $blast_output;
 
 		my $blast_novel_table = Util::parse_blast_to_table($blast_output, $blast_program);
 		$raw_blast_novel_table = $blast_novel_table;
@@ -372,8 +376,8 @@ main: {
 		# exit if no blast table was generated
 		unless (length $blast_novel_table > 1 )
 		{
-			Util::process_cmd("touch $sample_dir/no_virus_detected_by_blastx", $debug);
-			Util::process_cmd("cp $novel_contig $sample_dir/undetermined.contigs.fa", $debug);
+			Util::process_cmd("echo.> $sample_dir/no_virus_detected_by_blastx", $debug);
+			Util::process_cmd("copy $novel_contig $sample_dir/undetermined.contigs.fa", $debug);
 			exit;
 		}
 
@@ -667,9 +671,9 @@ sub get_contig_mapped_depth
 	my $log = $sample."_bwa.log";
 	my $parameters = "-n 1 -o 1 -e 1 -i 0 -l 15 -k 1 -t $cpu_num";
 	my $bwa_mhit_param = "-n 10000";
-	Util::process_cmd("$BIN_DIR/bwa index -p $contig -a bwtsw $contig 1> $log 2>> $log", $debug);
-	Util::process_cmd("$BIN_DIR/bwa aln $parameters $contig $sample 1> $sai 2>> $log", $debug);
-	Util::process_cmd("$BIN_DIR/bwa samse $bwa_mhit_param $contig $sai $sample 1> $sample.sam 2>> $log", $debug);
+	Util::process_cmd("$BIN_DIR/bwa index -p $contig -a bwtsw $contig 1> $log", $debug);
+	Util::process_cmd("$BIN_DIR/bwa aln $parameters $contig $sample 1> $sai", $debug);
+	Util::process_cmd("$BIN_DIR/bwa samse $bwa_mhit_param $contig $sai $sample 1> $sample.sam", $debug);
 	Util::xa2multi("$sample.sam");
 
 	# save map sRNA stat to hash
@@ -700,7 +704,7 @@ sub get_contig_mapped_depth
 
 	Util::process_cmd("$BIN_DIR/samtools faidx $contig");
 	Util::process_cmd("$BIN_DIR/samtools view -bt $contig.fai $sample.sam > $sample.bam 2>$sample.samtools.log");
-	Util::process_cmd("$BIN_DIR/samtools sort $sample.bam $sample.sorted 2>$sample.samtools.log");
+	Util::process_cmd("$BIN_DIR/samtools sort $sample.bam -o $sample.sorted.bam 2>$sample.samtools.log");
 	Util::process_cmd("$BIN_DIR/samtools mpileup -f $contig $sample.sorted.bam > $sample.pileup 2>$sample.samtools.log"); 
 	# parse pileup file to save depth info to hash
 	# key: ref_id, mean, total. cover

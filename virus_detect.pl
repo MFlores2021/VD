@@ -10,8 +10,7 @@ use FindBin;
 #use Mail::Sendmail;
 use lib "$FindBin::RealBin/bin";
 use Util;
-use align;
-
+use align; 
 my $usage = <<_EOUSAGE_;
 
 Usage: perl virus_detect.pl [option] --reference reference input1 input2 ...
@@ -81,7 +80,7 @@ _EOUSAGE_
 # basic options
 my $reference= "vrl_plant";		# virus sequence
 my $host_reference;       		# host reference
-my $thread_num = 8; 			# thread number
+my $thread_num = 1; 			# thread number
 my $rm_dup;						# remove duplicate
 my $kmer_range = "9-23";		# kmer range
 
@@ -101,8 +100,8 @@ my $min_overlap = 30; 			# minimum overlap for hsp combine
 my $max_end_clip = 6; 			# max end clip for hsp combine
 my $min_identity = 97;			# mininum identity for remove redundancy contigs
 my $mis_penalty = -3;     		# megablast mismatch penlty, minus integer
-my $gap_cost = -1;         		# megablast gap open cost, plus integer
-my $gap_extension = -1;    		# megablast gap extension cost, plus integer
+my $gap_cost = 1;         		# megablast gap open cost, plus integer
+my $gap_extension = 1;    		# megablast gap extension cost, plus integer
 my $cpu_num = 8;
 
 # paras for blast && identification 
@@ -111,10 +110,10 @@ my $exp_value = 1e-5;			#
 my $exp_valuex = 1e-2;			# 
 my $percent_identity = 25;		# percent identity for tblastx
 my $mis_penalty_b = -3;			# megablast mismatch penlty, minus integer
-my $gap_cost_b = -1;				# megablast gap open cost, plus integer
-my $gap_extension_b = -1;		# megablast gap extension cost, plus integer
+my $gap_cost_b = 1;				# megablast gap open cost, plus integer
+my $gap_extension_b = 1;		# megablast gap extension cost, plus integer
 
-my $filter_query = "F";			# megablast switch for remove simple sequence
+my $filter_query = "no";			# megablast switch for remove simple sequence
 my $hits_return = 500;			# megablast number of hit returns
 
 # paras for result filter
@@ -214,9 +213,9 @@ if ( $host_reference ) {
 
 	my @host_db = ("$host_reference.nhr", "$host_reference.nin", "$host_reference.nsq");
 	foreach my $h (@host_db) {
-		unless(-s $h) {
-			my $formatdb_bin = $BIN_DIR."/formatdb";
-			my $cmd_format_host = "$formatdb_bin -i $host_reference -p F";
+		unless(-s $h) { 
+			my $formatdb_bin = $BIN_DIR."/makeblastdb";
+			my $cmd_format_host = "$formatdb_bin -in $host_reference -dbtype nucl -logfile makeblastdb.log";
 			Util::process_cmd($cmd_format_host, $debug);
 			last;
 		}
@@ -232,10 +231,8 @@ die "[ERR]kmer range: $kmer_range\n" if $kmer_min > $kmer_max;
 # main
 foreach my $sample (@ARGV) 
 {
-	$sample =~ s/\//\\/g; 
 	# parse zip file
 	if ($sample =~ m/\.gz$/) {
-		#system("gzip $sample") && die "[ERR]unzip file $sample\n";
 		Util::process_cmd("$BIN_DIR/gzip $sample", $debug);
 		$sample =~ s/\.gz$//;
 	}
@@ -251,7 +248,8 @@ foreach my $sample (@ARGV)
 	
 	my $sample_base = basename($sample);
 	# set path and folder for sample
-	my $TEMP_DIR      = $WORKING_DIR."/".$sample_base."_temp"; $TEMP_DIR =~ s/\//\\/g; 	# set temp folder
+	my $TEMP_DIR      = $WORKING_DIR."/".$sample_base."_temp";	# set temp folder
+	$TEMP_DIR =~ s/\//\\/g; 
 	print "Working: $WORKING_DIR\nDatabase: $DATABASE_DIR\nBin: $BIN_DIR\nTemp: $TEMP_DIR\n" if $debug;
 
 	# create temp folder and create link for sample
@@ -259,12 +257,14 @@ foreach my $sample (@ARGV)
 	my $sample_abs_source;
 	if ($sample =~ m/^\//) { $sample_abs_source = $sample; }
 	else { $sample_abs_source = "$WORKING_DIR/$sample"; }
+	$sample_abs_source =~ s/\//\\/g; 
 
 	# process input sample [select 18-32 nt reads]
 	if (defined $read_length) {
-		Util::srna_range($read_length, $sample_abs_source, "$TEMP_DIR\\$sample_base");	
+		Util::srna_range($read_length, $sample_abs_source, "$TEMP_DIR/$sample_base");	
 	} else {
-		$sample_abs_source =~ s/\//\\/g; 
+		#Util::process_cmd("ln -s $sample_abs_source $TEMP_DIR/$sample_base", $debug) unless -e "$TEMP_DIR/$sample_base";
+		#Util::process_cmd("mklink /d $TEMP_DIR\\$sample_base $sample_abs_source", $debug) unless -e "$TEMP_DIR/$sample_base";
 		Util::process_cmd("copy $sample_abs_source $TEMP_DIR\\$sample_base", $debug) unless -e "$TEMP_DIR/$sample_base";
 	}
 	$sample = "$TEMP_DIR/$sample_base";             # change the sample name to the linke from this step
@@ -272,18 +272,18 @@ foreach my $sample (@ARGV)
 	# set parameters for remove reduncancy (rr)
 	my $rr_blast_word_size = int($min_overlap/3);
 	my $rr_hits_returns = 10;
-	my $rr_blast_parameters = "-F F -a $thread_num -W $rr_blast_word_size -q $mis_penalty -G $gap_cost -E $gap_extension -b $rr_hits_returns";
-	if ($strand_specific) { $rr_blast_parameters .=" -S 1"; }
+	#my $rr_blast_parameters = "-F F -a $thread_num -W $rr_blast_word_size -q $mis_penalty -G $gap_cost -E $gap_extension -b $rr_hits_returns";
+	my $rr_blast_parameters = "-dust no -num_threads $thread_num -word_size $rr_blast_word_size -penalty $mis_penalty -gapopen $gap_cost -gapextend $gap_extension -num_alignments $rr_hits_returns";
+	if ($strand_specific) { $rr_blast_parameters .=" -strand plus"; }
 
 	# part A: 1. align reads to plant virus; 2. extract aligned seqs; 3. remove redundancy contigs
 	my $align_parameters = "-n $max_dist -o $max_open -e $max_extension -i 0 -l $len_seed -k $dist_seed -t $thread_num";
-	my $align_program    = "$BIN_DIR/bwa"; $align_program =~ s/\//\\/g; 
+	my $align_program    = "$BIN_DIR/bwa";
 
 	print "Align Program: $align_program\nAlign Parameters: $align_parameters\nAlign Input File: $sample\nAlign Output File: $sample.sam\n" if $debug;
 
 	print ("####################################################################\nprocess sample $sample_base (total read: $seq_num)\n");
-	print ("Align reads to reference virus sequence database");
-	#	Util::print_user_message("Align reads to reference virus sequence database");
+	Util::print_user_message("Align reads to reference virus sequence database");
 	align::align_to_reference($align_program, $sample, $reference, "$sample.sam", $align_parameters, 10000, $TEMP_DIR, $debug);
 	my $mapped_num = align::filter_SAM($sample.".sam");	# filter out unmapped, 2nd hits, only keep the best hit
 
@@ -292,7 +292,7 @@ foreach my $sample (@ARGV)
 		Util::process_cmd("$BIN_DIR/samtools view -bt $reference.fai $sample.sam > $sample.bam 2> $TEMP_DIR/samtools.log", $debug) unless (-s "$sample.bam");
 		Util::process_cmd("$BIN_DIR/samtools sort $sample.bam -o $sample.sorted.bam 2> $TEMP_DIR/samtools.log", $debug) unless (-s "$sample.sorted.bam");
 		Util::process_cmd("$BIN_DIR/samtools mpileup -f $reference $sample.sorted.bam > $sample.pre.pileup 2> $TEMP_DIR/samtools.log", $debug) unless (-s "$sample.pre.pileup");
-		align::pileup_filter("$BIN_DIR","$sample.pre.pileup", "$seq_info", "$coverage", "$sample.pileup", $debug) unless (-s "$sample.pileup");	# filter pileup file 
+		align::pileup_filter("$sample.pre.pileup", "$seq_info", "$coverage", "$sample.pileup", "$BIN_DIR", $debug) unless (-s "$sample.pileup");	# filter pileup file 
 
 		# parameter fo pileup_to_contig: input_contig input pileup, output, min_len, min_depth, prefix
 		align::pileup_to_contig($reference, "$sample.pileup", "$sample.aligned", 40, 0, 'ALIGNED') if -s "$sample.pileup";
@@ -325,7 +325,7 @@ foreach my $sample (@ARGV)
 
 			my $total_num = 0;
 			my $unmap_num = 0;
-			my $hisat_rpt = `cat $sample.hisat.report.txt`;
+			my $hisat_rpt = `type $sample.hisat.report.txt`;
 			if ($hisat_rpt =~ m/(\d+) reads; of these:/) { $total_num = $1; }
 			if ($hisat_rpt =~ m/\s+(\d+) .*aligned 0 times/) { $unmap_num = $1; }
 			my $mapped_num = $total_num - $unmap_num;
@@ -369,10 +369,10 @@ foreach my $sample (@ARGV)
 				Util::print_user_submessage("$denovo_ctg contig was assembled");
 			}
 
-		    my $blast_program = $BIN_DIR."/megablast";
+		    my $blast_program = $BIN_DIR."/blastn";
  			my $blast_output  = "$sample.assembled.blast";
-			my $blast_param   = "-p 90 -F $filter_query -a $cpu_num -W $word_size -q $mis_penalty -G $gap_cost -E $gap_extension -b $hits_return -e $exp_value";
-    		Util::process_cmd("$blast_program -i $sample.assembled -d $host_reference -o $blast_output $blast_param", $debug) unless -s $blast_output;
+    		my $blast_param = "-perc_identity 90 -dust $filter_query -num_threads $cpu_num -word_size $word_size -penalty $mis_penalty -gapopen $gap_cost -gapextend $gap_extension -num_alignments $hits_return -evalue $exp_value";
+    		Util::process_cmd("$blast_program -query $sample.assembled -db $host_reference -out $blast_output $blast_param", $debug) unless -s $blast_output;
 			#system("cat $sample.assembled");
 			#print $blast_param."\n";
 			my $blast_table  = Util::parse_blast_to_table($blast_output, $blast_program);
@@ -395,11 +395,12 @@ foreach my $sample (@ARGV)
 	Util::print_user_message("Remove redundancies in virus contigs");
 
 	if (-s "$sample.aligned" && -s "$sample.assembled") {
-		Util::process_cmd("cat $sample.aligned $sample.assembled > $sample.combined", $debug);
+		$sample =~ s/\//\\/g; 
+		Util::process_cmd("type $sample.aligned $sample.assembled > $sample.combined", $debug);
 	} elsif ( -s "$sample.aligned" ) { 
-		Util::process_cmd("cp $sample.aligned $sample.combined", $debug);
+		Util::process_cmd("copy $sample.aligned $sample.combined", $debug);
 	} elsif ( -s "$sample.assembled" ) {
-		Util::process_cmd("cp $sample.assembled $sample.combined", $debug);
+		Util::process_cmd("copy $sample.assembled $sample.combined", $debug);
 	}
 
 	if (-s "$sample.combined") {
@@ -412,10 +413,10 @@ foreach my $sample (@ARGV)
 			} else {
 				Util::print_user_submessage("$denovo_ctg contig was assembled");
 			}
-			my $blast_program = $BIN_DIR."/megablast";
+			my $blast_program = $BIN_DIR."/blastn";
 			my $blast_output  = "$sample.combined.blast";
-			my $blast_param   = "-p 90 -F $filter_query -a $cpu_num -W $word_size -q $mis_penalty -G $gap_cost -E $gap_extension -b $hits_return -e $exp_value";
-			Util::process_cmd("$blast_program -i $sample.combined -d $host_reference -o $blast_output $blast_param", $debug) unless -s $blast_output;
+			my $blast_param = "-perc_identity 90 -dust $filter_query -num_threads $cpu_num -word_size $word_size -penalty $mis_penalty -gapopen $gap_cost -gapextend $gap_extension -num_alignments $hits_return -evalue $exp_value"; 
+			Util::process_cmd("$blast_program -query $sample.combined -db $host_reference -out $blast_output $blast_param", $debug) unless -s $blast_output;
 			my $blast_table  = Util::parse_blast_to_table($blast_output, $blast_program);
 			my %subtract = Util::host_subtraction("$sample.combined", $blast_table, 90, 70);
 			my $sub_num = scalar(keys(%subtract));
@@ -435,7 +436,7 @@ foreach my $sample (@ARGV)
 	# identify the virus
 
 	Util::print_user_message("Virus identification");
-	my $cmd_identify = "$BIN_DIR/virus_identify.pl --reference $reference ";
+	my $cmd_identify = "perl $BIN_DIR/virus_identify.pl --reference $reference ";
 	$cmd_identify .= "--word-size $word_size --exp-value $exp_value --exp-valuex $exp_valuex --percent-identity $percent_identity ";
 	$cmd_identify .= "--cpu-num $thread_num --mis-penalty $mis_penalty_b --gap-cost $gap_cost_b --gap-extension $gap_extension_b ";
 	$cmd_identify .= "--hsp-cover $hsp_cover --diff-ratio $diff_ratio --diff-contig-cover $diff_contig_cover --diff-contig-length $diff_contig_length ";
@@ -453,7 +454,7 @@ foreach my $sample (@ARGV)
 	# delete temp files and log files 
 	unlink("error.log", "formatdb.log");
 	unless ($debug) {
-		system("rm -r $TEMP_DIR") if -s $TEMP_DIR;
+		system("rd /s /q $TEMP_DIR") if -s $TEMP_DIR;
 	}
 	Util::print_user_message("Finished");
 	print ("####################################################################\n\n");

@@ -288,8 +288,9 @@ sub host_subtraction
 =cut
 sub xa2multi
 {
-	my $input_sam = shift; $input_sam =~ s/\//\\/g; 
-	my $tem_sam = $input_sam.".temp";	
+	my $input_sam = shift;
+	$input_sam =~ s/\//\\/g; 
+	my $tem_sam = $input_sam.".temp";
 
 	my $out = IO::File->new(">".$tem_sam) || die $!;
 	my $in = IO::File->new($input_sam) || die $!;
@@ -440,13 +441,13 @@ sub parse_blast_to_table
 	# output table title
 	my $output_table = "#query_name\tquery_length\thit_name\thit_length\thsp_length\tidentity\tevalue\tscore\tstrand".
 			   "\tquery_start\tquery_end\thit_start\thit_end\tidentity2\taligned_query\taligned_hit\taligned_string\n";
-
+my $length_reset = 0;
 	open(IN, "$input_blast") || die $!;
 	while (<IN>) 
 	{
 		chomp;
 		if (/Query=\s(\S+)/ || eof) # output all hsp info if the line has new Query name, or End of file 
-		{
+		{	
 			# previous hsp information
 			if ($hsp_count > 0) 
 			{
@@ -471,14 +472,16 @@ sub parse_blast_to_table
 			# start new query record
 			%hsp = ();$hsp_count = 0;
 
-			$query_name = $1; $query_length = ""; $hit_name = ""; $hit_length = "";
+			$query_name = $1; $query_length = ""; $hit_name = ""; $hit_length = ""; $length_reset =0;
 		}
-		elsif (/\s+\((\S+)\sletters\)/) # get Query Length
+		#elsif (/\s+\((\S+)\sletters\)/) # get Query Length
+		elsif (/Length=(\S+)/ && $length_reset==0) # get Query Length
 		{
 			$query_length = $1;
 			$query_length =~ s/,//g;
+			$query_length =~ s/ //g;
 		}
-		elsif (/>(\S+)/)# Hit Name, parse hit info
+		elsif (/> (\S+)/)# Hit Name, parse hit info
 		{
 			# previous hsp information
 			if ($hsp_count > 0 || eof)
@@ -491,13 +494,14 @@ sub parse_blast_to_table
 			}
 
 			# start new hit
-			$hit_name = $1; $hit_length = "";
+			$hit_name = $1; $hit_length = ""; $length_reset=1;
 
 		}
-		elsif (/\s+Length = (\d+)/)
+		elsif (/Length=(\d+)/ && $length_reset==1)
 		{
 			$hit_length = $1;
 			$hit_length =~ s/,//g;
+			$hit_length =~ s/ //g;
 		}
 		elsif (/Score =\s+(\S+) bits.+Expect(\(\d+\))? = (\S+)/) # parse hsp info
 		{
@@ -526,7 +530,7 @@ sub parse_blast_to_table
 			if ( $1 > $2 ) { $hsp_length = $1; $hsp_length =~ s/,//g; } else { $hsp_length = $2; $hsp_length =~ s/,//g; }
 			$identity2 = $1."/".$2."(".$3.")";
 		}
-		elsif (/\s+Strand = (\S+) \/ (\S+)/ && $hsp_count >= 1 ) 		# strand info
+		elsif (/\s+Strand=(\S+)\/(\S+)/ && $hsp_count >= 1 ) 		# strand info
 		{
 			die "[ERR]Unmatch blast:$blast\t$_\n" if $blast ne 'blastn';
 			if ( $2 eq "Plus" ) { $strand = 1;} else { $strand = -1;}
@@ -1991,3 +1995,6 @@ srna_range(read_length, input, output);
 }
 
 1;
+
+#my $abc = parse_blast_to_table("C:/Users/User/Documents/OVD_test/test_data_temp/test_data.combined.blastn.paired","C:/Users/User/Documents/OVD_test/bin/blastn.exe");
+#print $abc;

@@ -19,7 +19,7 @@ use Util;
 sub align_to_reference
 {
 	my ($align_program, $input_file, $reference, $output_file, $parameters, $mhit_num, $temp_folder, $debug) = @_;
-	$output_file =~ s/\//\\/g; 
+
 	# align for bwa
 	if ($align_program =~ m/bwa/)
 	{
@@ -90,7 +90,8 @@ sub generate_unmapped_reads
 =cut
 sub filter_SAM
 {
-        my $input_SAM = shift; $input_SAM =~ s/\//\\/g; 
+        my $input_SAM = shift;
+        $input_SAM =~ s/\//\\/g; 
 
         my $temp_SAM = $input_SAM.".temp";
         my ($total_count, $filtered_count) = (0, 0);
@@ -197,11 +198,10 @@ sub filter_SAM
 =head2
 	pileup_filter -- filter the pileup file by coverage (sRNA aligned)
 	20140712: the input and output file is same
-
 =cut
 sub pileup_filter
 {
-	my ($bin_dir,$input_pileup, $virus_seq_info, $coverage, $output_pileup) = @_;
+	my ($input_pileup, $virus_seq_info, $coverage, $output_pileup, $bin_dir) = @_;
 
 	# put plant virus sequence length to hash
 	my %seq_len;
@@ -215,11 +215,11 @@ sub pileup_filter
 
 	while(<$fh1>) {
 		chomp;
-		next if $_ =~ m/^#/; 
+		next if $_ =~ m/^#/;
 		# ID Len Desc
 		# AB000048 2007 Parvovirus Feline panleukopenia virus gene ...... 1 Vertebrata
 		my @a = split(/\t/, $_);
-		$seq_len{$a[0]} = $a[1];  
+		$seq_len{$a[0]} = $a[1];
 	}
 	close($fh1);
 
@@ -611,7 +611,8 @@ sub velvet_optimiser_combine
 				$opt_avgLen = $aa->{avgLen};
 			}
 		}
-		Util::process_cmd("rm $current_folder -r", $debug);		
+		$current_folder =~ s/\//\\/g; 
+		Util::process_cmd("rd /s /q $current_folder", $debug);		
 	} 
 
 	# optimize coverage using fixed k-mer length
@@ -636,7 +637,8 @@ sub velvet_optimiser_combine
 				$opt_avgLen = $aa->{avgLen};
 			}
 		}
-		Util::process_cmd("rm $current_folder -r");
+		$current_folder =~ s/\//\\/g; 
+		Util::process_cmd("rd /s /q $current_folder");
 	}       
 
 	print "Best Parameters for $sample:\nKmer: $opt_kmer\nCoverage: $opt_coverage\nMax $objective_type : $max_objective\nBest avgLen: $opt_avgLen\n" if $debug;
@@ -644,7 +646,7 @@ sub velvet_optimiser_combine
 	# run velvet again using best parameters
 	runVelvet($sample, $opt_kmer, $opt_coverage, $bin_dir, $temp_dir, $debug);
 	$current_folder = $sample."_".$opt_kmer."_".$opt_coverage;
-	Util::process_cmd("move $current_folder/contigs.fa $output_contig", $debug);
+	Util::process_cmd("move $current_folder\\contigs.fa $output_contig", $debug);
 }
 
 =head2
@@ -833,9 +835,9 @@ sub base_correction
 	my $log = $temp_dir."/bwa.log";
 	my $parameters = "-n 1 -o 1 -e 1 -i 0 -l 15 -k 1 -t $cpu_num";
 	my $bwa_mhit_param = "-n 10000";
-	Util::process_cmd("$bin_dir/bwa index -p $contig_file -a bwtsw $contig_file 1> $log 2>> $log", $debug);
-	Util::process_cmd("$bin_dir/bwa aln $parameters $contig_file $read_file 1> $sai 2>> $log", $debug);
-	Util::process_cmd("$bin_dir/bwa samse $bwa_mhit_param $contig_file $sai $read_file 1> $read_file.sam 2>> $log", $debug);
+	Util::process_cmd("$bin_dir/bwa index -p $contig_file -a bwtsw $contig_file 1> $log", $debug);
+	Util::process_cmd("$bin_dir/bwa aln $parameters $contig_file $read_file 1> $sai", $debug);
+	Util::process_cmd("$bin_dir/bwa samse $bwa_mhit_param $contig_file $sai $read_file 1> $read_file.sam", $debug);
 	Util::xa2multi("$read_file.sam");
 
 	# using bowtie
@@ -849,7 +851,7 @@ sub base_correction
 	# Util::process_cmd("bowtie2 --quiet --end-to-end -D 20 -R 3 -N 0 -L 13 -i S,1,0.50 --gbar 1 -p $cpu_num $format -a -x $contig_file -U $read_file -S $read_file.sam", $debug);
 
         Util::process_cmd("$bin_dir/samtools view -bS $read_file.sam > $read_file.bam 2> $temp_dir/samtools.log");
-        Util::process_cmd("$bin_dir/samtools sort $read_file.bam $read_file.sorted 2> $temp_dir/samtools.log");
+        Util::process_cmd("$bin_dir/samtools sort $read_file.bam -o $read_file.sorted.bam 2> $temp_dir/samtools.log");
         Util::process_cmd("$bin_dir/samtools mpileup -f $contig_file $read_file.sorted.bam > $read_file.pileup 2> $temp_dir/samtools.log");
 
         my $file_size = -s "$read_file.pileup";
@@ -865,12 +867,14 @@ sub base_correction
         # system("rm $read_file.sam");
 
 	# below code for debug
-        system("rm $read_file.bam");
-        system("rm $read_file.sorted.bam");
-        system("rm $read_file.pileup"); 	# must delete this file for next cycle remove redundancy
-        system("rm $contig_file.fai");
-        system("rm $temp_dir/*.ebwt") if -e "$read_file.1.ebwt";
-	system("rm $temp_dir/*.bt2") if -e "$read_file.1.bt2";
+		$read_file =~ s/\//\\/g; 
+		$contig_file =~ s/\//\\/g; 
+        system("del $read_file.bam");
+        system("del $read_file.sorted.bam");
+        system("del $read_file.pileup"); 	# must delete this file for next cycle remove redundancy
+        system("del $contig_file.fai");
+        system("del $temp_dir/*.ebwt") if -e "$read_file.1.ebwt";
+	system("del $temp_dir/*.bt2") if -e "$read_file.1.bt2";
 }
 =cut
 
@@ -1048,9 +1052,9 @@ sub ifRedundant
 	
     	# perform blast. 
 	# using process_cmd() could debug ouput result
-	system("$bin_dir/formatdb -i $hit_seq_file -p F");
-	my $blast_program = $bin_dir."/megablast";
-	my $blast_param = "-i $query_seq_file -d $hit_seq_file -o $blast_output $blast_parameters";
+	system("$bin_dir/makeblastdb -in $hit_seq_file -dbtype nucl -logfile makeblastdb.log");
+	my $blast_program = $bin_dir."/blastn";
+	my $blast_param = "-query $query_seq_file -db $hit_seq_file -out $blast_output $blast_parameters";
 	system($blast_program." ".$blast_param) && die "Error at blast command: $blast_param\n";
 	
 	# get redundancy info from blast result
@@ -1092,7 +1096,8 @@ sub findRedundancy
 			#########################################
 			#  previous hsp info to hash		#
 			#########################################
-			if ($hsp_count > 0)	{
+			if ($hsp_count > 0)#Èç¹û²»ÊÇµÚÒ»´Î³
+			{
 				my $hsp_info =  $query_name."\t".$query_length."\t".$hit_name."\t".$hit_length."\t".
 						$hsp_length."\t".$identity."\t".$evalue."\t".$score."\t".$strand."\t".
 						$query_start."\t".$query_end."\t".$hit_start."\t".$hit_end;
