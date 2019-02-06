@@ -1086,6 +1086,7 @@ sub findRedundancy
 	my $query_sequenc; 
 	my $subject_sequenc; 	
 	my $is_hsp = 1;
+	my $length_reset = 0;
 
 	my $bfh = IO::File->new($blast_output) || "Can not open blast result file: $blast_output $!\n";
 	while(<$bfh>)
@@ -1119,7 +1120,7 @@ sub findRedundancy
 					   ($one_hit[0], $one_hit[1], $one_hit[2], $one_hit[3], $one_hit[4], $one_hit[5], $one_hit[6], $one_hit[7],
 					    $one_hit[8], $one_hit[9], $one_hit[10],$one_hit[11],$one_hit[12]);
 
-					my $query_to_end = $query_length - $query_end;
+					my $query_to_end = $query_length - $query_end; 
 					my $hit_to_end = $hit_length - $hit_end;
 					my $hit_to_start = $hit_length - $hit_start;
 
@@ -1202,15 +1203,15 @@ sub findRedundancy
 			#  start a new query hsp	    #
 			#####################################
 			%hsp = ();$hsp_count = 0;
-			$query_name = $1; $query_length = ""; $hit_name = ""; $hit_length = "";
+			$query_name = $1; $query_length = ""; $hit_name = ""; $hit_length = ""; $length_reset =0;
 		}
-		elsif (/\s+\((\S+)\sletters\)/) # get Query Length
+		elsif (/Length=(\d+)/ && $length_reset==0) # get Query Length
 		{
 			$query_length = $1;
 			$query_length =~ s/,//g;
 		}
 		
-		elsif (/>(\S+)/)# Hit Name
+		elsif (/> (\S+)/)# Hit Name
 		{
 			#########################################
 			#  put previous hsp info to hash        #
@@ -1226,9 +1227,9 @@ sub findRedundancy
 			#################################
 			#  se4t a new hit	        #
 			#################################
-		    $hit_name = $1; $hit_length = "";
+		    $hit_name = $1; $hit_length = ""; $length_reset=1;
 		}
-		elsif (/\s+Length = (\d+)/)
+		elsif (/Length=(\d+)/ && $length_reset==1)
 		{
 				$hit_length = $1;
 				$hit_length =~ s/,//g;
@@ -1261,19 +1262,19 @@ sub findRedundancy
 			if ( $1 > $2 ) { $hsp_length = $1; } else { $hsp_length = $2; }
 		}
 
-		elsif (/\s+Strand = (\S+) \/ (\S+)/ && $hsp_count >= 1) 
+		elsif (/\s+Strand=(\S+)\/(\S+)/ && $hsp_count >= 1) 
 		{
 			if ( $2 eq "Plus" ) { $strand = 1;} else { $strand = -1;}
 		}
 
-		elsif (/Query\:\s(\d+)\s+(\S+)\s(\d+)/ && $hsp_count >= 1)
+		elsif (/Query\s\s(\d+)\s+(\S+)\s\s(\d+)/ && $hsp_count >= 1)
 		{
 			if ($query_start == 0) { $query_start = $1; $query_start =~ s/,//g;}
 			$query_end = $3;
 			$query_end =~ s/,//g;
 		}
 
-		elsif (/Sbjct\:\s(\d+)\s+(\S+)\s(\d+)/ && $hsp_count >= 1) 
+		elsif (/Sbjct\s\s(\d+)\s+(\S+)\s\s(\d+)/ && $hsp_count >= 1) 
 		{
 			if ( $strand == -1 )
 			{

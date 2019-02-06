@@ -484,7 +484,7 @@ main: {
 			$best_vid{$a[2]} = 1;
 		}
 	}
-	my %best_virus_info = Util::fetch_virus_info($seq_info, $prot_tab, \%best_vid);
+	my %best_virus_info = Util::fetch_virus_info($seq_info, $prot_tab, \%best_vid, $BIN_DIR);
 
 	# label contig for select_ctg_for_sRNA_len_check	
 	my %select_label;
@@ -620,7 +620,7 @@ sub arrange_col2
 	# fetch virus information
 	# key: seqID, Length, type, desc, version, host_type
 	# my %virus_info = Util::fetch_virus_info($seq_info, $prot_tab);
-	my %virus_info = Util::fetch_virus_info($seq_info, $prot_tab, \%virus_id);
+	my %virus_info = Util::fetch_virus_info($seq_info, $prot_tab, \%virus_id, $BIN_DIR);
 
 	foreach my $line (@a)
 	{
@@ -919,7 +919,7 @@ sub combine_table1
 	}
 
 	# 2. fetch virus_info
-	my %virus_info = Util::fetch_virus_info($seq_info, $prot_tab, \%virus_id);
+	my %virus_info = Util::fetch_virus_info($seq_info, $prot_tab, \%virus_id, $BIN_DIR);
 
 	# 3. parse data
 	foreach my $line (@b)

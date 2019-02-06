@@ -337,14 +337,14 @@ sub xa2multi
 =cut
 sub fetch_virus_info
 {
-	my ($file, $prot_tab, $iden_vid) = @_;
+	my ($file, $prot_tab, $iden_vid, $BIN_DIR) = @_;
 
 	# load protein tab info to hash
 	my %vid_pid; # key: virus ID, value: pid1 # pid2 # ... # pidN
 	if (defined $prot_tab && -s $prot_tab) {
 		my $fh1;
 		if ($prot_tab =~ m/\.gz$/) {
-			open($fh1, "-|", "gzip -cd $prot_tab") || die $!
+			open($fh1, "-|", "$BIN_DIR/gzip -cd $prot_tab") || die $!
 		} else {
 			open($fh1, $prot_tab) || die $!;
 		}
@@ -369,7 +369,7 @@ sub fetch_virus_info
 	my %virus_info;
 	my $fh;	
 	if  ($file =~ m/\.gz$/) {
-		open($fh, "-|", "gzip -cd $file") || die $!;
+		open($fh, "-|", "$BIN_DIR/gzip -cd $file") || die $!;
 	} else {
 		open($fh, $file) || die $!;
 	}
@@ -441,7 +441,8 @@ sub parse_blast_to_table
 	# output table title
 	my $output_table = "#query_name\tquery_length\thit_name\thit_length\thsp_length\tidentity\tevalue\tscore\tstrand".
 			   "\tquery_start\tquery_end\thit_start\thit_end\tidentity2\taligned_query\taligned_hit\taligned_string\n";
-my $length_reset = 0;
+	my $length_reset = 0;
+
 	open(IN, "$input_blast") || die $!;
 	while (<IN>) 
 	{
@@ -552,7 +553,8 @@ my $length_reset = 0;
 			if ( $a =~ /\+/ ) { $strand = 1;} else { $strand = -1;}
 		}
 
-		elsif (/Query\:\s(\d+)\s+(\S+)\s(\d+)/ && $hsp_count >= 1) 		# query sequence, && aligned string
+		#elsif (/Query\:\s(\d+)\s+(\S+)\s(\d+)/ && $hsp_count >= 1) 		# query sequence, && aligned string
+		elsif (/Query\s\s(\d+)\s+(\S+)\s\s(\d+)/ && $hsp_count >= 1) 	
 		{
 			if ($query_start == 0) { $query_start = $1; $query_start =~ s/,//g;}
 			$query_end = $3;
@@ -571,7 +573,7 @@ my $length_reset = 0;
 			chomp($next_line); 
 			$aligned_string .= $next_line.",";
 		}
-		elsif (/Sbjct\:\s(\d+)\s+(\S+)\s(\d+)/ && $hsp_count >= 1)		# subject sequence
+		elsif (/Sbjct\s\s(\d+)\s+(\S+)\s\s(\d+)/ && $hsp_count >= 1)		# subject sequence
 		{
 			if (defined $hit_strand && $blast eq 'tblastx') 
 			{
@@ -1334,13 +1336,13 @@ sub blast_table_to_sam
 
 		for (my $i = 0; $i < $l; ++$i)
 		{
-			$q_seqs[$i] =~ /Query\:\s(\d+)\s*(\S+)\s(\d+)/;
+			$q_seqs[$i] =~ /Query\s\s(\d+)\s*(\S+)\s\s(\d+)/;
 			$q = $2;
 			my $x = $q;
 			$x =~ s/-//g; 
 			$sam[9] .= $x;				# connect query seq from blast result
 		
-			$s_seqs[$i] =~ /Sbjct\:\s(\d+)\s*(\S+)\s(\d+)/;
+			$s_seqs[$i] =~ /Sbjct\s\s(\d+)\s*(\S+)\s\s(\d+)/;
 			$s = $2;
 			aln2cm(\@cigar, \$q, \$s, \@cmaux);	# get cigar from query and hit seq
 		}	
@@ -1996,5 +1998,5 @@ srna_range(read_length, input, output);
 
 1;
 
-#my $abc = parse_blast_to_table("C:/Users/User/Documents/OVD_test/test_data_temp/test_data.combined.blastn.paired","C:/Users/User/Documents/OVD_test/bin/blastn.exe");
+#my $abc = parse_blast_to_table("C:/Users/User/Documents/VD-master/test_data_temp/test_data.combined.blastn.paired","C:/Users/User/Documents/OVD_test/bin/blastn.exe");
 #print $abc;
