@@ -27,9 +27,9 @@ sub align_to_reference
 		my $log = $temp_folder."/bwa.log";
 		my $bwa_mhit_param = "-n $mhit_num";
 		if ($mhit_num > 1 ) { $bwa_mhit_param = "-n $mhit_num";  }
-		Util::process_cmd("$align_program index -p $reference -a bwtsw $reference 1> $log 2>> $log", $debug) unless -s "$reference.amb";
-		Util::process_cmd("$align_program aln $parameters $reference $input_file 1> $sai 2>> $log", $debug);
-		Util::process_cmd("$align_program samse $bwa_mhit_param $reference $sai $input_file 1> $output_file 2>> $log", $debug);
+		Util::process_cmd("$align_program index -p $reference -a bwtsw $reference -v 1 1> $log 2>> $log", $debug) unless -s "$reference.amb";
+		Util::process_cmd("$align_program aln $parameters $reference $input_file -v 1 1> $sai 2>> $log", $debug);
+		Util::process_cmd("$align_program samse $bwa_mhit_param $reference $sai $input_file -v 1 1> $output_file 2>> $log", $debug);
 		Util::xa2multi($output_file);
 	}
 
@@ -835,9 +835,9 @@ sub base_correction
 	my $log = $temp_dir."/bwa.log";
 	my $parameters = "-n 1 -o 1 -e 1 -i 0 -l 15 -k 1 -t $cpu_num";
 	my $bwa_mhit_param = "-n 10000";
-	Util::process_cmd("$bin_dir/bwa index -p $contig_file -a bwtsw $contig_file 1> $log", $debug);
-	Util::process_cmd("$bin_dir/bwa aln $parameters $contig_file $read_file 1> $sai", $debug);
-	Util::process_cmd("$bin_dir/bwa samse $bwa_mhit_param $contig_file $sai $read_file 1> $read_file.sam", $debug);
+	Util::process_cmd("$bin_dir/bwa index -p $contig_file -a bwtsw $contig_file -v 1 2> $log", $debug);
+	Util::process_cmd("$bin_dir/bwa aln $parameters $contig_file $read_file -v 1 1> $sai 2> $log", $debug);
+	Util::process_cmd("$bin_dir/bwa samse $bwa_mhit_param $contig_file $sai $read_file -v 1 1> $read_file.sam 2> $log", $debug);
 	Util::xa2multi("$read_file.sam");
 
 	# using bowtie
@@ -850,8 +850,8 @@ sub base_correction
 	# Util::process_cmd("$bin_dir/samtools faidx $contig_file 2> $temp_dir/samtools.log", $debug);
 	# Util::process_cmd("bowtie2 --quiet --end-to-end -D 20 -R 3 -N 0 -L 13 -i S,1,0.50 --gbar 1 -p $cpu_num $format -a -x $contig_file -U $read_file -S $read_file.sam", $debug);
 
-        Util::process_cmd("$bin_dir/samtools view -bS $read_file.sam > $read_file.bam 2> $temp_dir/samtools.log");
-        Util::process_cmd("$bin_dir/samtools sort $read_file.bam -o $read_file.sorted.bam 2> $temp_dir/samtools.log");
+        Util::process_cmd("$bin_dir/samtools view -@ 5 -bS $read_file.sam > $read_file.bam 2> $temp_dir/samtools.log");
+        Util::process_cmd("$bin_dir/samtools sort -@ 5 $read_file.bam -o $read_file.sorted.bam 2> $temp_dir/samtools.log");
         Util::process_cmd("$bin_dir/samtools mpileup -f $contig_file $read_file.sorted.bam > $read_file.pileup 2> $temp_dir/samtools.log");
 
         my $file_size = -s "$read_file.pileup";
@@ -1097,8 +1097,7 @@ sub findRedundancy
 			#########################################
 			#  previous hsp info to hash		#
 			#########################################
-			if ($hsp_count > 0)#Èç¹û²»ÊÇµÚÒ»´Î³
-			{
+			if ($hsp_count > 0){
 				my $hsp_info =  $query_name."\t".$query_length."\t".$hit_name."\t".$hit_length."\t".
 						$hsp_length."\t".$identity."\t".$evalue."\t".$score."\t".$strand."\t".
 						$query_start."\t".$query_end."\t".$hit_start."\t".$hit_end;

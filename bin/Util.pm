@@ -157,9 +157,10 @@ sub detect_seqNum {
 sub print_user_message {
 	my @message = @_;
 	#print "\n";
-	my $time = get_time();
+	#my $time = get_time();
 	foreach my $line (@message) { 
-		print $time." ".$line."\n";
+		#print $time." ".$line."\n";
+		print "#####   " . $line."\n";
 	}
 	#print "\n";
 }
