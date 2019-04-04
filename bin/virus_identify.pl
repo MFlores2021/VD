@@ -202,7 +202,7 @@ main: {
 	my $blast_output  = "$contig.blastn.paired";
 	#my $blast_param   = "-F $filter_query -a $cpu_num -W $word_size -q $mis_penalty -G $gap_cost -E $gap_extension -b $hits_return -e $exp_value";
 	my $blast_param = "-dust $filter_query -num_threads $cpu_num -word_size $word_size -penalty $mis_penalty -gapopen $gap_cost -gapextend $gap_extension -num_alignments $hits_return -evalue $exp_value";
-	Util::process_cmd("$blast_program -query $contig -db $reference -out $blast_output $blast_param", $debug) unless -s $blast_output; print "\n\n$blast_output\n\n";
+	Util::process_cmd("$blast_program -query $contig -db $reference -out $blast_output $blast_param", $debug) unless -s $blast_output;
 	my $blast_table  = Util::parse_blast_to_table($blast_output, $blast_program);
 	my $raw_blast_table = $blast_table;
 
@@ -671,9 +671,9 @@ sub get_contig_mapped_depth
 	my $log = $sample."_bwa.log";
 	my $parameters = "-n 1 -o 1 -e 1 -i 0 -l 15 -k 1 -t $cpu_num";
 	my $bwa_mhit_param = "-n 10000";
-	Util::process_cmd("$BIN_DIR/bwa index -p $contig -a bwtsw $contig 1> $log", $debug);
-	Util::process_cmd("$BIN_DIR/bwa aln $parameters $contig $sample 1> $sai", $debug);
-	Util::process_cmd("$BIN_DIR/bwa samse $bwa_mhit_param $contig $sai $sample 1> $sample.sam", $debug);
+	Util::process_cmd("$BIN_DIR/bwa index -p $contig -a bwtsw $contig -v 1 2> $log", $debug);
+	Util::process_cmd("$BIN_DIR/bwa aln $parameters $contig $sample -v 1 1> $sai 2> $log", $debug);
+	Util::process_cmd("$BIN_DIR/bwa samse $bwa_mhit_param $contig $sai $sample -v 1 1> $sample.sam 2> $log", $debug);
 	Util::xa2multi("$sample.sam");
 
 	# save map sRNA stat to hash
@@ -703,8 +703,8 @@ sub get_contig_mapped_depth
 	# Util::process_cmd("$BIN_DIR/bowtie --quiet $contig -v 1 -p $cpu_num -a --best --strata $format $sample -S --sam-nohead $sample.sam", $debug);
 
 	Util::process_cmd("$BIN_DIR/samtools faidx $contig");
-	Util::process_cmd("$BIN_DIR/samtools view -bt $contig.fai $sample.sam > $sample.bam 2>$sample.samtools.log");
-	Util::process_cmd("$BIN_DIR/samtools sort $sample.bam -o $sample.sorted.bam 2>$sample.samtools.log");
+	Util::process_cmd("$BIN_DIR/samtools view -@ 5 -bt $contig.fai $sample.sam > $sample.bam 2>$sample.samtools.log");
+	Util::process_cmd("$BIN_DIR/samtools sort -@ 5 $sample.bam -o $sample.sorted.bam 2>$sample.samtools.log");
 	Util::process_cmd("$BIN_DIR/samtools mpileup -f $contig $sample.sorted.bam > $sample.pileup 2>$sample.samtools.log"); 
 	# parse pileup file to save depth info to hash
 	# key: ref_id, mean, total. cover

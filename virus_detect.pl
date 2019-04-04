@@ -129,7 +129,7 @@ my $objective_type='maxLen';	# objective type for Velvet assembler:
 my $diff_ratio= 0.25;
 my $diff_contig_cover = 0.5;
 my $diff_contig_length= 100; 
-my $debug; my $email; my $user;
+my $debug=0; my $email; my $user;
 my $exp_valuexs;
 
 my $siRNA_percent = 0.5;		# Proportion cutoff of 21-nt and 22-nt siRNAs for 
@@ -289,8 +289,8 @@ foreach my $sample (@ARGV)
 
 	if ($mapped_num > 0)
 	{
-		Util::process_cmd("$BIN_DIR/samtools view -bt $reference.fai $sample.sam > $sample.bam 2> $TEMP_DIR/samtools.log", $debug) unless (-s "$sample.bam");
-		Util::process_cmd("$BIN_DIR/samtools sort $sample.bam -o $sample.sorted.bam 2> $TEMP_DIR/samtools.log", $debug) unless (-s "$sample.sorted.bam");
+		Util::process_cmd("$BIN_DIR/samtools view -@ 5 -bt $reference.fai $sample.sam > $sample.bam 2> $TEMP_DIR/samtools.log", $debug) unless (-s "$sample.bam");
+		Util::process_cmd("$BIN_DIR/samtools sort -@ 5 $sample.bam -o $sample.sorted.bam 2> $TEMP_DIR/samtools.log", $debug) unless (-s "$sample.sorted.bam");
 		Util::process_cmd("$BIN_DIR/samtools mpileup -f $reference $sample.sorted.bam > $sample.pre.pileup 2> $TEMP_DIR/samtools.log", $debug) unless (-s "$sample.pre.pileup");
 		align::pileup_filter("$sample.pre.pileup", "$seq_info", "$coverage", "$sample.pileup", "$BIN_DIR", $debug) unless (-s "$sample.pileup");	# filter pileup file 
 
@@ -396,7 +396,7 @@ foreach my $sample (@ARGV)
 
 	if (-s "$sample.aligned" && -s "$sample.assembled") {
 		$sample =~ s/\//\\/g; 
-		Util::process_cmd("type $sample.aligned $sample.assembled > $sample.combined", $debug);
+		Util::process_cmd("type $sample.aligned $sample.assembled > $sample.combined 1>NUL", $debug);
 	} elsif ( -s "$sample.aligned" ) { 
 		Util::process_cmd("copy $sample.aligned $sample.combined", $debug);
 	} elsif ( -s "$sample.assembled" ) {
