@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quality control</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+<body>
+  <script type="text/javascript" src="js/menu.js"></script>
+  <script>
+    require('nw.gui').Window.get().showDevTools();
+
+  function chooseFile(name, folder) {
+    var files = $(name)[0].files;
+    var pfolder = process.cwd() + "/" + folder;
+    var fs = require('fs');
+    var exec = require('child_process').exec; 
+
+    if (fs.existsSync(pfolder)) {
+      alert('Folder name already exists');
+    } else{
+      
+      exec('mkdir ' + pfolder); 
+      for (var i = 0; i < files.length; ++i){
+        console.log(files[i].name);
+        console.log(files[i].path);
+        exec("cp " + files[i].path + " "+ pfolder, function(error,stdout,stderr){
+          document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
+          if(error!=null){
+            alert('error :', error);
+          }
+        }); 
+        document.getElementById("subject").innerHTML += files[i].name +"\n";
+      }
+    }
+  }
+
+  function run_fastqc(folder) {
+
+    var dir = process.cwd() + "/" + folder;
+    var fs = require('fs');
+ 
+    fs.readdir(dir, function(err, files) {
+      var cfiles ="";
+      
+      for (var i = 0; i < files.length; ++i){
+        cfiles = cfiles + dir + "/" + files[i] + " ";
+      }
+    
+      var exec = require('child_process').exec; 
+
+      exec("~/Downloads/FastQC/fastqc " + cfiles, function(error,stdout,stderr){
+        document.getElementById("subject2").innerHTML += stdout +"\n" + stderr +"\n";
+
+        if(error!=null){
+          document.getElementById("subject2").innerHTML += "ERRORR:" + error + "\n" ;
+        }
+      });
+    })
+  }
+
+  </script>
+
+  <label>Run FastQC</label>
+  <div id="main">
+    <div class="container">
+     
+      <form>
+
+        <label for="fname">Directory name</label>
+        <input type="text" id="pname" name="projectname" placeholder="folder name">
+
+        <label for="upload">Upload</label><br>
+        <input id="fileDialog" type="file" multiple accept="*" nwworkingdir="C:\"  /><br>
+
+        <input type="submit"  value="Submit" onclick="chooseFile('#fileDialog','#pname')"><br><br>
+
+        <label for="subject">Files uploaded</label>
+        <textarea id="subject" name="subject" placeholder="Write something.." style="height:200px"></textarea>
+
+      </form><br>
+      <!-- <form> -->
+        <label for="subject">Run FastQC</label><br>
+        <input type="submit" value="Submit" onclick="run_fastqc('#pname')">
+        <textarea id="subject2" name="subject" placeholder="Write something.." style="height:200px"></textarea>
+      <!-- </form> -->
+      <webview id="wv" partition="trusted" src="file:///Users/mirellaflores/Documents/mrf252/projects/VD/nwjs-sdk/VD/%23pname/Apu-001.clean_fastqc.html"></webview>
+    </div>
+
+  </div>
+
+</body>
+</html>
