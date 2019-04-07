@@ -396,7 +396,7 @@ foreach my $sample (@ARGV)
 
 	if (-s "$sample.aligned" && -s "$sample.assembled") {
 		$sample =~ s/\//\\/g; 
-		Util::process_cmd("type $sample.aligned $sample.assembled > $sample.combined 1>NUL", $debug);
+		Util::process_cmd("type $sample.aligned $sample.assembled > $sample.combined ", $debug);
 	} elsif ( -s "$sample.aligned" ) { 
 		Util::process_cmd("copy $sample.aligned $sample.combined", $debug);
 	} elsif ( -s "$sample.assembled" ) {
