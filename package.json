@@ -1,1 +1,22 @@
-{"name":"VDW","description":"virus detect GUI","main":"index.html","window":{"heigth":500,"width":700},"css":"css/style.css","js":"js/menu.js","dependencies":{"wine":"^0.9.8"}}
+{"name":"VDW",
+	"description":"virus detect GUI",
+	"main":"index.html",
+	"window":{"heigth":700,"width":700},
+	"css":"css/style.css",
+	"js":"js/menu.js",
+	"dependencies":{"wine":"^0.9.8"},
+	 "chromium-args": "-load-extension=./extensions/ -ignore-certificate-errors",
+"webview": {
+  "partitions": [
+     {
+       "name": "trusted",
+       "accessible_resources": [
+          "<all_urls>"
+       ]
+     }
+  ]
+}
+
+}
+
+
