@@ -4,133 +4,63 @@
 	<title>
 		Analysis
 	</title>
-<!-- 	    <style>
-      #holder { border: 10px dashed #ccc; width: 300px; height: 300px; margin: 20px auto;}
-      #holder.hover { border: 10px dashed #333; }
-    </style> -->
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+ 	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<script type="text/javascript" src="js/functions.js"></script>
+  <script type="text/javascript" src="js/menu.js"></script>
+
 </head>
     <script>
 
-      //Same as $(document).ready();
-      function ready(fn) {
-        if (document.readyState != 'loading'){
-          fn();
-        } else {
-          document.addEventListener('DOMContentLoaded', fn);
-        }
-      }
-
-      //When the page has loaded, run this code
-  //     ready(function(){
-  //       // prevent default behavior from changing page on dropped file
-  //       window.ondragover = function(e) { e.preventDefault(); return false };
-  //       // NOTE: ondrop events WILL NOT WORK if you do not "preventDefault" in the ondragover event!!
-  //       window.ondrop = function(e) { e.preventDefault(); return false };
-
-  //       const holder = document.getElementById('holder');
-  //       holder.ondragover = function () { this.className = 'hover'; return false; };
-  //       holder.ondragleave = function () { this.className = ''; return false; };
-
-  //       holder.ondrop = function (e) {
-		//   e.preventDefault();
-
-	 // 		for (let i = 0; i < e.dataTransfer.files.length; ++i) {
-		// 	  const item = e.dataTransfer.items[i];
-		// 	  const entry = item.webkitGetAsEntry();
-
-		// 	  if (entry.isFile) {
-		// 	    const file = item.getAsFile();
-		// 	    console.log(file);
-
-	 //  			document.getElementById("outputtext").innerHTML += file.name +"\n";
-	 //  			// holder.hide();
-
-		// 	  } else if (entry.isDirectory) {
-		// 	    // Do magic with directory
-		// 	    const dir = item.getAsFile();
-		// 	    console.log(dir);
-		// 	  }
-		// 	}
-		//   return false;
-		// };
-
-		// var exec = require('child_process').exec; 
-		// exec('mkdir aaa');
-
-  //     });
-
-
-	  function doClick() {
-		  var el = document.getElementById("fileElem");
-		  if (el) {
-		    el.click(); 
-		  }
-		  el.addEventListener("change", handleFiles, false);
-	  }
-	  //require('nw.gui').Window.get().showDevTools();
-	  function handleFiles() {
-		  var fileList = this.files;
-		  var exec = require('child_process').exec; 
-		  exec("C:/Users/User/Documents/perlfiles/portableshell.bat", function(error,stdout,stderr){
-			console.log('stdout :', stdout); 
-			console.log('stderr :', stderr); 
-			if(error!=null){
-				console.log('error :', error);
-			}
-		  });
-
-		  if(fileList.length>0){
-		  	exec('mkdir aaa'); 
-		  }
-
-		  for (var i = 0; i < fileList.length; i++) { good
-			  var file = fileList[i].path;
-			  var commcp ='copy ' + file + '  aaa\\';
-			  exec(commcp); 	  
-			  var commrun ='perl VD-master\\virus_detect.pl aaa\\' + fileList[i].name; 
-			  exec(commrun, function(error,stdout,stderr){
-			console.log('stdout :', stdout); 
-			console.log('stderr :', stderr); 
-			if(error != null){
-				console.log('error :', error); 
-			}
-		  });
-			  document.getElementById("outputtext").innerHTML += fileList[i].name +"\n";
-		  }
-	  }
-
-	  function submit_files(fileList){
-	  	exec("c:/Documents/perlfiles/portableshell.bat");
-		  for (var i = 0; i < fileList.length; i++) {
-			  var file = fileList[i].path;
-			  exec('cp ' + file + '  aaa/'); 
-			  
-			  exec('perl virus_detect.pl aaa/' + fileList[i].name);
-		  }	  	
-	  }
-
+    $( document ).ready(function() {
+    // document.getElementById("outputtext").style.display = "none";
+      read_db();
+      read_reference();
+      document.getElementById("outputtext").style.display = "none";
+  });
 
 
   </script>
 
-<body>
-	<form>
-	  <input type="file" id="fileElem" multiple="true" style="display:none" onchange="handleFiles(this.files)">
-		<textarea id="outputtext"></textarea>
-	</form>
-	<a href="javascript:doClick()">Select some files</a>		
+<body> 
+  <div id="mySidenav" class="sidenav">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <a href="#">About</a>
+    <a href="reference.html">Host reference</a>
+    <a href="ncbi.html">NCBI update</a>
+    <a href="localdb.html">Local DB update</a>
+    <a href="qc.html">FastQC</a>
+    <a href="clean.html">Trimming</a>
+    <a href="spike.html">Spike</a>
+    <a href="control.html">Mejora QC</a>
+    <a href="analysis.html">Analysis</a>
+    <a href="#">Contact</a>
+  </div>
 
+  <span onclick="openNav()">Menu</span>  
 
-	<form>
-	  Select database<br>
-	  <input type="text" name="database" value="">
+  <label>Run Virus Detect</label>
+  <div id="main">
+    <div class="container" id="container">
+	  <label>Select uploaded samples folder</label><br><br>
+    <input id="fileDialog" type="file" nwdirectory nwworkingdir="./"  /><br><br>
+
+	  <label>Select virus sequence database</label><br>
+	  	<select  class="form-control" id="databases" name="databases">
+          <option value=""></option>
+        </select>
 	  <br>
-	  Select host reference<br>
-	  <input type="text" name="reference" value="">
+	  <label>Select host reference</label><br>
+	    <select  class="form-control" id="references" name="references">
+          <option value=""></option>
+        </select>
+      <label for="cores">Number of threads</label>
+      <input type="text" id="cores" name="cores" placeholder="1">
 	  <br><br>
-	  <input type="submit" value="Submit">
-	</form> 
-
+	  <input type="submit" value="Run" onclick="run_analysis()">
+	  <textarea id="outputtext"></textarea>
+	</div>
+  </div>
 
 </body>
 </html>
