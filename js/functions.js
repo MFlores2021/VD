@@ -156,21 +156,23 @@
     var commrun = "perl " + path.join(process.cwd(),'VD','virus_detect.pl ');
 
     fs.readdir(dir, function(err, files) {
-   
-      files.filter(extension).forEach(function(value) {
 
+      //files.filter(extension).forEach(function(value) {
+      files.forEach(function(value) {
           cfiles = cfiles + path.join(dir , value) + " "; 
-          document.getElementById("inputtext").innerHTML += value +"\n"; 
+         // document.getElementById("inputtext").innerHTML += value +"\n"; 
       }); 
-
+console.log(cfiles);
         if(cfiles != ""){
-          var str = document.getElementById("databases").value;
-          var db = str.replace(".pin", "");
+          var db1 = document.getElementById("databases").value;
+          var db = db1.replace(".nin", "");
+		  var ref = document.getElementById("references").value;
+		  var cores = document.getElementById("cores").value;
           commrun = (db != "") ?  commrun + " --reference " + db + " " : commrun;
-          commrun = (document.getElementById("references").value != "") ? commrun + " --host_reference " + document.getElementById("references").value + " ": commrun;
-          commrun = (document.getElementById("cores").value != "") ? commrun + " --thread_num " + document.getElementById("cores").value + " ": commrun;
+          commrun = (ref != "") ? commrun + " --host_reference " + ref + " ": commrun;
+          commrun = (cores != "") ? commrun + " --thread_num " + cores + " ": commrun;
           
-          commrun += cfiles; 
+          commrun += cfiles; console.log(commrun); console.log(ref);
           exec(commrun, function(error,stdout,stderr){
             console.log('stdout :', stdout); 
             console.log('stderr :', stderr); 
@@ -193,7 +195,7 @@
         var fs = require('fs');
         var exec = require('child_process').exec; 
         var cfiles = "";
-        var commrun = "perl " + path.join(process.cwd(),'VD','tools','sRNA_clean','RNA_clean.pl ');
+        var commrun = "perl " + path.join(process.cwd(),'VD','tools','sRNA_clean','sRNA_clean.pl ');
 console.log(commrun);
         fs.readdir(dir, function(err, files) {
        
@@ -259,16 +261,15 @@ function save(){
     });
 
     function extension(element) {
-      var extName = path.extname(element);
-      return extName === '.pin'; 
-
+	  var rege = new RegExp('vrl.+in$');
+      return rege.test(element); 
     };
   }
 
   function read_reference(){
 
     const path = require('path');
-    var dir = path.join(process.cwd(),'VD','references');
+    var dir = path.join(process.cwd(),'VD','databases');
     var fs = require('fs');
 
     fs.readdir(dir, function(err, files) {
@@ -280,7 +281,8 @@ function save(){
 
     function extension(element) {
       var extName = path.extname(element);
-      return extName === '.fa'; 
+	  var rege = new RegExp('^host_');
+      return rege.test(element); 
 
     };
   }

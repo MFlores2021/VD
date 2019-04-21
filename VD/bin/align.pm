@@ -27,9 +27,9 @@ sub align_to_reference
 		my $log = $temp_folder."/bwa.log";
 		my $bwa_mhit_param = "-n $mhit_num";
 		if ($mhit_num > 1 ) { $bwa_mhit_param = "-n $mhit_num";  }
-		Util::process_cmd("$align_program index -p $reference -a bwtsw $reference -v 1 1> $log 2>> $log", $debug) unless -s "$reference.amb";
-		Util::process_cmd("$align_program aln $parameters $reference $input_file -v 1 1> $sai 2>> $log", $debug);
-		Util::process_cmd("$align_program samse $bwa_mhit_param $reference $sai $input_file -v 1 1> $output_file 2>> $log", $debug);
+		Util::process_cmd("$align_program index -p $reference -a bwtsw $reference 2>> $log", $debug) unless -s "$reference.amb";
+		Util::process_cmd("$align_program aln $parameters $reference $input_file 1> $sai 2>> $log", $debug);
+		Util::process_cmd("$align_program samse $bwa_mhit_param $reference $sai $input_file 1> $output_file 2>> $log", $debug);
 		Util::xa2multi($output_file);
 	}
 
@@ -835,9 +835,9 @@ sub base_correction
 	my $log = $temp_dir."/bwa.log";
 	my $parameters = "-n 1 -o 1 -e 1 -i 0 -l 15 -k 1 -t $cpu_num";
 	my $bwa_mhit_param = "-n 10000";
-	Util::process_cmd("$bin_dir/bwa index -p $contig_file -a bwtsw $contig_file -v 1 2> $log", $debug);
-	Util::process_cmd("$bin_dir/bwa aln $parameters $contig_file $read_file -v 1 1> $sai 2> $log", $debug);
-	Util::process_cmd("$bin_dir/bwa samse $bwa_mhit_param $contig_file $sai $read_file -v 1 1> $read_file.sam 2> $log", $debug);
+	Util::process_cmd("$bin_dir/bwa index -p $contig_file -a bwtsw $contig_file 2> $log", $debug);
+	Util::process_cmd("$bin_dir/bwa aln $parameters $contig_file $read_file 1> $sai 2> $log", $debug);
+	Util::process_cmd("$bin_dir/bwa samse $bwa_mhit_param $contig_file $sai $read_file 1> $read_file.sam 2> $log", $debug);
 	Util::xa2multi("$read_file.sam");
 
 	# using bowtie
@@ -1055,7 +1055,7 @@ sub ifRedundant
 	system("$bin_dir/makeblastdb -in $hit_seq_file -dbtype nucl -logfile makeblastdb.log");
 	my $blast_program = $bin_dir."/blastn";
 	my $blast_param = "-query $query_seq_file -db $hit_seq_file -out $blast_output $blast_parameters";
-	system($blast_program." ".$blast_param) && die "Error at blast command: $blast_param\n";
+	system($blast_program." ".$blast_param) && die "Error at blast command:$blast_program $blast_param\n";
 	
 	# get redundancy info from blast result
 	my $result = findRedundancy($inset, $query, $blast_output, $max_end_clip, $min_overlap, $min_identity);

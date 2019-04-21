@@ -265,7 +265,7 @@ foreach my $sample (@ARGV)
 	} else {
 		#Util::process_cmd("ln -s $sample_abs_source $TEMP_DIR/$sample_base", $debug) unless -e "$TEMP_DIR/$sample_base";
 		#Util::process_cmd("mklink /d $TEMP_DIR\\$sample_base $sample_abs_source", $debug) unless -e "$TEMP_DIR/$sample_base";
-		Util::process_cmd("copy $sample_abs_source $TEMP_DIR\\$sample_base", $debug) unless -e "$TEMP_DIR/$sample_base";
+		Util::process_cmd("copy $sample $TEMP_DIR\\$sample_base", $debug) unless -e "$TEMP_DIR/$sample_base";
 	}
 	$sample = "$TEMP_DIR/$sample_base";             # change the sample name to the linke from this step
 
