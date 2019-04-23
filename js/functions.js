@@ -229,6 +229,57 @@ console.log(commrun);
               document.getElementById("resultLbl").style.display = "block";
               document.getElementById("analysis").style.display = "block";
               document.getElementById("save").style.display = "block";
+
+              var element=[]; 
+              var str = fs.readFileSync(path.join(dir,sRNA_length.txt), "utf8");
+              var x = str.split('\n');
+
+              for (var i=0; i<x.length; i++) {
+                if(!x[i].startsWith('#') && x[i] != ''){
+                  y = x[i].split('\t');
+                  x[i] = y;
+                  element.push({"x": Number(x[i][0]),"y": Number(x[i][1]) });
+                }
+              }
+
+              var margin = {top: 50, right: 50, bottom: 50, left: 50}
+                , width = window.innerWidth - margin.left - margin.right 
+                , height = window.innerHeight - margin.top - margin.bottom; 
+
+              var xScale = d3.scaleLinear()
+                  .domain([d3.min(element, function(d) { return d.x; }), d3.max(element, function(d) { return d.x; })]) // input
+                  .range([0, width-40]); // output
+
+              var yScale = d3.scaleLinear()
+                  .domain([0, d3.max(element, function(d) { return d.y; })]) // input 
+                  .range([height, 0]); // output 
+
+              var line = d3.line()
+                  .x(function(d) { return xScale(d.x); }) // set the x values for the line generator
+                  .y(function(d) { return yScale(d.y); }) // set the y values for the line generator 
+                  // .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+              var svg = d3.select("#graph").append("svg")
+                  .attr("id","svg")
+                  .attr("width", width + margin.left + margin.right)
+                  .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+              svg.append("g")
+                  .attr("class", "x axis")
+                  .attr("transform", "translate(0," + height + ")")
+                  .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
+
+              svg.append("g")
+                  .attr("class", "y axis")
+                  .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+
+              svg.append("path")
+                  .datum(element)
+                  .attr("class", "line")
+                  .attr("d", line);  
+            
             }
 
           });
