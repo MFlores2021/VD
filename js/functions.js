@@ -18,7 +18,7 @@
       alert('Folder name already exists');
     } else{
       
-      exec('mkdir ' + pfolder); 
+      exec('mkdir ' + pfolder, function(error,stdout,stderr){ if(error!=null){ console.log('error :', error); }});
       for (var i = 0; i < files.length; ++i){
         exec("copy " + files[i].path + " "+ pfolder, function(error,stdout,stderr){
           document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
@@ -111,6 +111,7 @@
     const path = require('path');
     var dir = return_folder();
     var fs = require('fs');
+	var fqcdir = path.join(process.cwd(),'VD', 'bin','fastQC');
      
     fs.readdir(dir, function(err, files) {
       var cfiles ="";
@@ -120,12 +121,12 @@
       }
 
       var exec = require('child_process').exec; 
-      var commrun = path.join(process.cwd(),'VD', 'bin','fastqc ');
-
+	  var commrun = "java -Xmx250m -classpath " + fqcdir + ";" + path.join(fqcdir,"sam-1.103.jar") + ";" + path.join(fqcdir,"jbzip2-0.9.jar") + " uk.ac.babraham.FastQC.FastQCApplication ";
+	  
       exec(commrun + cfiles, function(error,stdout,stderr){
         document.getElementById("subject2").innerHTML += stdout +"\n" + stderr +"\n";
 
-        if(error!=null){
+        if(error!=null){ console.log(commrun);
           document.getElementById("subject2").innerHTML += "ERRORR:" + error + "\n" ;
         }
       });
@@ -220,7 +221,7 @@ console.log(commrun);
                 }
               });
               document.getElementById("outputtext").innerHTML += commrun +"\n";
-              document.getElementById("alink").innerHTML = '<a target="_blank" href="file://' + dir + '/report_sRNA_trim.txt" >Report</a><br>';
+              document.getElementById("alink").innerHTML = '<a target="_blank" href="file://' + dir + '" >Reports</a><br>';
               document.getElementById("adaptor").disabled = true;
               document.getElementById("length").disabled = true;
               document.getElementById("outputtext").disabled = true;

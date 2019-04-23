@@ -67,7 +67,7 @@ USAGE: $0 -s adapter_sequence -l minimum_length sRNA1 sRNA2 ... sRNAn
 	my %sRNA_sample;	# key: sample; value: 1
 
 	my $report_file = 'report_sRNA_trim.txt';
-	print "[ERR]report file exist\n" if -s $report_file;
+	my $report_sRNA = '';
 
 	my $report_info = '';
 	$report_info.= "#sRNA\ttotal\t3Punmatch\t3Pnull\t3Pmatch\tbaseN\tshort\tcleaned\n";
@@ -285,15 +285,17 @@ USAGE: $0 -s adapter_sequence -l minimum_length sRNA1 sRNA2 ... sRNAn
 
 		# debug 5p info
 		#print "$inFile\t$mode_5p_a\t$mode_5p_a_match\t$mode_5p_b\n";
+		$report_file = $prefix .'.report_sRNA_trim.txt';
+		$report_sRNA = $prefix . '.sRNA_length.txt';
 	}
-
+	print "[ERR]report file exist\n" if -s $report_file;
 	# report sRNA trim information
 	my $outr = IO::File->new(">$report_file") || die $!;
 	print $outr $report_info;
 	$outr->close;
 
 	# report sRNA length distribution
-	my $out_len = IO::File->new(">sRNA_length.txt") || die $!;
+	my $out_len = IO::File->new(">$report_sRNA") || die $!;
 	print $out_len "#Size";
 	foreach my $s (sort keys %sRNA_sample) {
 		print $out_len "\t$s (No. of reads)";
