@@ -194,32 +194,29 @@ console.log(cfiles);
         const path = require('path');
         var dir = document.getElementById(name).value;
         var fs = require('fs');
-        var exec = require('child_process').exec; 
-        var cfiles = "";
-        var commrun = "perl " + path.join(process.cwd(),'VD','tools','sRNA_clean','sRNA_clean.pl ');
-console.log(commrun);
+        var spawn = require('child_process').spawn;
+		var cfiles = "";
+		var cn = path.join(process.cwd(),'VD','tools','sRNA_clean','sRNA_clean.pl ');
+
         fs.readdir(dir, function(err, files) {
        
           files.filter(extension).forEach(function(value) {
-
               cfiles = cfiles + path.join(dir , value) + " "; 
           }); 
 
             if(cfiles != ""){
 
-              commrun = (document.getElementById("adaptor").value != "") ?  commrun + " -s " + document.getElementById("adaptor").value + " " : commrun;
-              commrun = (document.getElementById("length").value != "") ? commrun + " -l " + document.getElementById("length").value + " ": commrun;
-              
-              commrun += cfiles; 
-              exec(commrun, function(error,stdout,stderr){
-                console.log('stdout :', stdout); 
-                console.log('stderr :', stderr); 
-                document.getElementById("outputtext").innerHTML += stdout +"\n";
-                if(error != null){
-                  console.log('error :', error); 
-                  document.getElementById("outputtext").innerHTML += error +"\n";
-                }
-              });
+              var adapt = document.getElementById("adaptor").value;
+              var len = document.getElementById("length").value;
+			  var comando = spawn('perl',[cn,'-s',adapt,'-l',len,cfiles],{shell:true}); console.log(comando);
+			  comando.stdout.on('data',(data) =>{ console.log('stdout: ${data}');});
+			  comando.stderr.on('data',(data) =>{ console.log('stderr: ${data}');});
+			  comando.on('close',function(code){
+				  if(code === 0){
+					dibujo(fs,dir);
+				  }
+			  })
+
               document.getElementById("outputtext").innerHTML += commrun +"\n";
               document.getElementById("alink").innerHTML = '<a target="_blank" href="file://' + dir + '" >Reports</a><br>';
               document.getElementById("adaptor").disabled = true;
@@ -230,67 +227,80 @@ console.log(commrun);
               document.getElementById("analysis").style.display = "block";
               document.getElementById("save").style.display = "block";
 
-              var element=[]; 
-              var str = fs.readFileSync(path.join(dir,sRNA_length.txt), "utf8");
-              var x = str.split('\n');
-
-              for (var i=0; i<x.length; i++) {
-                if(!x[i].startsWith('#') && x[i] != ''){
-                  y = x[i].split('\t');
-                  x[i] = y;
-                  element.push({"x": Number(x[i][0]),"y": Number(x[i][1]) });
-                }
-              }
-
-              var margin = {top: 50, right: 50, bottom: 50, left: 50}
-                , width = window.innerWidth - margin.left - margin.right 
-                , height = window.innerHeight - margin.top - margin.bottom; 
-
-              var xScale = d3.scaleLinear()
-                  .domain([d3.min(element, function(d) { return d.x; }), d3.max(element, function(d) { return d.x; })]) // input
-                  .range([0, width-40]); // output
-
-              var yScale = d3.scaleLinear()
-                  .domain([0, d3.max(element, function(d) { return d.y; })]) // input 
-                  .range([height, 0]); // output 
-
-              var line = d3.line()
-                  .x(function(d) { return xScale(d.x); }) // set the x values for the line generator
-                  .y(function(d) { return yScale(d.y); }) // set the y values for the line generator 
-                  // .curve(d3.curveMonotoneX) // apply smoothing to the line
-
-              var svg = d3.select("#graph").append("svg")
-                  .attr("id","svg")
-                  .attr("width", width + margin.left + margin.right)
-                  .attr("height", height + margin.top + margin.bottom)
-                .append("g")
-                  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-              svg.append("g")
-                  .attr("class", "x axis")
-                  .attr("transform", "translate(0," + height + ")")
-                  .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
-
-              svg.append("g")
-                  .attr("class", "y axis")
-                  .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
-
-              svg.append("path")
-                  .datum(element)
-                  .attr("class", "line")
-                  .attr("d", line);  
-            
             }
 
           });
-
-
+		  
         function extension(element) {
           var extName = path.extname(element);
           return extName === '.fq'; 
-
         };
+		function extension_sRNA(element) {
+          var extName = new RegExp('sRNA_length.txt$');
+          return extName.test(element); 
+        };
+		
+		function dibujo(fs,dir){
+			var sRNA='';  
+			fs.readdir(dir, function(err, files1) {
+			  files1.filter(extension_sRNA).forEach(function(value1) {
+				  sRNA = path.join(dir , value1); 
+			  }); 
+			  if(sRNA != ''){
+				  var element=[]; 
+				  var str = fs.readFileSync(sRNA, "utf8");
+				  var x = str.split('\n');
+
+				  for (var i=0; i<x.length; i++) {
+					if(!x[i].startsWith('#') && x[i] != ''){
+					  y = x[i].split('\t');
+					  x[i] = y;
+					  element.push({"x": Number(x[i][0]),"y": Number(x[i][1]) });
+					}
+				  }
+
+				  var margin = {top: 50, right: 50, bottom: 50, left: 50}
+					, width = window.innerWidth - margin.left - margin.right 
+					, height = window.innerHeight - margin.top - margin.bottom; 
+
+				  var xScale = d3.scaleLinear()
+					  .domain([d3.min(element, function(d) { return d.x; }), d3.max(element, function(d) { return d.x; })]) // input
+					  .range([0, width-60]); // output
+
+				  var yScale = d3.scaleLinear()
+					  .domain([0, d3.max(element, function(d) { return d.y; })]) // input 
+					  .range([height, 0]); // output 
+
+				  var line = d3.line()
+					  .x(function(d) { return xScale(d.x); }) // set the x values for the line generator
+					  .y(function(d) { return yScale(d.y); }) // set the y values for the line generator 
+					  .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+				  var svg = d3.select("#graph").append("svg")
+					  .attr("id","svg")
+					  .attr("width", width + margin.left + margin.right)
+					  .attr("height", height + margin.top + margin.bottom)
+					.append("g")
+					  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+				  svg.append("g")
+					  .attr("class", "x axis")
+					  .attr("transform", "translate(0," + height + ")")
+					  .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
+
+				  svg.append("g")
+					  .attr("class", "y axis")
+					  .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+
+				  svg.append("path")
+					  .datum(element)
+					  .attr("class", "line")
+					  .attr("d", line);  
+			  }
+			});
+		}
   }
+
 
 
 function save(){
