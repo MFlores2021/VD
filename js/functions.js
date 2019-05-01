@@ -195,8 +195,8 @@ console.log(cfiles);
         var dir = document.getElementById(name).value;
         var fs = require('fs');
         var spawn = require('child_process').spawn;
-		var cfiles = "";
-		var cn = path.join(process.cwd(),'VD','tools','sRNA_clean','sRNA_clean.pl ');
+		    var cfiles = "";
+		    var cn = path.join(process.cwd(),'VD','tools','sRNA_clean','sRNA_clean.pl ');
 
         fs.readdir(dir, function(err, files) {
        
@@ -208,14 +208,14 @@ console.log(cfiles);
 
               var adapt = document.getElementById("adaptor").value;
               var len = document.getElementById("length").value;
-			  var comando = spawn('perl',[cn,'-s',adapt,'-l',len,cfiles],{shell:true}); console.log(comando);
-			  comando.stdout.on('data',(data) =>{ console.log('stdout: ${data}');});
-			  comando.stderr.on('data',(data) =>{ console.log('stderr: ${data}');});
-			  comando.on('close',function(code){
-				  if(code === 0){
-					dibujo(fs,dir);
-				  }
-			  })
+      			  var comando = spawn('perl',[cn,'-s',adapt,'-l',len,cfiles],{shell:true}); console.log(comando);
+      			  comando.stdout.on('data',(data) =>{ console.log('stdout: ${data}');});
+      			  comando.stderr.on('data',(data) =>{ console.log('stderr: ${data}');});
+      			  comando.on('close',function(code){
+      				  if(code === 0){
+      					dibujo(fs,dir);
+      				  }
+      			  })
 
               document.getElementById("outputtext").innerHTML += commrun +"\n";
               document.getElementById("alink").innerHTML = '<a target="_blank" href="file://' + dir + '" >Reports</a><br>';
@@ -235,72 +235,196 @@ console.log(cfiles);
           var extName = path.extname(element);
           return extName === '.fq'; 
         };
-		function extension_sRNA(element) {
-          var extName = new RegExp('sRNA_length.txt$');
-          return extName.test(element); 
-        };
+    		function extension_sRNA(element) {
+              var extName = new RegExp('sRNA_length.txt$');
+              return extName.test(element); 
+            };
 		
-		function dibujo(fs,dir){
-			var sRNA='';  
-			fs.readdir(dir, function(err, files1) {
-			  files1.filter(extension_sRNA).forEach(function(value1) {
-				  sRNA = path.join(dir , value1); 
-			  }); 
-			  if(sRNA != ''){
-				  var element=[]; 
-				  var str = fs.readFileSync(sRNA, "utf8");
-				  var x = str.split('\n');
+    		function dibujo(fs,dir){
+    			var sRNA='';  
+    			fs.readdir(dir, function(err, files1) {
+    			  files1.filter(extension_sRNA).forEach(function(value1) {
+    				  sRNA = path.join(dir , value1); 
+    			  }); 
+    			  if(sRNA != ''){
+    				  var element=[]; 
+    				  var str = fs.readFileSync(sRNA, "utf8");
+    				  var x = str.split('\n');
 
-				  for (var i=0; i<x.length; i++) {
-					if(!x[i].startsWith('#') && x[i] != ''){
-					  y = x[i].split('\t');
-					  x[i] = y;
-					  element.push({"x": Number(x[i][0]),"y": Number(x[i][1]) });
-					}
-				  }
+    				  for (var i=0; i<x.length; i++) {
+    					if(!x[i].startsWith('#') && x[i] != ''){
+    					  y = x[i].split('\t');
+    					  x[i] = y;
+    					  element.push({"x": Number(x[i][0]),"y": Number(x[i][1]) });
+    					}
+    				  }
 
-				  var margin = {top: 50, right: 50, bottom: 50, left: 50}
-					, width = window.innerWidth - margin.left - margin.right 
-					, height = window.innerHeight - margin.top - margin.bottom; 
+    				  var margin = {top: 50, right: 50, bottom: 50, left: 50}
+    					, width = window.innerWidth - margin.left - margin.right 
+    					, height = window.innerHeight - margin.top - margin.bottom; 
 
-				  var xScale = d3.scaleLinear()
-					  .domain([d3.min(element, function(d) { return d.x; }), d3.max(element, function(d) { return d.x; })]) // input
-					  .range([0, width-60]); // output
+    				  var xScale = d3.scaleLinear()
+    					  .domain([d3.min(element, function(d) { return d.x; }), d3.max(element, function(d) { return d.x; })]) // input
+    					  .range([0, width-60]); // output
 
-				  var yScale = d3.scaleLinear()
-					  .domain([0, d3.max(element, function(d) { return d.y; })]) // input 
-					  .range([height, 0]); // output 
+    				  var yScale = d3.scaleLinear()
+    					  .domain([0, d3.max(element, function(d) { return d.y; })]) // input 
+    					  .range([height, 0]); // output 
 
-				  var line = d3.line()
-					  .x(function(d) { return xScale(d.x); }) // set the x values for the line generator
-					  .y(function(d) { return yScale(d.y); }) // set the y values for the line generator 
-					  .curve(d3.curveMonotoneX) // apply smoothing to the line
+    				  var line = d3.line()
+    					  .x(function(d) { return xScale(d.x); }) // set the x values for the line generator
+    					  .y(function(d) { return yScale(d.y); }) // set the y values for the line generator 
+    					  .curve(d3.curveMonotoneX) // apply smoothing to the line
 
-				  var svg = d3.select("#graph").append("svg")
-					  .attr("id","svg")
-					  .attr("width", width + margin.left + margin.right)
-					  .attr("height", height + margin.top + margin.bottom)
-					.append("g")
-					  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    				  var svg = d3.select("#graph").append("svg")
+    					  .attr("id","svg")
+    					  .attr("width", width + margin.left + margin.right)
+    					  .attr("height", height + margin.top + margin.bottom)
+    					.append("g")
+    					  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-				  svg.append("g")
-					  .attr("class", "x axis")
-					  .attr("transform", "translate(0," + height + ")")
-					  .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
+    				  svg.append("g")
+    					  .attr("class", "x axis")
+    					  .attr("transform", "translate(0," + height + ")")
+    					  .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
 
-				  svg.append("g")
-					  .attr("class", "y axis")
-					  .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+    				  svg.append("g")
+    					  .attr("class", "y axis")
+    					  .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
 
-				  svg.append("path")
-					  .datum(element)
-					  .attr("class", "line")
-					  .attr("d", line);  
-			  }
-			});
+    				  svg.append("path")
+    					  .datum(element)
+    					  .attr("class", "line")
+    					  .attr("d", line);  
+    			  }
+    		});
 		}
   }
 
+  function get_nro_reads(fq,name){
+    const path = require('path');
+        var dir = document.getElementById(name).value;
+        var file = path.join(dir , fq);
+
+    if(!fs.existsSync(file+ "_stats.txt")) {
+
+      if(fs.existsSync(file)){
+      
+        var fs = require('fs');
+        var spawn = require('child_process').spawn;
+        var cn = path.join(process.cwd(),'VD','bin','seqkit.exe ');
+        var comando = spawn(cn,['stats','-p',file,'-o',file+"_stats.txt"],{shell:true}); console.log(comando);
+        var str = fs.readFileSync(file+"_stats.txt", "utf8");
+        var x = str.split('\n');
+        var y = x[1].split('\t');
+        y=y[3].replace(/,/g,"");
+
+        return Number(y);
+      }
+    } else{
+
+        var str = fs.readFileSync(file+"_stats.txt", "utf8");
+        var x = str.split('\n');
+        var y = x[1].split('\t');
+        y=y[3].replace(/,/g,"");
+        
+        return Number(y);
+    }
+
+  }
+  function spike(name){
+        const path = require('path');
+        var dir = document.getElementById(name).value;
+        var fs = require('fs');
+        var spawn = require('child_process').spawn;
+        var cfiles = "";
+        var cn = path.join(process.cwd(),'VD','bin','seqkit.exe ');
+        var adapt = document.getElementById("inputtext").value;
+        adapt = adapt.replace(/\n/g, ",");
+ 
+        fs.readdir(dir, function(err, files) {
+       
+          files.filter(extension).forEach(function(value) {
+              cfiles = path.join(dir , value); 
+              var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
+          }); 
+
+            if(cfiles != ""){
+              document.getElementById("inputtext").disabled = true;
+              document.getElementById("run").style.display = "block";
+            }
+
+          });
+      
+        function extension(element) {
+          var extName = path.extname(element);
+          return extName === '.fq'; 
+        };
+        function extension_sRNA(element) {
+              var extName = new RegExp('spike.txt$');
+              return extName.test(element); 
+            };
+    
+        function dibujo(fs,dir){
+          var sRNA='';  
+          fs.readdir(dir, function(err, files1) {
+            files1.filter(extension_sRNA).forEach(function(value1) {
+              sRNA = path.join(dir , value1); 
+            }); 
+            if(sRNA != ''){
+              var element=[]; 
+              var str = fs.readFileSync(sRNA, "utf8");
+              var x = str.split('\n');
+
+              for (var i=0; i<x.length; i++) {
+                if(!x[i].startsWith('#') && x[i] != ''){
+                  y = x[i].split('\t');
+                  x[i] = y;
+                  element.push({"x": Number(x[i][0]),"y": Number(x[i][1]) });
+                }
+              }
+
+              var margin = {top: 50, right: 50, bottom: 50, left: 50}
+              , width = window.innerWidth - margin.left - margin.right 
+              , height = window.innerHeight - margin.top - margin.bottom; 
+
+              var xScale = d3.scaleLinear()
+                .domain([d3.min(element, function(d) { return d.x; }), d3.max(element, function(d) { return d.x; })]) // input
+                .range([0, width-60]); // output
+
+              var yScale = d3.scaleLinear()
+                .domain([0, d3.max(element, function(d) { return d.y; })]) // input 
+                .range([height, 0]); // output 
+
+              var line = d3.line()
+                .x(function(d) { return xScale(d.x); }) // set the x values for the line generator
+                .y(function(d) { return yScale(d.y); }) // set the y values for the line generator 
+                .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+              var svg = d3.select("#graph").append("svg")
+                .attr("id","svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+              svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
+
+              svg.append("g")
+                .attr("class", "y axis")
+                .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+
+              svg.append("path")
+                .datum(element)
+                .attr("class", "line")
+                .attr("d", line);  
+            }
+        });
+      }
+  }
 
 
 function save(){
@@ -308,8 +432,7 @@ function save(){
 
 }
 
-
-  function read_db(){
+   function read_db(){
 
     const path = require('path');
     var dir = path.join(process.cwd(),'VD','databases');
@@ -321,14 +444,13 @@ function save(){
         select.options[select.options.length] = new Option(value, value);
       });
     });
-
     function extension(element) {
 	  var rege = new RegExp('vrl.+in$');
       return rege.test(element); 
     };
   }
 
-  function read_reference(){
+   function read_reference(){
 
     const path = require('path');
     var dir = path.join(process.cwd(),'VD','databases');
@@ -356,3 +478,5 @@ function save(){
   function link_analysis(){
     location.href = './analysis.html';
   }
+
+
