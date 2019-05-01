@@ -85,6 +85,7 @@
         }); 
          if (dir == 'databases'){
               format_db(path.join(folder,files[i].name),dbtype);
+			  format_faidx(path.join(folder,files[i].name),dbtype);
             }
          document.getElementById("subject").innerHTML += files[i].name +"\n";
       }
@@ -96,6 +97,21 @@
     var formatdb = path.join(process.cwd(),'VD','bin','makeblastdb');
     var exec = require('child_process').exec; 
     var cmd = formatdb + " -in " + file + " -dbtype " + dbtype; console.log(cmd);
+
+    exec(cmd, function(error,stdout,stderr){
+      document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
+      if(error!=null){
+        console.log('error :', error);
+        document.getElementById("subject").innerHTML += error +"\n";
+      } 
+    }); 
+  }
+  
+  function format_faidx(file,dbtype){
+    const path = require('path');
+    var formatdb = path.join(process.cwd(),'VD','bin','samtools');
+    var exec = require('child_process').exec; 
+    var cmd = formatdb + " faidx " + file; console.log(cmd);
 
     exec(cmd, function(error,stdout,stderr){
       document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
