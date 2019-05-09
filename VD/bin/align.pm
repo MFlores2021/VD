@@ -851,7 +851,7 @@ sub base_correction
 	# Util::process_cmd("bowtie2 --quiet --end-to-end -D 20 -R 3 -N 0 -L 13 -i S,1,0.50 --gbar 1 -p $cpu_num $format -a -x $contig_file -U $read_file -S $read_file.sam", $debug);
 
         Util::process_cmd("$bin_dir/samtools view -@ 5 -bS $read_file.sam > $read_file.bam 2> $temp_dir/samtools.log");
-        Util::process_cmd("$bin_dir/samtools sort -@ 5 $read_file.bam -o $read_file.sorted.bam 2> $temp_dir/samtools.log");
+        Util::process_cmd("$bin_dir/samtools sort $read_file.bam -o $read_file.sorted.bam 2> $temp_dir/samtools.log");
         Util::process_cmd("$bin_dir/samtools mpileup -f $contig_file $read_file.sorted.bam > $read_file.pileup 2> $temp_dir/samtools.log");
 
         my $file_size = -s "$read_file.pileup";

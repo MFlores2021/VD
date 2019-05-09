@@ -2,39 +2,39 @@
 <html>
 <head>
   <title>VDW</title>
-  <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/menu.js"></script>
+    <script type="text/javascript" src="js/functions.js"></script>
+    <style type="text/css">
+      body, html {
+        height: 100%;
+      }
+    </style>
 </head>
+
 <body>
-<script type="text/javascript" src="js/menu.js"></script>
 <script>
-// get the system platform using node.js
-var os = require('os');
-require('nw.gui').Window.get().showDevTools();
-// document.write('You are running on ', os.platform());
+    // get the system platform using node.js
+    var os = require('os');
+    // require('nw.gui').Window.get().showDevTools();
+    // document.write('You are running on ', os.platform());
+    $(function(){
+      $("#Menu").load("menu.html"); 
+    });
 </script>
-
-<div id="mySidenav" class="sidenav">
-  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-  <a href="#">About</a>
-  <a href="reference.html">Host reference</a>
-  <a href="ncbi.html">NCBI update</a>
-  <a href="localdb.html">Local DB update</a>
-  <a href="qc.html">FastQC</a>
-  <a href="clean.html">Trimming</a>
-  <a href="spike.html">Spike</a>
-  <a href="control.html">Mejora QC</a>
-  <a href="analysis.html">Analysis</a>
-  <a href="#">Contact</a>
-</div>
-
+<div id="Menu"></div>
 
 <!-- Use any element to open the sidenav -->
-<span onclick="openNav()">Menu</span>
+<span onclick="openNav()" style="color: white;background-color: black;">Menu</span>
 
 <!-- Add all page content inside this div if you want the side nav to push page content to the right (not used if you only want the sidenav to sit on top of the page -->
-<div id="main">
-  ...
-</div>
+<!-- <div id="main"> -->
+<div style="height:100%; width:100%; padding:0px; background:url(./index.jpg) no-repeat white"></div>
+
+<!-- <img src="index.jpg" id="bg" alt=""> -->
+<!-- </div> -->
 
 </body>
 </html>

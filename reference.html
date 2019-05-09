@@ -1,38 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Upload host reference</title>
-  <link rel="stylesheet" type="text/css" href="css/style.css">
+  <title>Host reference</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+      <script src="https://d3js.org/d3.v5.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/menu.js"></script>
+    <script type="text/javascript" src="js/functions.js"></script>
 </head>
 <body>
-  <script type="text/javascript" src="js/menu.js"></script>
-  <script type="text/javascript" src="js/functions.js"></script>
   <script>
-
+  	$( document ).ready(function() {
+        $("#Menu").load("menu.html");  
+	});
   </script>
-    <div id="mySidenav" class="sidenav">
-	  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-	  <a href="#">About</a>
-	  <a href="reference.html">Host reference</a>
-	  <a href="ncbi.html">NCBI update</a>
-	  <a href="localdb.html">Local DB update</a>
-	  <a href="qc.html">FastQC</a>
-	  <a href="clean.html">Trimming</a>
-	  <a href="spike.html">Spike</a>
-	  <a href="control.html">Mejora QC</a>
-	  <a href="analysis.html">Analysis</a>
-	  <a href="#">Contact</a>
-	</div>
+  <div id="Menu"></div>
 
 	<span onclick="openNav()">Menu</span>
 	
   <div id="main">
   	<div class="container" id="container">    
       <form>
-	  	<label for="upload">Upload (fasta file)</label><br><br>
+	  	<label for="upload">Upload host reference (fasta file)</label><br><br>
 	    <input id="fileDialog" type="file" multiple accept=".fasta,.fa" nwworkingdir="C:\"  /><br><br>
-	    <input type="submit"  value="Submit" onclick="upload_reference('#fileDialog','references')"><br><br><br>
+	    <input type="submit"  value="Submit" onclick="upload_reference('#fileDialog','databases')"><br><br><br>
 	    <div id="subject" name="subject"></div>
 	  </form>
 	</div>

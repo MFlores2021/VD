@@ -704,7 +704,7 @@ sub get_contig_mapped_depth
 
 	Util::process_cmd("$BIN_DIR/samtools faidx $contig");
 	Util::process_cmd("$BIN_DIR/samtools view -@ 5 -bt $contig.fai $sample.sam > $sample.bam 2>$sample.samtools.log");
-	Util::process_cmd("$BIN_DIR/samtools sort -@ 5 $sample.bam -o $sample.sorted.bam 2>$sample.samtools.log");
+	Util::process_cmd("$BIN_DIR/samtools sort $sample.bam -o $sample.sorted.bam 2>$sample.samtools.log");
 	Util::process_cmd("$BIN_DIR/samtools mpileup -f $contig $sample.sorted.bam > $sample.pileup 2>$sample.samtools.log"); 
 	# parse pileup file to save depth info to hash
 	# key: ref_id, mean, total. cover

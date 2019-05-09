@@ -85,7 +85,7 @@ input[type=submit] {
 
 /* When moving the mouse over the submit button, add a darker green color */
 input[type=submit]:hover {
-  background-color: #0080ff;
+  background-color: #5580ff;
 }
 
 /* Add a background color and some padding around the form */

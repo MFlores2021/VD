@@ -15,10 +15,11 @@
     var exec = require('child_process').exec; 
 
     if (fs.existsSync(pfolder)) {
-      alert('Folder name already exists');
+      alert('Folder name already exists, choose another folder name');
     } else{
       
-      exec('mkdir ' + pfolder, function(error,stdout,stderr){ if(error!=null){ console.log('error :', error); }});
+      exec('md ' + pfolder, function(error,stdout,stderr){ if(error!=null){ console.log('error :', error); }});
+      document.getElementById("ruta").value = pfolder ;
       for (var i = 0; i < files.length; ++i){
         exec("copy " + files[i].path + " "+ pfolder, function(error,stdout,stderr){
           document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
@@ -30,15 +31,13 @@
       }
         document.getElementById("subject").style.display = "block";
         document.getElementById("file").style.display = "block";
-        document.getElementById("file1").style.display = "block";
         document.getElementById("button").style.display = "block";
+        document.getElementById("trimming").style.display = "block";
         document.getElementById("subject").disabled = true;
         document.getElementById("file").disabled = true;
-        document.getElementById("file1").disabled = true;
         document.getElementById("pname").disabled = true;
-        document.getElementById("upload").style.display = "none";
-        document.getElementById("fileDialog").style.display = "none";
-        document.getElementById("submit").style.display = "none";
+        document.getElementById("container").removeChild(document.getElementById("remove"));
+
     }
   }
 
@@ -54,42 +53,52 @@
       alert('Folder ' +dir+ ' does not exists');
     } else{
         for (var i = 0; i < files.length; ++i){
-        exec("copy " + files[i].path + " "+ folder, function(error,stdout,stderr){
-          document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
+        exec("copy " + files[i].path + " "+ path.join(folder,"host_"+files[i].name), function(error,stdout,stderr){
           if(error!=null){
-            console.log('error :', error);
+            alert(error);
+            return;
           } 
+          alert("Done!");
         }); 
-         document.getElementById("subject").innerHTML += files[i].name +"\n";
       }
     }
   }
 
-  function upload_localdb(name,dir,dbtype) {
+  function upload_localdb(name,prot_name,dir) {
 
-    const path = require('path');
-    var folder = path.join(process.cwd(),'VD',dir);
-    var files = $(name)[0].files;
-    var fs = require('fs');
-    var exec = require('child_process').exec; 
+   if (!($(prot_name)[0].value =="") && !($(name)[0].value =="" )){
+      const path = require('path');
+      var folder = path.join(process.cwd(),'VD',dir);
+      var files = $(name)[0].files;
+      var files_prot = $(prot_name)[0].files;
+      var fs = require('fs');
+      var exec = require('child_process').exec; 
 
-    if (!fs.existsSync(folder)) {
-      alert('Folder ' +dir+ ' does not exists');
-    } else{
-        for (var i = 0; i < files.length; ++i){
-        exec("copy " + files[i].path + " "+ folder, function(error,stdout,stderr){
-          document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
-          if(error!=null){
-            console.log('error :', error);
-          } 
-        }); 
-         if (dir == 'databases'){
-              format_db(path.join(folder,files[i].name),dbtype);
-			  format_faidx(path.join(folder,files[i].name),dbtype);
-            }
-         document.getElementById("subject").innerHTML += files[i].name +"\n";
+      if (!fs.existsSync(folder)) {
+        alert('Folder ' +dir+ ' does not exists');
+      } else{
+          for (var i = 0; i < files.length; ++i){ 
+          var tmp = files[i].name;
+          var tmp1 = tmp.replace(".fasta", "");
+          var dbname  = "l_" +  tmp.replace(".fa", "");
+          var commrun = "copy " + files[i].path + " "+ path.join(folder,dbname) + " & copy " + files_prot[i].path + " "+ path.join(folder,dbname + "_prot") ;
+          
+          exec(commrun, function(error,stdout,stderr){
+            document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
+            if(error!=null){
+              console.log('error :', error);
+            } 
+          }); 
+           if (dir == 'databases'){
+                format_db(path.join(folder,dbname),"nucl");
+                format_db(path.join(folder,dbname + "_prot"),"prot");
+  			        format_faidx(path.join(folder,dbname));
+              }
+           document.getElementById("subject").innerHTML += files[i].name +"\n";
+        }
       }
     }
+    else alert("Select nucleotide and protein files");
   }
 
   function format_db(file,dbtype){
@@ -107,7 +116,7 @@
     }); 
   }
   
-  function format_faidx(file,dbtype){
+  function format_faidx(file){
     const path = require('path');
     var formatdb = path.join(process.cwd(),'VD','bin','samtools');
     var exec = require('child_process').exec; 
@@ -137,7 +146,7 @@
       }
 
       var exec = require('child_process').exec; 
-	  var commrun = "java -Xmx250m -classpath " + fqcdir + ";" + path.join(fqcdir,"sam-1.103.jar") + ";" + path.join(fqcdir,"jbzip2-0.9.jar") + " uk.ac.babraham.FastQC.FastQCApplication ";
+	    var commrun = "java -Xmx250m -classpath " + fqcdir + ";" + path.join(fqcdir,"sam-1.103.jar") + ";" + path.join(fqcdir,"jbzip2-0.9.jar") + " uk.ac.babraham.FastQC.FastQCApplication ";
 	  
       exec(commrun + cfiles, function(error,stdout,stderr){
         document.getElementById("subject2").innerHTML += stdout +"\n" + stderr +"\n";
@@ -153,15 +162,24 @@
         a = document.createElement('a');
         a.innerHTML = '<a target="_blank" href="' + txt + '" >' + el + '</a><br>';
         leftDiv.appendChild(a);
-        document.getElementById("container").appendChild(leftDiv);
+        document.getElementById("container").appendChild(leftDiv); 
         document.getElementById("subject2").style.display = "block";
         document.getElementById("subject2").disabled = true;
         document.getElementById("button").style.display = "none";
-        document.getElementById("trimming").style.display = "block";
+        document.getElementById("div-fastqc").style.display = "block";
+        document.getElementById("trimming2").style.display = "block";
         document.getElementById("analysis").style.display = "block";
       });
 
     })
+  }
+
+    function analysis(){
+      if(document.getElementById("fileDialog").style.display == "none"){
+        run_analysis('ruta');
+      } else{
+        run_analysis('fileDialog');
+      }
   }
 
   function run_analysis(name){
@@ -170,7 +188,17 @@
     var fs = require('fs');
     var exec = require('child_process').exec; 
     var cfiles = "";
+    var runperl = path.join("perlfiles","tmp.bat");
     var commrun = "perl " + path.join(process.cwd(),'VD','virus_detect.pl ');
+
+    // exec("where perl", function(error,stdout,stderr){
+    //   if(error != null){
+    //     console.log('error :', error); 
+    //     return;
+
+    //   }
+    //   console.log("sigue");
+    // });
 
     fs.readdir(dir, function(err, files) {
 
@@ -179,32 +207,55 @@
           cfiles = cfiles + path.join(dir , value) + " "; 
          // document.getElementById("inputtext").innerHTML += value +"\n"; 
       }); 
-console.log(cfiles);
-        if(cfiles != ""){
-          var db1 = document.getElementById("databases").value;
-          var db = db1.replace(".nin", "");
-		  var ref = document.getElementById("references").value;
-		  var cores = document.getElementById("cores").value;
-          commrun = (db != "") ?  commrun + " --reference " + db + " " : commrun;
-          commrun = (ref != "") ? commrun + " --host_reference " + ref + " ": commrun;
-          commrun = (cores != "") ? commrun + " --thread_num " + cores + " ": commrun;
-          
-          commrun += cfiles; console.log(commrun); console.log(ref);
-          exec(commrun, function(error,stdout,stderr){
-            console.log('stdout :', stdout); 
-            console.log('stderr :', stderr); 
-            document.getElementById("outputtext").innerHTML += stdout +"\n";
-            if(error != null){
-              console.log('error :', error); 
-              document.getElementById("outputtext").innerHTML += error +"\n";
-            }
-          });
-          document.getElementById("outputtext").innerHTML += commrun +"\n";
-          document.getElementById("outputtext").style.display = "block";
-        }
+
+      if(cfiles != ""){
+        var db1 = document.getElementById("databases").value;
+        var db = db1.replace(".nin", "");
+  		  var ref = document.getElementById("references").value;
+  		  var cores = document.getElementById("cores").value;
+        commrun = (db != "") ?  commrun + " --reference " + db + " " : commrun;
+        commrun = (ref != "") ? commrun + " --host_reference " + ref + " ": commrun;
+        commrun = (cores != "") ? commrun + " --thread_num " + cores + " ": commrun;
+        
+        commrun += cfiles; console.log(commrun);
+        
+        create_analysisbat(runperl, commrun);
+
+        if(fs.existsSync(runperl)){
+
+            exec(runperl, function(error,stdout,stderr){
+              console.log('stdout :', stdout); 
+              console.log('stderr :', stderr); 
+              document.getElementById("outputtext").innerHTML += stdout +"\n";
+              fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + stdout, (err) => {   if (err) throw err; });
+
+              if(error != null){
+                console.log('error :', error); 
+                document.getElementById("outputtext").innerHTML += error +"\n";
+                fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + error, (err) => {   if (err) throw err; });
+                alert("There is an error. Please check analysis.log!");
+                return;
+              }
+              alert("Done!");
+            });
+          }
+        document.getElementById("outputtext").innerHTML += commrun +"\n";
+        document.getElementById("outputtext").style.display = "block";
+
+
+      }
+      
 
     });
   }
+
+  function trim(){
+      if(document.getElementById("fileDialog").style.display == "none"){
+        trimming('ruta');
+      } else{
+        trimming('fileDialog');
+      }
+    }
 
   function trimming(name){
         const path = require('path');
@@ -213,6 +264,7 @@ console.log(cfiles);
         var spawn = require('child_process').spawn;
 		    var cfiles = "";
 		    var cn = path.join(process.cwd(),'VD','tools','sRNA_clean','sRNA_clean.pl ');
+        var runperl = path.join("perlfiles","tmp.bat");
 
         fs.readdir(dir, function(err, files) {
        
@@ -224,8 +276,13 @@ console.log(cfiles);
 
               var adapt = document.getElementById("adaptor").value;
               var len = document.getElementById("length").value;
-      			  var comando = spawn('perl',[cn,'-s',adapt,'-l',len,cfiles],{shell:true}); console.log(comando);
-      			  comando.stdout.on('data',(data) =>{ console.log('stdout: ${data}');});
+              var commrun = 'perl ' + cn + ' -s '+ adapt + ' -l ' + len + ' ' + cfiles;
+
+              create_analysisbat(runperl, commrun);
+
+      			  // var comando = spawn('perl',[cn,'-s',adapt,'-l',len,cfiles],{shell:true});
+              var comando = spawn(runperl,[],{shell:true});
+              comando.stdout.on('data',(data) =>{ console.log('stdout: ${data}');});
       			  comando.stderr.on('data',(data) =>{ console.log('stderr: ${data}');});
       			  comando.on('close',function(code){
       				  if(code === 0){
@@ -242,6 +299,7 @@ console.log(cfiles);
               document.getElementById("resultLbl").style.display = "block";
               document.getElementById("analysis").style.display = "block";
               document.getElementById("save").style.display = "block";
+              document.getElementById("ruta").value = dir;
 
             }
 
@@ -348,7 +406,15 @@ console.log(cfiles);
     }
 
   }
-  function spike(name){
+  function skipe(){
+      if(document.getElementById("fileDialog").style.display == "none"){
+        spike_analysis('ruta');
+      } else{
+        spike_analysis('fileDialog');
+      }
+  }
+
+  function spike_analysis(name){
         const path = require('path');
         var dir = document.getElementById(name).value;
         var fs = require('fs');
@@ -368,6 +434,7 @@ console.log(cfiles);
             if(cfiles != ""){
               document.getElementById("inputtext").disabled = true;
               document.getElementById("run").style.display = "block";
+              document.getElementById("outputtext").style.display = "block";
             }
 
           });
@@ -457,11 +524,12 @@ function save(){
     fs.readdir(dir, function(err, files) {
       var select = document.getElementById("databases");
       files.filter(extension).forEach(function(value) {
+        value = value.replace(/_prot.pin/, "");
         select.options[select.options.length] = new Option(value, value);
       });
     });
     function extension(element) {
-	  var rege = new RegExp('vrl.+in$');
+	  var rege = new RegExp('_prot.pin$');
       return rege.test(element); 
     };
   }
@@ -480,19 +548,25 @@ function save(){
     });
 
     function extension(element) {
-      var extName = path.extname(element);
-	  var rege = new RegExp('^host_');
+        var extName = path.extname(element);
+	      var rege = new RegExp('^host_');
       return rege.test(element); 
 
     };
   }
 
-  function link_trimming(){
-    location.href = './clean.html';
+  function link_trimming(name){
+    var path1 = document.getElementById(name).value;
+    location.href = './clean.html?folder=' + path1;
   }
 
-  function link_analysis(){
-    location.href = './analysis.html';
+  function link_spike(name){
+    var path1 = document.getElementById(name).value;
+    location.href = './spike.html?folder=' + path1;
   }
 
+  function link_analysis(name){
+    var path1 = document.getElementById(name).value;
+    location.href = './analysis.html?folder=' + path1;
+  }
 

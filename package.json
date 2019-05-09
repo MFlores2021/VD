@@ -1,22 +1,30 @@
-{"name":"VDW",
-	"description":"virus detect GUI",
-	"main":"index.html",
-	"window":{"heigth":700,"width":700},
-	"css":"css/style.css",
-	"js":"js/menu.js",
-	"dependencies":{"wine":"^0.9.8"},
-	 "chromium-args": "-load-extension=./extensions/ -ignore-certificate-errors",
-"webview": {
-  "partitions": [
-     {
-       "name": "trusted",
-       "accessible_resources": [
+{
+  "name": "VDW",
+  "description": "virus detect GUI",
+  "main": "index.html",
+  "window": {
+    "heigth": 700,
+    "width": 700
+  },
+  "css": "css/style.css",
+  "js": "js/menu.js",
+  "bin": "./bin/npm-cli.js",
+  "dependencies": {
+    "ftp": "^0.3.10",
+    "wine": "^0.9.8"
+  },
+  "chromium-args": "-load-extension=./extensions/ -ignore-certificate-errors",
+  "webview": {
+    "partitions": [
+      {
+        "name": "trusted",
+        "accessible_resources": [
           "<all_urls>"
-       ]
-     }
-  ]
+        ]
+      }
+    ]
+  },
+  "devDependencies": {
+    "nwjs-builder-phoenix": "^1.15.0"
+  }
 }
-
-}
-
-

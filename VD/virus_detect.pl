@@ -215,7 +215,7 @@ if ( $host_reference ) {
 	foreach my $h (@host_db) {
 		unless(-s $h) { 
 			my $formatdb_bin = $BIN_DIR."/makeblastdb";
-			my $cmd_format_host = "$formatdb_bin -in $host_reference -dbtype nucl -logfile makeblastdb.log";
+			my $cmd_format_host = "$formatdb_bin -in $host_reference -dbtype nucl -logfile  makeblastdb.log";
 			Util::process_cmd($cmd_format_host, $debug);
 			last;
 		}
@@ -290,7 +290,7 @@ foreach my $sample (@ARGV)
 	if ($mapped_num > 0)
 	{
 		Util::process_cmd("$BIN_DIR/samtools view -@ 5 -bt $reference.fai $sample.sam > $sample.bam 2> $TEMP_DIR/samtools.log", $debug) unless (-s "$sample.bam");
-		Util::process_cmd("$BIN_DIR/samtools sort -@ 5 $sample.bam -o $sample.sorted.bam 2> $TEMP_DIR/samtools.log", $debug) unless (-s "$sample.sorted.bam");
+		Util::process_cmd("$BIN_DIR/samtools sort $sample.bam -o $sample.sorted.bam 2> $TEMP_DIR/samtools.log", $debug) unless (-s "$sample.sorted.bam");
 		Util::process_cmd("$BIN_DIR/samtools mpileup -f $reference $sample.sorted.bam > $sample.pre.pileup 2> $TEMP_DIR/samtools.log", $debug) unless (-s "$sample.pre.pileup");
 		align::pileup_filter("$sample.pre.pileup", "$seq_info", "$coverage", "$sample.pileup", "$BIN_DIR", $debug) unless (-s "$sample.pileup");	# filter pileup file 
 

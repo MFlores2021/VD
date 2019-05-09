@@ -1,44 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>sRNA data cleaning</title>
-  <link rel="stylesheet" type="text/css" href="css/style.css">
+  <title>Check spike sequences</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+      <script src="https://d3js.org/d3.v5.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/menu.js"></script>
+   	<script type="text/javascript" src="js/functions.js"></script>
 </head>
 <body>
-  <script type="text/javascript" src="js/menu.js"></script>
-  <script type="text/javascript" src="js/functions.js"></script>
-
   <script>
+	$( document ).ready(function() {
+        $("#Menu").load("menu.html");  
+        document.getElementById("outputtext").style.display = "none";
 
+    var url = require('url');
+    var url_parts = url.parse(location.href, true);
+    const query = url_parts.query;
+    var fs = require('fs');
+
+    if (fs.existsSync(query.folder)) {
+      const path = require('path');
+      document.getElementById("fileDialog").style.display = "none";
+      document.getElementById("path1").innerHTML = "Working in the directory: " + path.basename(query.folder);
+      document.getElementById("ruta").value = query.folder;
+    }
+
+	});
   </script>
-  <div id="mySidenav" class="sidenav">
-	  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-	  <a href="#">About</a>
-	  <a href="reference.html">Host reference</a>
-	  <a href="ncbi.html">NCBI update</a>
-	  <a href="localdb.html">Local DB update</a>
-	  <a href="qc.html">FastQC</a>
-	  <a href="clean.html">Trimming</a>
-	  <a href="spike.html">Spike</a>
-	  <a href="control.html">Mejora QC</a>
-	  <a href="analysis.html">Analysis</a>
-	  <a href="#">Contact</a>
-	</div>
+  <div id="Menu"></div>
 <!-- Use any element to open the sidenav -->
   <span onclick="openNav()">Menu</span>
 
   <div id="main">
     <div class="container" id="container">
-	  <textarea id="inputtext">Select folder</textarea>
-	  <label>Sequences of the adaptor</label><br>
-	  <input type="text" id="adaptor" name="adaptor" placeholder="">
-	  <br>
-	  <label>Minimum length of sRNAs after trimming</label><br>
-	  <input type="text" id="length" name="length" placeholder="">
+      <label id="ruta"></label>
+    <label id="path1">Select uploaded samples folder</label><br><br>
+	  <input id="fileDialog" type="file" nwdirectory nwworkingdir="./"  /><br><br>
+	  
+	  <label>Spinking sequences</label><br>
+	  <textarea id="inputtext"></textarea>
 	  <br><br>
-	  <input type="submit" value="Run" onclick="trimming()">
+	  <input id="run" type="submit" value="Run" onclick="spike()">
 	  <textarea id="outputtext"></textarea>
+	  <div id="graph"></div>
+    <input id="trimming" type="submit" value="Next >" align="right" onclick="link_analysis('ruta')"></div>
 	</div>
   </div>
 
