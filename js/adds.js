@@ -159,6 +159,6 @@ function unzip(dir){
         console.log(commrun);
         if(error!=null) console.log(stderr);
       });
-    }
+    });
 }
 
