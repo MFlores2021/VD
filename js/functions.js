@@ -10,34 +10,39 @@
   function upload(name) {
 
     var files = $(name)[0].files;
-    var pfolder = return_folder();
+    const path = require('path');
     var fs = require('fs');
     var exec = require('child_process').exec; 
+
+    var dir = document.getElementById("pname").value;
+    var pfolder = path.join(process.cwd(),'results',dir); 
 
     if (fs.existsSync(pfolder)) {
       alert('Folder name already exists, choose another folder name');
     } else{
       
-      exec('md ' + pfolder, function(error,stdout,stderr){ if(error!=null){ console.log('error :', error); }});
-      document.getElementById("ruta").value = pfolder ;
-      for (var i = 0; i < files.length; ++i){
-        exec("copy " + files[i].path + " "+ pfolder, function(error,stdout,stderr){
-          document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
-          if(error!=null){
-            console.log('error :', error);
-          }
-        }); 
-        document.getElementById("subject").innerHTML += files[i].name +"\n";
-      }
-        document.getElementById("subject").style.display = "block";
-        document.getElementById("file").style.display = "block";
-        document.getElementById("button").style.display = "block";
-        document.getElementById("trimming").style.display = "block";
-        document.getElementById("subject").disabled = true;
-        document.getElementById("file").disabled = true;
-        document.getElementById("pname").disabled = true;
-        document.getElementById("container").removeChild(document.getElementById("remove"));
+      exec('md ' + pfolder, function(error,stdout,stderr){ 
+        if(error!=null){ alert('error :', error); }
+        else {
+          
+          for (var i = 0; i < files.length; ++i){
+              var tmp = files[i].name;
+              // var newname1 = tmp.replace(".", "-");
+              var newname = tmp.replace(" ", "-");
 
+              exec("copy " + files[i].path + " "+  path.join(pfolder,newname) , function(error,stdout,stderr){
+                // document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
+                if(error!=null){
+                  console.log('error :', error);
+                  alert('Something went wrong while copying files.' + error);
+                } else{
+                  document.getElementById("ruta").value = pfolder;
+                }
+              }); 
+          }
+          //document.getElementById("container").removeChild(document.getElementById("remove"));
+        }
+      });
     }
   }
 
@@ -131,50 +136,49 @@
     }); 
   }
 
-  function run_fastqc() {
+  function run_fastqc(dir) {
 
     const path = require('path');
-    var dir = return_folder();
     var fs = require('fs');
-	var fqcdir = path.join(process.cwd(),'VD', 'bin','fastQC');
+	  var fqcdir = path.join(process.cwd(),'VD', 'bin','fastQC');
      
     fs.readdir(dir, function(err, files) {
-      var cfiles ="";
-      
-      for (var i = 0; i < files.length; ++i){
-        cfiles = cfiles + path.join(dir , files[i]) + " "; 
+      var cfiles =""; 
+      files.filter(extension_fastq).forEach(function(value) {
+          cfiles = cfiles + path.join(dir , value) + " "; 
+      });
+
+      if (cfiles != ""){
+        var exec = require('child_process').exec; 
+  	    var commrun = "java -Xmx250m -classpath " + fqcdir + ";" + path.join(fqcdir,"sam-1.103.jar") + ";" + path.join(fqcdir,"jbzip2-0.9.jar") + " uk.ac.babraham.FastQC.FastQCApplication ";
+  	   
+        exec(commrun + cfiles, function(error,stdout,stderr){
+          // document.getElementById("subject2").innerHTML += stdout +"\n" + stderr +"\n";
+
+          if(error!=null){ console.log(commrun);
+           // document.getElementById("subject2").innerHTML += "ERRORR:" + error + "\n" ;
+          }
+        });
+
+        var leftDiv = document.createElement("div"); 
+        [].forEach.call(files, function (el) {
+          var txt = "file://" + path.join(dir, path.parse(el).name) + "_fastqc.html";
+          a = document.createElement('a');
+          a.innerHTML = '<a target="_blank" href="' + txt + '" >' + el + '</a><br>';
+          leftDiv.appendChild(a);
+          // document.getElementById("container").appendChild(leftDiv); 
+          // document.getElementById("subject2").style.display = "block";
+          // document.getElementById("subject2").disabled = true;
+          // document.getElementById("button").style.display = "none";
+          // document.getElementById("div-fastqc").style.display = "block";
+          // document.getElementById("trimming2").style.display = "block";
+          // document.getElementById("analysis").style.display = "block";
+        });
       }
-
-      var exec = require('child_process').exec; 
-	    var commrun = "java -Xmx250m -classpath " + fqcdir + ";" + path.join(fqcdir,"sam-1.103.jar") + ";" + path.join(fqcdir,"jbzip2-0.9.jar") + " uk.ac.babraham.FastQC.FastQCApplication ";
-	  
-      exec(commrun + cfiles, function(error,stdout,stderr){
-        document.getElementById("subject2").innerHTML += stdout +"\n" + stderr +"\n";
-
-        if(error!=null){ console.log(commrun);
-          document.getElementById("subject2").innerHTML += "ERRORR:" + error + "\n" ;
-        }
-      });
-
-      var leftDiv = document.createElement("div"); 
-      [].forEach.call(files, function (el) {
-        var txt = "file://" + path.join(dir, path.parse(el).name) + "_fastqc.html";
-        a = document.createElement('a');
-        a.innerHTML = '<a target="_blank" href="' + txt + '" >' + el + '</a><br>';
-        leftDiv.appendChild(a);
-        document.getElementById("container").appendChild(leftDiv); 
-        document.getElementById("subject2").style.display = "block";
-        document.getElementById("subject2").disabled = true;
-        document.getElementById("button").style.display = "none";
-        document.getElementById("div-fastqc").style.display = "block";
-        document.getElementById("trimming2").style.display = "block";
-        document.getElementById("analysis").style.display = "block";
-      });
-
-    })
+    });
   }
 
-    function analysis(){
+  function analysis(){
       if(document.getElementById("fileDialog").style.display == "none"){
         run_analysis('ruta');
       } else{
@@ -182,31 +186,28 @@
       }
   }
 
-  function run_analysis(name){
+  function run_analysis(dir,trim){
     const path = require('path');
-    var dir = document.getElementById(name).value;
     var fs = require('fs');
     var exec = require('child_process').exec; 
     var cfiles = "";
     var runperl = path.join("perlfiles","tmp.bat");
     var commrun = "perl " + path.join(process.cwd(),'VD','virus_detect.pl ');
 
-    // exec("where perl", function(error,stdout,stderr){
-    //   if(error != null){
-    //     console.log('error :', error); 
-    //     return;
-
-    //   }
-    //   console.log("sigue");
-    // });
-
     fs.readdir(dir, function(err, files) {
+      if(trim){
+        files.filter(extension_cleanfastq).forEach(function(value) {
+        //files.forEach(function(value) {
+            cfiles = cfiles + path.join(dir , value) + " "; 
+           // document.getElementById("inputtext").innerHTML += value +"\n"; 
+        }); 
+      }
 
-      //files.filter(extension).forEach(function(value) {
-      files.forEach(function(value) {
-          cfiles = cfiles + path.join(dir , value) + " "; 
-         // document.getElementById("inputtext").innerHTML += value +"\n"; 
-      }); 
+      if(cfiles == ""){
+        files.filter(extension_fastq).forEach(function(value) {
+            cfiles = cfiles + path.join(dir , value) + " "; 
+        }); 
+      }
 
       if(cfiles != ""){
         var db1 = document.getElementById("databases").value;
@@ -226,12 +227,12 @@
             exec(runperl, function(error,stdout,stderr){
               console.log('stdout :', stdout); 
               console.log('stderr :', stderr); 
-              document.getElementById("outputtext").innerHTML += stdout +"\n";
+              // document.getElementById("outputtext").innerHTML += stdout +"\n";
               fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + stdout, (err) => {   if (err) throw err; });
 
               if(error != null){
                 console.log('error :', error); 
-                document.getElementById("outputtext").innerHTML += error +"\n";
+                // document.getElementById("outputtext").innerHTML += error +"\n";
                 fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + error, (err) => {   if (err) throw err; });
                 alert("There is an error. Please check analysis.log!");
                 return;
@@ -239,27 +240,22 @@
               alert("Done!");
             });
           }
-        document.getElementById("outputtext").innerHTML += commrun +"\n";
-        document.getElementById("outputtext").style.display = "block";
-
-
+        // document.getElementById("outputtext").innerHTML += commrun +"\n";
+        // document.getElementById("outputtext").style.display = "block";
       }
-      
-
     });
   }
 
   function trim(){
-      if(document.getElementById("fileDialog").style.display == "none"){
-        trimming('ruta');
-      } else{
-        trimming('fileDialog');
-      }
+    if(document.getElementById("fileDialog").style.display == "none"){
+      trimming('ruta');
+    } else{
+      trimming('fileDialog');
     }
+  }
 
-  function trimming(name){
+  function trimming(dir){
         const path = require('path');
-        var dir = document.getElementById(name).value;
         var fs = require('fs');
         var spawn = require('child_process').spawn;
 		    var cfiles = "";
@@ -268,7 +264,7 @@
 
         fs.readdir(dir, function(err, files) {
        
-          files.filter(extension).forEach(function(value) {
+          files.filter(extension_fastq).forEach(function(value) {
               cfiles = cfiles + path.join(dir , value) + " "; 
           }); 
 
@@ -290,15 +286,15 @@
       				  }
       			  })
 
-              document.getElementById("outputtext").innerHTML += commrun +"\n";
-              document.getElementById("alink").innerHTML = '<a target="_blank" href="file://' + dir + '" >Reports</a><br>';
-              document.getElementById("adaptor").disabled = true;
-              document.getElementById("length").disabled = true;
-              document.getElementById("outputtext").disabled = true;
-              document.getElementById("outputtext").style.display = "block";
-              document.getElementById("resultLbl").style.display = "block";
-              document.getElementById("analysis").style.display = "block";
-              document.getElementById("save").style.display = "block";
+              // document.getElementById("outputtext").innerHTML += commrun +"\n";
+              // document.getElementById("alink").innerHTML = '<a target="_blank" href="file://' + dir + '" >Reports</a><br>';
+              // document.getElementById("adaptor").disabled = true;
+              // document.getElementById("length").disabled = true;
+              // document.getElementById("outputtext").disabled = true;
+              // document.getElementById("outputtext").style.display = "block";
+              // document.getElementById("resultLbl").style.display = "block";
+              // document.getElementById("analysis").style.display = "block";
+              // document.getElementById("save").style.display = "block";
               document.getElementById("ruta").value = dir;
 
             }
@@ -312,7 +308,7 @@
     		function extension_sRNA(element) {
               var extName = new RegExp('sRNA_length.txt$');
               return extName.test(element); 
-            };
+        };
 		
     		function dibujo(fs,dir){
     			var sRNA='';  
@@ -350,26 +346,26 @@
     					  .y(function(d) { return yScale(d.y); }) // set the y values for the line generator 
     					  .curve(d3.curveMonotoneX) // apply smoothing to the line
 
-    				  var svg = d3.select("#graph").append("svg")
-    					  .attr("id","svg")
-    					  .attr("width", width + margin.left + margin.right)
-    					  .attr("height", height + margin.top + margin.bottom)
-    					.append("g")
-    					  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    				 //  var svg = d3.select("#graph").append("svg")
+    					//   .attr("id","svg")
+    					//   .attr("width", width + margin.left + margin.right)
+    					//   .attr("height", height + margin.top + margin.bottom)
+    					// .append("g")
+    					//   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    				  svg.append("g")
-    					  .attr("class", "x axis")
-    					  .attr("transform", "translate(0," + height + ")")
-    					  .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
+    				 //  svg.append("g")
+    					//   .attr("class", "x axis")
+    					//   .attr("transform", "translate(0," + height + ")")
+    					//   .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
 
-    				  svg.append("g")
-    					  .attr("class", "y axis")
-    					  .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+    				 //  svg.append("g")
+    					//   .attr("class", "y axis")
+    					//   .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
 
-    				  svg.append("path")
-    					  .datum(element)
-    					  .attr("class", "line")
-    					  .attr("d", line);  
+    				 //  svg.append("path")
+    					//   .datum(element)
+    					//   .attr("class", "line")
+    					//   .attr("d", line);  
     			  }
     		});
 		}
@@ -404,9 +400,8 @@
         
         return Number(y);
     }
-
   }
-  function skipe(){
+  function spike(){
       if(document.getElementById("fileDialog").style.display == "none"){
         spike_analysis('ruta');
       } else{
@@ -414,30 +409,36 @@
       }
   }
 
-  function spike_analysis(name){
+  function spike_analysis(dir,trim){
         const path = require('path');
-        var dir = document.getElementById(name).value;
         var fs = require('fs');
         var spawn = require('child_process').spawn;
         var cfiles = "";
         var cn = path.join(process.cwd(),'VD','bin','seqkit.exe ');
-        var adapt = document.getElementById("inputtext").value;
+        var adapt = document.getElementById("spiketext").value;
         adapt = adapt.replace(/\n/g, ",");
  
         fs.readdir(dir, function(err, files) {
-       
-          files.filter(extension).forEach(function(value) {
-              cfiles = path.join(dir , value); 
-              var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
-          }); 
+          
+          if(trim){
+            files.filter(extension_cleanfastq).forEach(function(value) {
+                cfiles = path.join(dir , value); 
+                var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
+            }); 
+          } else {
+            files.filter(extension_fastq).forEach(function(value) {
+                cfiles = path.join(dir , value); 
+                var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
+            }); 
+          }
 
-            if(cfiles != ""){
-              document.getElementById("inputtext").disabled = true;
-              document.getElementById("run").style.display = "block";
-              document.getElementById("outputtext").style.display = "block";
-            }
+          if(cfiles != ""){
+            document.getElementById("spiketext").disabled = true;
+            // document.getElementById("run").style.display = "block";
+            // document.getElementById("outputtext").style.display = "block";
+          }
 
-          });
+        });
       
         function extension(element) {
           var extName = path.extname(element);
@@ -484,29 +485,33 @@
                 .y(function(d) { return yScale(d.y); }) // set the y values for the line generator 
                 .curve(d3.curveMonotoneX) // apply smoothing to the line
 
-              var svg = d3.select("#graph").append("svg")
-                .attr("id","svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-              .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+              // var svg = d3.select("#graph").append("svg")
+              //   .attr("id","svg")
+              //   .attr("width", width + margin.left + margin.right)
+              //   .attr("height", height + margin.top + margin.bottom)
+              // .append("g")
+              //   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-              svg.append("g")
-                .attr("class", "x axis")
-                .attr("transform", "translate(0," + height + ")")
-                .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
+              // svg.append("g")
+              //   .attr("class", "x axis")
+              //   .attr("transform", "translate(0," + height + ")")
+              //   .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
 
-              svg.append("g")
-                .attr("class", "y axis")
-                .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+              // svg.append("g")
+              //   .attr("class", "y axis")
+              //   .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
 
-              svg.append("path")
-                .datum(element)
-                .attr("class", "line")
-                .attr("d", line);  
+              // svg.append("path")
+              //   .datum(element)
+              //   .attr("class", "line")
+              //   .attr("d", line);  
             }
         });
       }
+  }
+
+  function control(name){
+
   }
 
 
@@ -515,26 +520,26 @@ function save(){
 
 }
 
-   function read_db(){
+  function read_db(){
 
-    const path = require('path');
-    var dir = path.join(process.cwd(),'VD','databases');
-    var fs = require('fs');
+      const path = require('path');
+      var dir = path.join(process.cwd(),'VD','databases');
+      var fs = require('fs');
 
-    fs.readdir(dir, function(err, files) {
-      var select = document.getElementById("databases");
-      files.filter(extension).forEach(function(value) {
-        value = value.replace(/_prot.pin/, "");
-        select.options[select.options.length] = new Option(value, value);
+      fs.readdir(dir, function(err, files) {
+        var select = document.getElementById("databases");
+        files.filter(extension).forEach(function(value) {
+          value = value.replace(/_prot.pin/, "");
+          select.options[select.options.length] = new Option(value, value);
+        });
       });
-    });
-    function extension(element) {
-	  var rege = new RegExp('_prot.pin$');
-      return rege.test(element); 
-    };
+      function extension(element) {
+  	  var rege = new RegExp('_prot.pin$');
+        return rege.test(element); 
+      };
   }
 
-   function read_reference(){
+  function read_reference(){
 
     const path = require('path');
     var dir = path.join(process.cwd(),'VD','databases');
@@ -553,6 +558,25 @@ function save(){
       return rege.test(element); 
 
     };
+  }
+
+  function read_control(){
+
+      const path = require('path');
+      var dir = path.join(process.cwd(),'VD','databases');
+      var fs = require('fs');
+
+      fs.readdir(dir, function(err, files) {
+        var select = document.getElementById("databases");
+        files.filter(extension).forEach(function(value) {
+          value = value.replace(/_prot.pin/, "");
+          select.options[select.options.length] = new Option(value, value);
+        });
+      });
+      function extension(element) {
+      var rege = new RegExp('^c_');
+        return rege.test(element); 
+      };
   }
 
   function link_trimming(name){

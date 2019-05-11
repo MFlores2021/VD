@@ -10,8 +10,7 @@
   "js": "js/menu.js",
   "bin": "./bin/npm-cli.js",
   "dependencies": {
-    "ftp": "^0.3.10",
-    "wine": "^0.9.8"
+    "ftp": "^0.3.10"
   },
   "chromium-args": "-load-extension=./extensions/ -ignore-certificate-errors",
   "webview": {
