@@ -3,24 +3,32 @@
 function run_all(name){
 
 	var validation = validate();
+	var fs = require('fs');
 
 	if (validation){
 		upload(name);
 		var folder = document.getElementById("ruta").value;
 		const clean =false;
+		console.log("created folder" + folder);
 
 		if (fs.existsSync(folder)) {
 			unzip(folder);
+			console.log("unzipped");
 			run_fastqc(folder);
+			console.log("fastqc ed");
 			if (document.getElementById("adaptor").value != '' && document.getElementById("length").value != ''){
 				trimming(folder);
 				clean = true;
+				console.log("trimmed");
 			}
 			if(document.getElementById("inputtext").value != ''){
 				spike_analysis(folder,clean);
+				console.log("spiked");
 			}
 			//control(name);
+			console.log("antes-ana");
 			run_analysis(folder,clean);
+			console.log("despues-ana");
 		}
 	}
 }

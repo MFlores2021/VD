@@ -141,23 +141,31 @@ function extension_cleanfastq(element) {
   return extName.test(element); 
 };
 
+function extension_gz(element) {
+  var extName = new RegExp('.\\.gz$');
+  return extName.test(element); 
+};
+
+
 function unzip(dir){
     const path = require('path');
     var fs = require('fs');
     var exec = require('child_process').exec; 
-    var tooldir = path.join(process.cwd(),'VD', 'bin','gzip.exe');
+    var tooldir = path.join(process.cwd(),'VD', 'bin','gzip.exe ');
 
     fs.readdir(dir, function(err, files) {
-      var cfiles ="";
-      
-      for (var i = 0; i < files.length; ++i){
-        cfiles = cfiles + path.join(dir , files[i]) + " "; 
-      }
-      var commrun = tooldir  + " " + cfiles;
+      files.filter(extension_gz).forEach(function(value) {
+        var cfiles ="";
+        
+        for (var i = 0; i < files.length; ++i){
+          cfiles = cfiles + path.join(dir , files[i]) + " "; 
+        }
+        var commrun = tooldir  + " " + cfiles;
 
-      exec(commrun, function(error,stdout,stderr){
-        console.log(commrun);
-        if(error!=null) console.log(stderr);
+        exec(commrun, function(error,stdout,stderr){
+          console.log(commrun);
+          if(error!=null) console.log("unzip error:" + stderr);
+        });
       });
     });
 }

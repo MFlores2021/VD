@@ -156,6 +156,7 @@
           // document.getElementById("subject2").innerHTML += stdout +"\n" + stderr +"\n";
 
           if(error!=null){ console.log(commrun);
+            console.log("fastqc error:",error);
            // document.getElementById("subject2").innerHTML += "ERRORR:" + error + "\n" ;
           }
         });
@@ -231,7 +232,7 @@
               fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + stdout, (err) => {   if (err) throw err; });
 
               if(error != null){
-                console.log('error :', error); 
+                console.log('analysis error :', error); 
                 // document.getElementById("outputtext").innerHTML += error +"\n";
                 fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + error, (err) => {   if (err) throw err; });
                 alert("There is an error. Please check analysis.log!");
@@ -279,7 +280,7 @@
       			  // var comando = spawn('perl',[cn,'-s',adapt,'-l',len,cfiles],{shell:true});
               var comando = spawn(runperl,[],{shell:true});
               comando.stdout.on('data',(data) =>{ console.log('stdout: ${data}');});
-      			  comando.stderr.on('data',(data) =>{ console.log('stderr: ${data}');});
+      			  comando.stderr.on('data',(data) =>{ console.log('trimming stderr: ${data}');});
       			  comando.on('close',function(code){
       				  if(code === 0){
       					dibujo(fs,dir);
