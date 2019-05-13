@@ -200,7 +200,10 @@
     fs.readdir(dir, function(err, files) {
       if(trim){
         files.filter(extension_cleanfastq).forEach(function(value) {
+          var stats1 = fs.statSync(value).size;
+          if (stats1>50){
             cfiles = cfiles + path.join(dir , value) + " "; 
+          }
         }); 
       }
 
@@ -276,7 +279,7 @@ function trimmingx(dir){
               var commrun = 'perl ' + cn + ' -s '+ adapt + ' -l ' + len + ' ' + cfiles;
 
               create_analysisbat(runperl, commrun);
-              runperl = 'ls ';
+              
 
               // var comando = spawn('perl',[cn,'-s',adapt,'-l',len,cfiles],{shell:true});
               var comando = spawn(runperl,[],{shell:true});
@@ -463,17 +466,17 @@ function trimmingx(dir){
  
         fs.readdir(dir, function(err, files) {
           
-          // if(trim){
-          //   files.filter(extension_cleanfastq).forEach(function(value) {
-          //       cfiles = path.join(dir , value); 
-          //       var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
-          //   }); 
-          // } else {
-          //   files.filter(extension_fastq).forEach(function(value) {
-          //       cfiles = path.join(dir , value); 
-          //       var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
-          //   }); 
-          // }
+          if(trim){
+            files.filter(extension_cleanfastq).forEach(function(value) {
+                cfiles = path.join(dir , value); 
+                var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
+            }); 
+          } else {
+            files.filter(extension_fastq).forEach(function(value) {
+                cfiles = path.join(dir , value); 
+                var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
+            }); 
+          }
 
           if(cfiles != ""){
             document.getElementById("spiketext").disabled = true;
@@ -483,10 +486,6 @@ function trimmingx(dir){
 
         });
       
-        function extension(element) {
-          var extName = path.extname(element);
-          return extName === '.fq'; 
-        };
         function extension_sRNA(element) {
               var extName = new RegExp('spike.txt$');
               return extName.test(element); 
