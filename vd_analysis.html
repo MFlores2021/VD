@@ -32,6 +32,7 @@
   <div id="main">
     <div class="container" id="container"><br>
         <label id="ruta"></label>
+        <label>Select project folder name</label><br>
         <input type="text" id="pname" name="projectname" placeholder=""><br>
         <div id=remove>
             <label id="upload" for="upload">Select file(s) to upload (fastq,fq,gz) <br><br></label>
@@ -60,7 +61,7 @@
             <label for="cores">Number of threads</label>
             <input type="text" id="cores" name="cores" placeholder="1" onkeypress="return onlyNos(event,this);">
         </div>
-        <input type="submit" value="Run" onclick="run_all('#fileDialog')">
+        <input type="submit" value="Run" onclick="run_all1('#fileDialog')">
     </div>
 
   </div>

@@ -148,6 +148,7 @@ function extension_gz(element) {
 
 
 function unzip(dir){
+  console.log("unziping");
     const path = require('path');
     var fs = require('fs');
     var exec = require('child_process').exec; 
@@ -160,7 +161,7 @@ function unzip(dir){
         for (var i = 0; i < files.length; ++i){
           cfiles = cfiles + path.join(dir , files[i]) + " "; 
         }
-        var commrun = tooldir  + " " + cfiles;
+        var commrun = tooldir  + " -d " + cfiles;
 
         exec(commrun, function(error,stdout,stderr){
           console.log(commrun);

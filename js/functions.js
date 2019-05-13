@@ -41,7 +41,10 @@
               }); 
           }
           //document.getElementById("container").removeChild(document.getElementById("remove"));
+                  unzip(pfolder);
+      run_all(pfolder);
         }
+
       });
     }
   }
@@ -137,7 +140,7 @@
   }
 
   function run_fastqc(dir) {
-
+    console.log("entra fastqc");
     const path = require('path');
     var fs = require('fs');
 	  var fqcdir = path.join(process.cwd(),'VD', 'bin','fastQC');
@@ -152,14 +155,12 @@
         var exec = require('child_process').exec; 
   	    var commrun = "java -Xmx250m -classpath " + fqcdir + ";" + path.join(fqcdir,"sam-1.103.jar") + ";" + path.join(fqcdir,"jbzip2-0.9.jar") + " uk.ac.babraham.FastQC.FastQCApplication ";
   	   
-        exec(commrun + cfiles, function(error,stdout,stderr){
-          // document.getElementById("subject2").innerHTML += stdout +"\n" + stderr +"\n";
+        // exec(commrun + cfiles, function(error,stdout,stderr){
 
-          if(error!=null){ console.log(commrun);
-            console.log("fastqc error:",error);
-           // document.getElementById("subject2").innerHTML += "ERRORR:" + error + "\n" ;
-          }
-        });
+        //   if(error!=null){ console.log(commrun);
+        //     console.log("fastqc error:",error);
+        //   }
+        // });
 
         var leftDiv = document.createElement("div"); 
         [].forEach.call(files, function (el) {
@@ -188,6 +189,7 @@
   }
 
   function run_analysis(dir,trim){
+    console.log("entra runanalysis");
     const path = require('path');
     var fs = require('fs');
     var exec = require('child_process').exec; 
@@ -198,9 +200,7 @@
     fs.readdir(dir, function(err, files) {
       if(trim){
         files.filter(extension_cleanfastq).forEach(function(value) {
-        //files.forEach(function(value) {
             cfiles = cfiles + path.join(dir , value) + " "; 
-           // document.getElementById("inputtext").innerHTML += value +"\n"; 
         }); 
       }
 
@@ -255,6 +255,48 @@
     }
   }
 
+function trimmingx(dir){
+        const path = require('path');
+        var fs = require('fs');
+        var spawn = require('child_process').spawn;
+        var cfiles = "";
+        var cn = path.join(process.cwd(),'VD','tools','sRNA_clean','sRNA_clean.pl ');
+        var runperl = path.join("perlfiles","tmp.bat");
+
+        fs.readdir(dir, function(err, files) {
+       
+          files.filter(extension_fastq).forEach(function(value) {
+              cfiles = cfiles + path.join(dir , value) + " "; 
+          }); 
+
+            if(cfiles != ""){
+
+              var adapt = document.getElementById("adaptor").value;
+              var len = document.getElementById("length").value;
+              var commrun = 'perl ' + cn + ' -s '+ adapt + ' -l ' + len + ' ' + cfiles;
+
+              create_analysisbat(runperl, commrun);
+              runperl = 'ls ';
+
+              // var comando = spawn('perl',[cn,'-s',adapt,'-l',len,cfiles],{shell:true});
+              var comando = spawn(runperl,[],{shell:true});
+              comando.stdout.on('data',(data) =>{ console.log('stdout: ${data}');});
+              comando.stderr.on('data',(data) =>{ console.log('trimming stderr: ${data}');});
+              comando.on('close',function(code){
+                if(code === 0){
+                // dibujo(fs,dir);
+                if(document.getElementById("spiketext").value != ''){
+                      spike_analysis(folder,true);
+                    }
+                    run_analysis(dir,true);
+                }
+              })
+            }
+
+          });
+     console.log("termina trimming");
+  }
+
   function trimming(dir){
         const path = require('path');
         var fs = require('fs');
@@ -277,15 +319,15 @@
 
               create_analysisbat(runperl, commrun);
 
-      			  // var comando = spawn('perl',[cn,'-s',adapt,'-l',len,cfiles],{shell:true});
-              var comando = spawn(runperl,[],{shell:true});
-              comando.stdout.on('data',(data) =>{ console.log('stdout: ${data}');});
-      			  comando.stderr.on('data',(data) =>{ console.log('trimming stderr: ${data}');});
-      			  comando.on('close',function(code){
-      				  if(code === 0){
-      					dibujo(fs,dir);
-      				  }
-      			  })
+      			  // // var comando = spawn('perl',[cn,'-s',adapt,'-l',len,cfiles],{shell:true});
+           //    var comando = spawn(runperl,[],{shell:true});
+           //    comando.stdout.on('data',(data) =>{ console.log('stdout: ${data}');});
+      			  // comando.stderr.on('data',(data) =>{ console.log('trimming stderr: ${data}');});
+      			  // comando.on('close',function(code){
+      				 //  if(code === 0){
+      					// dibujo(fs,dir);
+      				 //  }
+      			  // })
 
               // document.getElementById("outputtext").innerHTML += commrun +"\n";
               // document.getElementById("alink").innerHTML = '<a target="_blank" href="file://' + dir + '" >Reports</a><br>';
@@ -369,7 +411,7 @@
     					//   .attr("d", line);  
     			  }
     		});
-		}
+		} console.log("termina trimming");
   }
 
   function get_nro_reads(fq,name){
@@ -421,17 +463,17 @@
  
         fs.readdir(dir, function(err, files) {
           
-          if(trim){
-            files.filter(extension_cleanfastq).forEach(function(value) {
-                cfiles = path.join(dir , value); 
-                var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
-            }); 
-          } else {
-            files.filter(extension_fastq).forEach(function(value) {
-                cfiles = path.join(dir , value); 
-                var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
-            }); 
-          }
+          // if(trim){
+          //   files.filter(extension_cleanfastq).forEach(function(value) {
+          //       cfiles = path.join(dir , value); 
+          //       var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
+          //   }); 
+          // } else {
+          //   files.filter(extension_fastq).forEach(function(value) {
+          //       cfiles = path.join(dir , value); 
+          //       var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
+          //   }); 
+          // }
 
           if(cfiles != ""){
             document.getElementById("spiketext").disabled = true;
@@ -509,6 +551,7 @@
             }
         });
       }
+      console.log("termina spike");
   }
 
   function control(name){
