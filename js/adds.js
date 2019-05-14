@@ -107,7 +107,7 @@ function removeElement(elementId) {
             var charCode = e.which;
         }
         else { return true; }
-        if ((charCode > 64 && charCode < 91) || (charCode > 96 && charCode < 123))
+        if ((charCode > 64 && charCode < 91) || (charCode > 96 && charCode < 123) ||  charCode == 13)
             return true;
         else
             return false;
@@ -154,7 +154,7 @@ function unzip(dir){
     var exec = require('child_process').exec; 
     var tooldir = path.join(process.cwd(),'VD', 'bin','gzip.exe ');
 
-    fs.readdir(dir, function(err, files) {
+    var files = fs.readdirSync(dir);
       files.filter(extension_gz).forEach(function(value) {
         var cfiles ="";
         
@@ -168,6 +168,6 @@ function unzip(dir){
           if(error!=null) console.log("unzip error:" + stderr);
         });
       });
-    });
+
 }
 
