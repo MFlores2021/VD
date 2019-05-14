@@ -155,26 +155,19 @@
         var exec = require('child_process').exec; 
   	    var commrun = "java -Xmx250m -classpath " + fqcdir + ";" + path.join(fqcdir,"sam-1.103.jar") + ";" + path.join(fqcdir,"jbzip2-0.9.jar") + " uk.ac.babraham.FastQC.FastQCApplication ";
   	   
-        // exec(commrun + cfiles, function(error,stdout,stderr){
+        exec(commrun + cfiles, function(error,stdout,stderr){
 
-        //   if(error!=null){ console.log(commrun);
-        //     console.log("fastqc error:",error);
-        //   }
-        // });
+          if(error!=null){ console.log(commrun);
+            console.log("fastqc error:",error);
+          }
+        });
 
         var leftDiv = document.createElement("div"); 
         [].forEach.call(files, function (el) {
           var txt = "file://" + path.join(dir, path.parse(el).name) + "_fastqc.html";
           a = document.createElement('a');
           a.innerHTML = '<a target="_blank" href="' + txt + '" >' + el + '</a><br>';
-          leftDiv.appendChild(a);
-          // document.getElementById("container").appendChild(leftDiv); 
-          // document.getElementById("subject2").style.display = "block";
-          // document.getElementById("subject2").disabled = true;
-          // document.getElementById("button").style.display = "none";
-          // document.getElementById("div-fastqc").style.display = "block";
-          // document.getElementById("trimming2").style.display = "block";
-          // document.getElementById("analysis").style.display = "block";
+          leftDiv.appendChild(a);ß
         });
       }
     });
@@ -286,13 +279,14 @@ function trimmingx(dir){
               comando.stdout.on('data',(data) =>{ console.log('stdout: ${data}');});
               comando.stderr.on('data',(data) =>{ console.log('trimming stderr: ${data}');});
               comando.on('close',function(code){
-                if(code === 0){
+                //if(code === 0){
                 // dibujo(fs,dir);
                 if(document.getElementById("spiketext").value != ''){
                       spike_analysis(folder,true);
                     }
-                    run_analysis(dir,true);
-                }
+                run_analysis(dir,true);
+                console.log("trimx after run_a code:", code);
+               // }
               })
             }
 

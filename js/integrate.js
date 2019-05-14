@@ -74,7 +74,108 @@ function validate(){
 
 //check perl and java
 
-function run_all1(name){
+function execShellCommand(cmd) {
+ const exec = require('child_process').exec;
+ return new Promise((resolve, reject) => {
+  exec(cmd, (error, stdout, stderr) => {
+   if (error) {
+    console.warn(error);
+   }
+   resolve(stdout? stdout : stderr);
+  });
+ });
+}
+
+async function run_all1(name){
+	console.log("run_all_1");
+	var validation = true; //validate();
+	var fs = require('fs');
+	var files = $(name)[0].files;
+    const path = require('path');
+    var exec = require('child_process').exec; 
+    var execgz = require('child_process').exec; 
+    var folder = document.getElementById("pname").value;
+    var dir = path.join(process.cwd(),'results',folder); 
+    const clean =false;
+
+    if (fs.existsSync(dir)) {
+      alert('Folder name already exists, choose another folder name');
+    } else{
+      
+    	const create_dir = await execShellCommand('md ' + dir);
+
+	          
+        for (var i = 0; i < files.length; ++i){
+              var tmp = files[i].name;
+              // var newname1 = tmp.replace(".", "-");
+              var newname = tmp.replace(" ", "-");
+
+              const copy_file = await execShellCommand("copy " + files[i].path + " "+  path.join(dir,newname));
+        }
+		             
+       var fs1 = require('fs');
+	   var tooldir = path.join(process.cwd(),'VD', 'bin','gzip.exe ');
+	   //var tooldir = "gzip"
+		console.log(dir);
+
+	   fs1.readdir(dir, async function(err, files) { 
+	    	var cfiles ="";
+	      	files.filter(extension_gz).forEach(function(value) {	        
+	        	cfiles = cfiles + path.join(dir , value) + " "; 
+	       	});
+	        var commrun = tooldir  + " -d " + cfiles;
+	        const decompress = await execShellCommand(commrun);
+          
+   		});
+					   
+				   		
+		fs.readdir(dir, async function(err, files) {
+   
+	          files.filter(extension_fastq).forEach(function(value) {
+	              cfiles = cfiles + path.join(dir , value) + " "; 
+	          }); 
+
+		    	if (document.getElementById("adaptor").value != '' && document.getElementById("length").value != ''){
+				  var adapt = document.getElementById("adaptor").value;
+	              var len = document.getElementById("length").value;
+	              var commrun = 'perl ' + cn + ' -s '+ adapt + ' -l ' + len + ' ' + cfiles;
+	              var runperl = path.join("perlfiles","tmp.bat");
+
+	              create_analysisbat(runperl, commrun);
+	              const trimm = await execShellCommand(runperl);
+		    	}
+
+		    await run_fastqc(dir);
+		 });
+
+		 fs.readdir(dir, async function(err, files) {
+   
+	          files.filter(extension_cleanfastq).forEach(function(value) {
+	              cfiles = cfiles + path.join(dir , value) + " "; 
+	          }); 
+
+	          if (cfiles == ""){
+	          	files.filter(extension_fastq).forEach(function(value) {
+	              cfiles = cfiles + path.join(dir , value) + " "; 
+	          }); 
+	          }
+
+    		if(document.getElementById("spiketext").value != ''){
+    			var spike = document.getElementById("spiketext").value;
+    			var cn = path.join(process.cwd(),'VD','bin','seqkit.exe ');
+				spike = spike.replace(/\n/g, ",");
+				var comando = cn + ' locate -p '+ spike + ' ' + cfiles+' -o '+ cfiles+".spike.txt"; 
+				const spiking = await execShellCommand(comando);
+				console.log(comando);
+    		}
+    		await run_analysis(dir,false);
+    	
+		    	
+		 });
+ 	}		        
+}
+
+function run_all2(name){
 	console.log("run_all_1");
 	var validation = true; //validate();
 	var fs = require('fs');
