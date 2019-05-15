@@ -151,23 +151,23 @@ function unzip(dir){
   console.log("unziping");
     const path = require('path');
     var fs = require('fs');
-    var exec = require('child_process').exec; 
+    var exec = require('child_process').execSync; 
     var tooldir = path.join(process.cwd(),'VD', 'bin','gzip.exe ');
+	var cfiles =""; 
 
     var files = fs.readdirSync(dir);
       files.filter(extension_gz).forEach(function(value) {
-        var cfiles ="";
+            
+          cfiles = cfiles + path.join(dir , value) + " "; 
+	 });
         
-        for (var i = 0; i < files.length; ++i){
-          cfiles = cfiles + path.join(dir , files[i]) + " "; 
-        }
-        var commrun = tooldir  + " -d " + cfiles;
+		var commrun = tooldir  + " -d " + cfiles;
 
         exec(commrun, function(error,stdout,stderr){
           console.log(commrun);
           if(error!=null) console.log("unzip error:" + stderr);
         });
-      });
+     
 
 }
 

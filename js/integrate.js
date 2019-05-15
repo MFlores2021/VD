@@ -1,6 +1,6 @@
 /* integrate tools */
 
- function run_all1(name){
+  function run_all1(name){
 	console.log("run_all");
 	var validation = true; //validate();
 	var fs = require('fs');
@@ -17,18 +17,17 @@
 			run_fastqc(folder);
 			console.log("fastqc ed");
 			if (document.getElementById("adaptor").value != '' && document.getElementById("length").value != ''){
-				trimming(folder);
+				 run_trim(folder);
 				clean = true;
 				console.log("trimmed");
-			}
-			if(document.getElementById("spiketext").value != ''){
-				spike_analysis(folder,clean);
-				console.log("spiked");
-			}
-			//control(name);
-			console.log("antes-ana");
-			run_analysis(folder,clean);
-			console.log("despues-ana");
+			} else{
+				if(document.getElementById("spiketext").value != ''){
+					//spike_analysis(folder,clean);
+					console.log("spiked");
+				}
+				//control(name);
+				run_analysis(folder,clean);
+				}
 		}
 	}
 }

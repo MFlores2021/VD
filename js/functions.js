@@ -154,7 +154,7 @@
       });
 
       if (cfiles != ""){
-        var exec = require('child_process').exec; 
+        var exec = require('child_process').execSync; 
   	    var commrun = "java -Xmx250m -classpath " + fqcdir + ";" + path.join(fqcdir,"sam-1.103.jar") + ";" + path.join(fqcdir,"jbzip2-0.9.jar") + " uk.ac.babraham.FastQC.FastQCApplication ";
   	   
         exec(commrun + cfiles, function(error,stdout,stderr){
@@ -169,7 +169,7 @@
           var txt = "file://" + path.join(dir, path.parse(el).name) + "_fastqc.html";
           a = document.createElement('a');
           a.innerHTML = '<a target="_blank" href="' + txt + '" >' + el + '</a><br>';
-          leftDiv.appendChild(a);ß
+          leftDiv.appendChild(a);
         });
       }
     
@@ -188,7 +188,7 @@
      
     if(trim){
       files.filter(extension_cleanfastq).forEach(function(value) {
-        var stats1 = fs.statSync(value).size;
+        var stats1 = fs.statSync(path.join(dir , value)).size;console.log(stats1);
         if (stats1>50){
           cfiles = cfiles + path.join(dir , value) + " "; 
         }
@@ -197,7 +197,10 @@
 
     if(cfiles == ""){
       files.filter(extension_fastq).forEach(function(value) {
-          cfiles = cfiles + path.join(dir , value) + " "; 
+		 var stats1 = fs.statSync(path.join(dir , value)).size;
+		if (stats1>50){
+		  cfiles = cfiles + path.join(dir , value) + " "; 
+		}
       }); 
     }
 
@@ -219,12 +222,10 @@
         exec(runperl, function(error,stdout,stderr){
           console.log('stdout :', stdout); 
           console.log('stderr :', stderr); 
-          // document.getElementById("outputtext").innerHTML += stdout +"\n";
           fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + stdout, (err) => {   if (err) throw err; });
 
           if(error != null){
             console.log('analysis error :', error); 
-            // document.getElementById("outputtext").innerHTML += error +"\n";
             fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + error, (err) => {   if (err) throw err; });
             alert("There is an error. Please check analysis.log!");
             return;
@@ -233,14 +234,65 @@
         });
       }
     }
-
   }
 
+  function run_trim(dir){
+
+    const path = require('path');
+    var fs = require('fs');
+    var exec = require('child_process').exec; 
+    var cfiles = "";
+    var runperl = path.join("perlfiles","tmp2.bat");
+	var commrun = 'perl ' + path.join(process.cwd(),'VD','tools','sRNA_clean','sRNA_clean.pl ');
+
+    var files = fs.readdirSync(dir);
+
+    if(cfiles == ""){
+      files.filter(extension_fastq).forEach(function(value) {
+          cfiles = cfiles + path.join(dir , value) + " "; 
+      }); 
+    }
+
+    if(cfiles != ""){
+      var adapt = document.getElementById("adaptor").value;
+      var len = document.getElementById("length").value;
+      var commrun = commrun + ' -s '+ adapt + ' -l ' + len + ' ' + cfiles;
+
+      commrun += cfiles; console.log(commrun);
+      
+      create_analysisbat(runperl, commrun);
+
+      if(fs.existsSync(runperl)){
+		console.log("fq:",cfiles);
+		exec(runperl); 
+		
+        exec(runperl, function(error,stdout,stderr){
+          console.log('stdout :', stdout); 
+          console.log('stderr :', stderr); 
+		  
+          fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + stdout, (err) => {   if (err) throw err; });
+
+          if(error != null){
+            console.log('analysis error :', error); 
+            fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + error, (err) => {   if (err) throw err; });
+            alert("There is an error. Please check analysis.log!");
+            return;
+          }
+		  run_analysis(dir,true);
+		  if(document.getElementById("spiketext").value != ''){
+			spike_analysis(dir,true);
+		  }		  
+        });
+      }
+    }
+  }
+  
   function trimming(dir){
 
     const path = require('path');
     var fs = require('fs');
     var spawn = require('child_process').spawn;
+	var exec = require('child_process').execSync;
     var cfiles = "";
     var cn = path.join(process.cwd(),'VD','tools','sRNA_clean','sRNA_clean.pl ');
     var runperl = path.join("perlfiles","tmp.bat");
@@ -250,22 +302,32 @@
     files.filter(extension_fastq).forEach(function(value) {
         cfiles = cfiles + path.join(dir , value) + " "; 
     }); 
-
+	
     if(cfiles != ""){
-
+console.log("FASTQ:", cfiles);
       var adapt = document.getElementById("adaptor").value;
       var len = document.getElementById("length").value;
       var commrun = 'perl ' + cn + ' -s '+ adapt + ' -l ' + len + ' ' + cfiles;
 
       create_analysisbat(runperl, commrun);
-
-      var comando = spawn(runperl,[],{shell:true});
-      comando.stdout.on('data',(data) =>{ console.log('stdout: ${data}');});
-      comando.stderr.on('data',(data) =>{ console.log('trimming stderr: ${data}');});
+	  if(fs.existsSync(runperl)){
+	
+		exec(runperl, function(error,stdout,stderr){
+			console.log('stdout :', stdout); 
+            console.log('stderr :', stderr);
+			console.log("get inside");
+			if(error != null){
+				console.log("ENTRA TRIM;", stderr);
+			}
+		});
+/*       var comando = spawn(runperl,[],{shell:true});
+      comando.stdout.on('data',(data) =>{ console.log('stdout:' + data);});
+      comando.stderr.on('data',(data) =>{ console.log('trimming stderr:'+data);});
       comando.on('close',function(code){
        console.log("trimx after run_a code:", code);
-      });
+      }); */
      console.log("termina trimming");
+	  }
     }
   }
 
@@ -315,22 +377,26 @@
     
     if(trim){
       files.filter(extension_cleanfastq).forEach(function(value) {
+		var stats1 = fs.statSync(path.join(dir , value)).size;
+        if (stats1>50){
           cfiles = path.join(dir , value); 
           var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
+		}
       }); 
-    } else {
+    } 
+	if(cfiles == ""){
       files.filter(extension_fastq).forEach(function(value) {
+		var stats1 = fs.statSync(path.join(dir , value)).size;
+		if (stats1>50){
           cfiles = path.join(dir , value); 
           var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
+		}
       }); 
     }
 
     if(cfiles != ""){
       document.getElementById("spiketext").disabled = true;
-      // document.getElementById("run").style.display = "block";
-      // document.getElementById("outputtext").style.display = "block";
     }
-
       console.log("termina spike");
   }
 
