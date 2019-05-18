@@ -296,9 +296,9 @@ USAGE: $0 -s adapter_sequence -l minimum_length sRNA1 sRNA2 ... sRNAn
 
 	# report sRNA length distribution
 	my $out_len = IO::File->new(">$report_sRNA") || die $!;
-	print $out_len "#Size";
+	print $out_len "Size";
 	foreach my $s (sort keys %sRNA_sample) {
-		print $out_len "\t$s (No. of reads)";
+		print $out_len "\tfile";
 	}
 	print $out_len "\n";
 

@@ -1,43 +1,35 @@
-function update_db(){
-console.log("err0");
-  var Client = require('ftp');
-var fs = require('fs');
+function update_db(orga,filt, vers){
+    var org = document.getElementById(orga).value;
+    var filter = document.getElementById(filt).value;
+    var version = document.getElementById(vers).value;
+    const path = require('path');
 
-// var req = http.get('ftp://bioinfo.bti.cornell.edu/pub/program/VirusDetect/virus_database/v229/U100/protozoa_229_U100.tar.gz', function (res) {
+    var exec = require('child_process').exec;
+    var execSync = require('child_process').execSync;
+    var runperl = path.join("perlfiles","tmp_db.bat");
+    var commrun = "perl " + path.join(process.cwd(),'VD','download.pl '+ org + " " + filter+ " " + version);
+    var info = "vrl_genbank_info.gz";
+    var ids = "vrl_idmapping.gz";
 
-//     var fileSize = res.headers['content-length'];
-//     res.setEncoding('binary');
-//     var a = "";
-//     res.on('data', function (chunk) {
-//         a += chunk;
-//         document.getElementById('percent').innerHTML = Math.round(100*a.length/fileSize) + "";
-//     });
-//     res.on('end', function() {
-//         fs.writeFile('file.tar.gz', a, 'binary', function (err) {
-//             if (err) throw err;
-//             console.log('finished');
-//         });
-//     });
-// });
+    create_analysisbat(runperl, commrun);
 
-// }
-//  host: "ftp://bioinfo.bti.cornell.edu/pub/program/VirusDetect/virus_database/v229/U100/",
-// var connectionProperties = {
-//     host: "ftp://bioinfo.bti.cornell.edu"
-// };
+    exec(commrun, function(error,stdout,stderr){
+        if(error!=null){
+          console.log('error :', error);
+          alert('Something went wrong readying external database version.' + error);
+        } else{
 
-  var c = new Client();
-  c.on('ready', function() { console.log("err1");
-    c.get('protozoa_229_U100.tar.gz', function(err, stream) {
-      if (err) console.log(err);
-      console.log("err");
-      stream.once('close', function() { c.end(); });
-      stream.pipe(fs.createWriteStream('file.tar.gz'));
-    });
-  });
-  // connect to localhost:21 as anonymous
-  c.connect(connectionProperties);
-
+          var database = path.join("VD","databases",stdout);
+          try{
+            var eje=execSync("move " + stdout + " "+ database,  { stdio:  'inherit' } ); 
+            execSync("move " + info + " "+ path.join("VD","databases"),  { stdio:  'inherit' } ); 
+            execSync("move " + ids + " "+ path.join("VD","databases"),  { stdio:  'inherit' } ); 
+            unzip_file(database);
+          } catch (ex){
+            console.log(ex);
+          }
+        }
+    }); 
 }
 
 function create_analysisbat(file, commrun){
@@ -167,7 +159,17 @@ function unzip(dir){
           console.log(commrun);
           if(error!=null) console.log("unzip error:" + stderr);
         });
-     
+}
 
+function unzip_file(file){
+  console.log("unziping");
+    const path = require('path');
+    var execSync = require('child_process').execSync; 
+    //var tooldir = path.join(process.cwd(),'VD', 'bin','gzip.exe ');    
+    var tooldir = 'gzip '; 
+    var commrun = tooldir  + " -d " + file;
+
+    var ff = execSync(commrun);
+    console.log(ff);
 }
 

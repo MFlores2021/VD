@@ -7,26 +7,71 @@
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <script type="text/javascript" src="js/menu.js"></script>
     <script type="text/javascript" src="js/functions.js"></script>
+    <script type="text/javascript" src="js/adds.js"></script>
 </head>
 <body>
   <script>
   	$( document ).ready(function() {
       $("#Menu").load("menu.html");  
       document.getElementById("outputtext").style.display = "none";
-	});
+	  });
+
+    function extension_vrl(element) {
+      var extName = new RegExp('vrl_.+nin$');
+      return extName.test(element); 
+    };
+
+    var exec = require('child_process').exec;
+    var runperl = path.join("perlfiles","tmp_db.bat");
+    var commrun = "perl " + path.join(process.cwd(),'VD','get_version.pl ');
+
+    create_analysisbat(runperl, commrun);
+
+    exec(runperl, function(error,stdout,stderr){
+        if(error!=null){
+          console.log('error :', error);
+          alert('Something went wrong readying external database version.' + error);
+        } else{
+          document.getElementById("version").value = stdout;
+          console.log("output:" + stdout);
+        }
+      }); 
+
+    var fs = require('fs');
+
+    fs.readdir("VD/databases", function(err, items) {
+      //console.log(items);
+        items.filter(extension_vrl).forEach(function(value) {
+          console.log(value);
+        });
+    });
+
   </script>
+
+
   <div id="Menu"></div>
 <!-- Use any element to open the sidenav -->
   <span onclick="openNav()">Menu</span>
   <div id="main">
     <div class="container" id="container">
-	  <label>NCBI Database version</label><br>
+	  <label>Current local NCBI Database version</label><br>
+    <input type="text" id="percent" name="percent" placeholder="">
+    <br><br>
+    <label>Update to NCBI Database version</label><br>
 	  <input type="text" id="version" name="version" placeholder="">
 	  <br>
-	  <label>Local NCBI Database version</label><br>
-	  <input type="text" id="percent" name="percent" placeholder="">
-	  <br><br>
-	  <input type="submit" value="Update" onclick="update_db()">
+    <label>Organism</label><br>
+            <select  class="form-control" id="organism" name="organism">
+              <option value=""></option>
+              <option value="plant">Plant</option>
+            </select><br>
+    <label>Select redundancy levele</label><br>
+            <select  class="form-control" id="filtering" name="filtering">
+              <option value=""></option>
+              <option value="U95">U95</option>
+            </select><br>
+	  
+	  <input type="submit" value="Update" onclick="update_db('organism','filtering','version')">
 	  <textarea id="outputtext"></textarea>
 	</div>
   </div>

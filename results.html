@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Summary</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/graph.js"></script>
+    <script type="text/javascript" src="js/menu.js"></script>
+
+    <style type="text/css">
+      body, html {
+        height: 100%;
+      }
+      /* 13. Basic Styling with CSS */
+
+      /* Style the lines by removing the fill and applying a stroke */
+      .line {
+          fill: none;
+          stroke: #ffab90;
+          stroke-width: 3;
+      }
+        
+      .overlay {
+        fill: none;
+        pointer-events: all;
+      }
+
+      /* Style the dots by assigning a fill and stroke */
+      .dot {
+          fill: #ffab00;
+          stroke: #fff;
+      }
+        
+        .focus circle {
+        fill: none;
+        stroke: steelblue;
+      }
+
+        .bar {
+        fill: steelblue;
+      }
+
+      .bar:hover {
+        fill: brown;
+      }
+
+      .axis--x path {
+        display: none;
+      }
+    </style>
+</head>
+
+<body>
+<script>
+ $(function(){
+     $("#Menu").load("menu.html"); 
+     draw_summary("Caj-001.clean.sRNA_length.txt","Apu-002.clean.fq.spike2.txt");
+     draw_summary("Caj-001.clean.sRNA_length.txt","Apu-002.clean.fq.spike2.txt");
+  });
+
+</script>
+<div id="Menu"></div>
+<span onclick="openNav()" style="color: white;background-color: black;">Menu</span>
+
+  <div id="graph"></div>
+  <div id="graph1"></div>
+  <button onclick="save_html()">Try it</button>
+
+</body>
+</html>
