@@ -7,7 +7,7 @@ function update_db(orga,filt, vers){
     var exec = require('child_process').exec;
     var execSync = require('child_process').execSync;
     var runperl = path.join("perlfiles","tmp_db.bat");
-    var commrun = "perl " + path.join(process.cwd(),'VD','download.pl '+ org + " " + filter+ " " + version);
+    var commrun = "perl " + path.join(process.cwd(),'VD','bin','download.pl '+ org + " " + filter+ " " + version);
     var info = "vrl_genbank_info.gz";
     var ids = "vrl_idmapping.gz";
 

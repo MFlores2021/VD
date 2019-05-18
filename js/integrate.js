@@ -1,7 +1,7 @@
 /* integrate tools */
 
   function run_all1(name){
-	console.log("run_all");
+	$('#ballsWaveG').show();
 	var validation = true; //validate();
 	var fs = require('fs');
 
@@ -22,14 +22,14 @@
 				console.log("trimmed");
 			} else{
 				if(document.getElementById("spiketext").value != ''){
-					//spike_analysis(folder,clean);
-					console.log("spiked");
+					spike_analysis(folder,clean);
 				}
 				//control(name);
 				run_analysis(folder,clean);
 				}
 		}
 	}
+	$('#ballsWaveG').hide();
 }
 
 function validate(){
