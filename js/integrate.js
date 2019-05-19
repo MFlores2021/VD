@@ -1,11 +1,12 @@
 /* integrate tools */
 
-  function run_all1(name){
-	$('#ballsWaveG').show();
+  function run_all(name){
+	
 	var validation = true; //validate();
 	var fs = require('fs');
 
 	if (validation){
+		$('#ballsWaveG').show();
 		upload(name); 
 		var folder = document.getElementById("ruta").value;
 		var clean =false;
@@ -17,7 +18,7 @@
 			run_fastqc(folder);
 			console.log("fastqc ed");
 			if (document.getElementById("adaptor").value != '' && document.getElementById("length").value != ''){
-				 run_trim(folder);
+				run_trim(folder);
 				clean = true;
 				console.log("trimmed");
 			} else{
@@ -26,7 +27,7 @@
 				}
 				//control(name);
 				run_analysis(folder,clean);
-				}
+			}
 		}
 	}
 	$('#ballsWaveG').hide();

@@ -28,8 +28,11 @@
 	    <input id="fileDialog" type="file" nwworkingdir="C:\" accept=".fasta,.fa"/><br><br>
       <label for="Nucl">Proteins</label><br><br>
       <input id="fileDialog2" type="file" nwworkingdir="C:\" accept=".fasta,.fa"/><br><br>
+      <label for="Nucl">Sequence_info</label><br><br>
+      <input id="info" type="file" nwworkingdir="C:\" accept=".txt"/><br><br>
+      <label for="Nucl">Protein-nucleotide correspondence</label><br><br>
+      <input id="ids" type="file" nwworkingdir="C:\" accept=".txt"/><br><br>
 	    <input type="submit"  value="Submit" onclick="upload_localdb('#fileDialog','#fileDialog2','databases');"><br><br><br>
-      <!-- <input type="submit"  value="Submit" onclick="upload_localdb('#fileDialog','databases',document.getElementById('dbtype').value);"><br><br><br> -->
 	    <div id="subject" name="subject"></div>
 	  <!-- </form> -->
 	</div>

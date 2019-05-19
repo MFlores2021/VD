@@ -1,21 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Upload data</title>
+  <title>Run analysis</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-      <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
     <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/spinner.css">
     <script type="text/javascript" src="js/menu.js"></script>
     <script type="text/javascript" src="js/integrate.js"></script>
     <script type="text/javascript" src="js/functions.js"></script>
     <script type="text/javascript" src="js/adds.js"></script>
+    <div id="ballsWaveG" class="overlay">
+       <div id="ballsWaveG_1" class="ballsWaveG"></div>
+       <div id="ballsWaveG_2" class="ballsWaveG"></div>
+       <div id="ballsWaveG_3" class="ballsWaveG"></div>
+       <div id="ballsWaveG_4" class="ballsWaveG"></div>
+       <div id="ballsWaveG_5" class="ballsWaveG"></div>
+       <div id="ballsWaveG_6" class="ballsWaveG"></div>
+       <div id="ballsWaveG_7" class="ballsWaveG"></div>
+       <div id="ballsWaveG_8" class="ballsWaveG"></div>
+     </div>
 </head>
 <body>
 
   <script>
     $( document ).ready(function() {
       $("#Menu").load("menu.html"); 
-       nw.Window.get().on('new-win-policy', function(frame, url, policy) { policy.ignore(); nw.Shell.openExternal(url); }); 
+      nw.Window.get().on('new-win-policy', function(frame, url, policy) { policy.ignore(); nw.Shell.openExternal(url); }); 
       read_db();
       read_reference();
       read_control();
@@ -61,7 +72,7 @@
             <label for="cores">Number of threads</label>
             <input type="text" id="cores" name="cores" placeholder="1" onkeypress="return onlyNos(event,this);">
         </div>
-        <input type="submit" value="Run" onclick="run_all1('#fileDialog')">
+        <input type="submit" value="Run" onclick="run_all('#fileDialog')">
     </div>
 
   </div>

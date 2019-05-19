@@ -56,7 +56,7 @@ _EOUSAGE_
 
 my $WORKING_DIR = cwd();				# current folder : working folder
 my $BIN_DIR = ${FindBin::RealBin};			# bin folder
-my $result_dir = $WORKING_DIR."/result";		# result folder
+my $result_dir = $WORKING_DIR."/results/result";		# result folder
 my $tf = $WORKING_DIR."/temp";				# temp folder
 
 my $DATABASE_DIR = ${FindBin::RealBin}."/../databases";	# database folder

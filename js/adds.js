@@ -1,4 +1,5 @@
 function update_db(orga,filt, vers){
+    $('#ballsWaveG').show();
     var org = document.getElementById(orga).value;
     var filter = document.getElementById(filt).value;
     var version = document.getElementById(vers).value;
@@ -13,23 +14,27 @@ function update_db(orga,filt, vers){
 
     create_analysisbat(runperl, commrun);
 
-    exec(commrun, function(error,stdout,stderr){
+    exec(runperl, function(error,stdout,stderr){
         if(error!=null){
           console.log('error :', error);
-          alert('Something went wrong readying external database version.' + error);
+          $('#ballsWaveG').hide();
+          alert('Something went wrong. ' + error);
         } else{
 
           var database = path.join("VD","databases",stdout);
           try{
+            execSync("DEL /F/Q/S " + path.join("VD","databases","vrl_*") + " >NUL",  { stdio:  'inherit' } ); 
             var eje=execSync("move " + stdout + " "+ database,  { stdio:  'inherit' } ); 
             execSync("move " + info + " "+ path.join("VD","databases"),  { stdio:  'inherit' } ); 
             execSync("move " + ids + " "+ path.join("VD","databases"),  { stdio:  'inherit' } ); 
             unzip_file(database);
           } catch (ex){
             console.log(ex);
+            $('#ballsWaveG').hide();
           }
         }
     }); 
+    $('#ballsWaveG').hide();
 }
 
 function create_analysisbat(file, commrun){
@@ -140,34 +145,35 @@ function extension_gz(element) {
 
 
 function unzip(dir){
-  console.log("unziping");
+
+    console.log("unziping");
     const path = require('path');
     var fs = require('fs');
     var exec = require('child_process').execSync; 
     var tooldir = path.join(process.cwd(),'VD', 'bin','gzip.exe ');
-	var cfiles =""; 
-
+	  var cfiles =""; 
     var files = fs.readdirSync(dir);
-      files.filter(extension_gz).forEach(function(value) {
+
+    files.filter(extension_gz).forEach(function(value) {
             
           cfiles = cfiles + path.join(dir , value) + " "; 
 	 });
-        
-		var commrun = tooldir  + " -d " + cfiles;
+    
+    if (cfiles != ""){
+		  var commrun = tooldir  + " -d " + cfiles;
 
-        exec(commrun, function(error,stdout,stderr){
+      exec(commrun, function(error,stdout,stderr){
           console.log(commrun);
           if(error!=null) console.log("unzip error:" + stderr);
-        });
+      });
+    }
 }
 
 function unzip_file(file){
   console.log("unziping");
     const path = require('path');
     var execSync = require('child_process').execSync; 
-    //var tooldir = path.join(process.cwd(),'VD', 'bin','gzip.exe ');    
-    var tooldir = 'gzip '; 
-    var commrun = tooldir  + " -d " + file;
+    var commrun = "tar -zxvf " + file + " --strip-components 1 -C " + path.join(process.cwd(),'VD','databases');
 
     var ff = execSync(commrun);
     console.log(ff);

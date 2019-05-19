@@ -7,45 +7,51 @@
     return folder;
   }
 
-  function upload(name) {
+  function upload(name){
 
     var files = $(name)[0].files;
     const path = require('path');
     var fs = require('fs');
-    var exec = require('child_process').execSync; 
-
+    var spawnSync = require('child_process').spawnSync;
     var dir = document.getElementById("pname").value;
     var pfolder = path.join(process.cwd(),'results',dir); 
 
     if (fs.existsSync(pfolder)) {
-      alert('Folder name already exists, choose another folder name');
+      alert('Folder name already exists, choose another folder name.');
     } else{
       
-      exec('md ' + pfolder, function(error,stdout,stderr){ 
-        
-        if(error!=null){ alert('error :', error); }
-          console.log("stdout",stdout);
-          console.log("stderr",stderr);
-      });
+      var commitMessage = (function(){
+        var spawn = spawnSync('md', [pfolder]);
+        var errorText = spawn.error;
+        if (errorText) {
+          $('#ballsWaveG').hide();
+          alert('Fatal error: Folder cannot be created!');
+        }
+        else {
+          return spawn.stdout;
+        }
+      })();
+
       if (fs.existsSync(pfolder)) {
+        
         document.getElementById("ruta").value = pfolder;
           console.log("sigue process");
-          for (var i = 0; i < files.length; ++i){
-              var tmp = files[i].name;
-              // var newname1 = tmp.replace(".", "-");
-              var newname = tmp.replace(" ", "-");
+        for (var i = 0; i < files.length; ++i){
+            var tmp = files[i].name;
+            // var newname1 = tmp.replace(".", "-");
+            var newname = tmp.replace(" ", "-");
 
-              exec("copy " + files[i].path + " "+  path.join(pfolder,newname) , function(error,stdout,stderr){
-                // document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
-                if(error!=null){
-                  console.log('error :', error);
-                  alert('Something went wrong while copying files.' + error);
-                } else{
-                  console.log("entra pfolder");
-                  
-                }
-              }); 
-          }
+            exec("copy " + files[i].path + " "+  path.join(pfolder,newname) , function(error,stdout,stderr){
+              // document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
+              if(error!=null){
+                $('#ballsWaveG').hide();
+                alert('Something went wrong while copying files.' + error);
+              } else{
+                console.log("entra pfolder");
+                
+              }
+            }); 
+        }
       };
       
     }
@@ -65,7 +71,7 @@
         for (var i = 0; i < files.length; ++i){
         exec("copy " + files[i].path + " "+ path.join(folder,"host_"+files[i].name), function(error,stdout,stderr){
           if(error!=null){
-            alert(error);
+            alert("Error:" + error);
             return;
           } 
           alert("Done!");
@@ -74,13 +80,15 @@
     }
   }
 
-  function upload_localdb(name,prot_name,dir) {
+  function upload_localdb(name,prot_name,info,ids,dir) {
 
    if (!($(prot_name)[0].value =="") && !($(name)[0].value =="" )){
       const path = require('path');
       var folder = path.join(process.cwd(),'VD',dir);
       var files = $(name)[0].files;
       var files_prot = $(prot_name)[0].files;
+      var linfo = $(info)[0].files;
+      var lids = $(ids)[0].files;
       var fs = require('fs');
       var exec = require('child_process').exec; 
 
@@ -91,19 +99,23 @@
           var tmp = files[i].name;
           var tmp1 = tmp.replace(".fasta", "");
           var dbname  = "l_" +  tmp.replace(".fa", "");
-          var commrun = "copy " + files[i].path + " "+ path.join(folder,dbname) + " & copy " + files_prot[i].path + " "+ path.join(folder,dbname + "_prot") ;
+          var commrun = "copy " + files[i].path + " "+ path.join(folder,dbname) +
+             " & copy " + files_prot[i].path + " "+ path.join(folder,dbname + "_prot") +
+             " & copy " + linfo[i].path + " "+ folder +
+             " & copy " + lids[i].path + " "+ folder  ;
           
           exec(commrun, function(error,stdout,stderr){
             document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
             if(error!=null){
-              console.log('error :', error);
+              alert('Error :', error);
             } 
           }); 
-           if (dir == 'databases'){
+
+          if (dir == 'databases'){
                 format_db(path.join(folder,dbname),"nucl");
                 format_db(path.join(folder,dbname + "_prot"),"prot");
   			        format_faidx(path.join(folder,dbname));
-              }
+          }
            document.getElementById("subject").innerHTML += files[i].name +"\n";
         }
       }
@@ -118,11 +130,9 @@
     var cmd = formatdb + " -in " + file + " -dbtype " + dbtype; console.log(cmd);
 
     exec(cmd, function(error,stdout,stderr){
-      document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
       if(error!=null){
-        console.log('error :', error);
-        document.getElementById("subject").innerHTML += error +"\n";
-      } 
+        alert('Error :', error);
+      }
     }); 
   }
   
@@ -133,10 +143,8 @@
     var cmd = formatdb + " faidx " + file; console.log(cmd);
 
     exec(cmd, function(error,stdout,stderr){
-      document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
       if(error!=null){
-        console.log('error :', error);
-        document.getElementById("subject").innerHTML += error +"\n";
+        alert('Error :', error);
       } 
     }); 
   }
@@ -145,10 +153,10 @@
     console.log("entra fastqc");
     const path = require('path');
     var fs = require('fs');
-	  var fqcdir = path.join(process.cwd(),'VD', 'bin','fastQC');
-     
+	  var fqcdir = path.join(process.cwd(),'VD', 'bin','fastQC');  
     var files = fs.readdirSync(dir);
-      var cfiles =""; 
+    var cfiles =""; 
+    
       files.filter(extension_fastq).forEach(function(value) {
           cfiles = cfiles + path.join(dir , value) + " "; 
       });
@@ -160,7 +168,8 @@
         exec(commrun + cfiles, function(error,stdout,stderr){
 
           if(error!=null){ console.log(commrun);
-            console.log("fastqc error:",error);
+            $('#ballsWaveG').hide();
+            alert("Fastqc error:",error);
           }
         });
 
@@ -176,7 +185,7 @@
   }
 
   function run_analysis(dir,trim){
-    console.log("entra runanalysis");
+
     const path = require('path');
     var fs = require('fs');
     var exec = require('child_process').exec; 
@@ -197,10 +206,10 @@
 
     if(cfiles == ""){
       files.filter(extension_fastq).forEach(function(value) {
-		 var stats1 = fs.statSync(path.join(dir , value)).size;
-		if (stats1>50){
-		  cfiles = cfiles + path.join(dir , value) + " "; 
-		}
+		    var stats1 = fs.statSync(path.join(dir , value)).size;
+    		if (stats1>50){
+    		  cfiles = cfiles + path.join(dir , value) + " "; 
+    		}
       }); 
     }
 
@@ -225,7 +234,8 @@
           fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + stdout, (err) => {   if (err) throw err; });
 
           if(error != null){
-            console.log('analysis error :', error); 
+            $('#ballsWaveG').hide();
+            alert('analysis error :', error); 
             fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + error, (err) => {   if (err) throw err; });
             alert("There is an error. Please check analysis.log!");
             return;
@@ -243,7 +253,7 @@
     var exec = require('child_process').exec; 
     var cfiles = "";
     var runperl = path.join("perlfiles","tmp2.bat");
-	var commrun = 'perl ' + path.join(process.cwd(),'VD','tools','sRNA_clean','sRNA_clean.pl ');
+	  var commrun = 'perl ' + path.join(process.cwd(),'VD','tools','sRNA_clean','sRNA_clean.pl ');
 
     var files = fs.readdirSync(dir);
 
@@ -263,25 +273,25 @@
       create_analysisbat(runperl, commrun);
 
       if(fs.existsSync(runperl)){
-		console.log("fq:",cfiles);
-		exec(runperl); 
+    		// exec(runperl); 
 		
         exec(runperl, function(error,stdout,stderr){
           console.log('stdout :', stdout); 
-          console.log('stderr :', stderr); 
 		  
           fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + stdout, (err) => {   if (err) throw err; });
 
           if(error != null){
-            console.log('analysis error :', error); 
+            $('#ballsWaveG').hide();
+            alert('Trimming error :', error); 
             fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + error, (err) => {   if (err) throw err; });
             alert("There is an error. Please check analysis.log!");
             return;
           }
-		  run_analysis(dir,true);
-		  if(document.getElementById("spiketext").value != ''){
-			spike_analysis(dir,true);
-		  }		  
+
+    		  run_analysis(dir,true);
+    		  if(document.getElementById("spiketext").value != ''){
+    			   spike_analysis(dir,true);
+    		  }		  
         });
       }
     }
@@ -292,7 +302,7 @@
     const path = require('path');
     var fs = require('fs');
     var spawn = require('child_process').spawn;
-	var exec = require('child_process').execSync;
+	   var exec = require('child_process').execSync;
     var cfiles = "";
     var cn = path.join(process.cwd(),'VD','tools','sRNA_clean','sRNA_clean.pl ');
     var runperl = path.join("perlfiles","tmp.bat");
@@ -304,7 +314,7 @@
     }); 
 	
     if(cfiles != ""){
-console.log("FASTQ:", cfiles);
+      console.log("FASTQ:", cfiles);
       var adapt = document.getElementById("adaptor").value;
       var len = document.getElementById("length").value;
       var commrun = 'perl ' + cn + ' -s '+ adapt + ' -l ' + len + ' ' + cfiles;
@@ -371,33 +381,33 @@ console.log("FASTQ:", cfiles);
     var cfiles = "";
     var cn = path.join(process.cwd(),'VD','bin','seqkit.exe ');
     var adapt = document.getElementById("spiketext").value;
-    adapt = adapt.replace(/\n/g, ",");
+        adapt = adapt.replace(/\n/g, ",");
 
     var files = fs.readdirSync(dir);
     
     if(trim){
       files.filter(extension_cleanfastq).forEach(function(value) {
-		var stats1 = fs.statSync(path.join(dir , value)).size;
+		    var stats1 = fs.statSync(path.join(dir , value)).size;
         if (stats1>50){
           cfiles = path.join(dir , value); 
           var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
-		}
+		    }
       }); 
     } 
-	if(cfiles == ""){
-      files.filter(extension_fastq).forEach(function(value) {
-		var stats1 = fs.statSync(path.join(dir , value)).size;
-		if (stats1>50){
-          cfiles = path.join(dir , value); 
-          var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
-		}
-      }); 
+
+  	if(cfiles == ""){
+        files.filter(extension_fastq).forEach(function(value) {
+      		var stats1 = fs.statSync(path.join(dir , value)).size;
+      		if (stats1>50){
+                cfiles = path.join(dir , value); 
+                var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
+      		}
+        }); 
     }
 
     if(cfiles != ""){
-      document.getElementById("spiketext").disabled = true;
+        document.getElementById("spiketext").disabled = true;
     }
-      console.log("termina spike");
   }
 
 
@@ -419,7 +429,7 @@ console.log("FASTQ:", cfiles);
         });
       });
       function extension(element) {
-  	  var rege = new RegExp('_prot.pin$');
+  	     var rege = new RegExp('_prot.pin$');
         return rege.test(element); 
       };
   }
