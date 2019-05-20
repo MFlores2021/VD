@@ -24,15 +24,16 @@ function update_db(orga,filt, vers){
 
           var database = path.join("VD","databases",stdout);
           try{
-            execSync("DEL /F/Q/S " + path.join("VD","databases","vrl_*"+ org + "*" + filter) + " >NUL",  { stdio:  'inherit' } ); 
-            var eje=execSync("move " + stdout + " "+ database,  { stdio:  'inherit' } ); 
-            execSync("move " + info + " "+ path.join("VD","databases"),  { stdio:  'inherit' } ); 
-            execSync("move " + ids + " "+ path.join("VD","databases"),  { stdio:  'inherit' } ); 
+            var delPrev ="IF EXIST "+ path.join("VD","databases","vrl_*"+ org + "*" + filter + "*") + " DEL /F/Q/S " + path.join("VD","databases","vrl_*"+ org + "*" + filter + "*") + " >NUL";
+            execSync(delPrev,  { stdio:  'inherit' } ); 
+            var eje=execSync("IF EXIST "+ stdout + " move " + stdout + " "+ database,  { stdio:  'inherit' } ); 
+            execSync("IF EXIST "+ info + " move " + info + " "+ path.join("VD","databases"),  { stdio:  'inherit' } ); 
+            execSync("IF EXIST "+ ids + " move " + ids + " "+ path.join("VD","databases"),  { stdio:  'inherit' } ); 
             unzip_file(database);
-            execSync("DEL /F/Q/S " + database + " >NUL",  { stdio:  'inherit' } );  
-            execSync("DEL /F/Q/S " + path.join("VD","databases","vrl_*amb") + " >NUL",  { stdio:  'inherit' } );  
-            execSync("DEL /F/Q/S " + path.join("VD","databases","vrl_*ann") + " >NUL",  { stdio:  'inherit' } );  
-            execSync("DEL /F/Q/S " + path.join("VD","databases","vrl_*pac") + " >NUL",  { stdio:  'inherit' } );         
+            execSync("IF EXIST "+ database +" DEL /F/Q/S " + database + " >NUL",  { stdio:  'inherit' } );  
+            execSync("IF EXIST "+ path.join("VD","databases","vrl_*amb") +" DEL /F/Q/S " + path.join("VD","databases","vrl_*amb") + " >NUL",  { stdio:  'inherit' } );  
+            execSync("IF EXIST "+ path.join("VD","databases","vrl_*ann") +" DEL /F/Q/S " + path.join("VD","databases","vrl_*ann") + " >NUL",  { stdio:  'inherit' } );  
+            execSync("IF EXIST "+ path.join("VD","databases","vrl_*pac") +" DEL /F/Q/S " + path.join("VD","databases","vrl_*pac") + " >NUL",  { stdio:  'inherit' } );         
           } catch (ex){
             console.log(ex);
             $('#ballsWaveG').hide();
