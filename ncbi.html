@@ -52,9 +52,7 @@
     var fs = require('fs');
 
     fs.readdir(path.join(process.cwd(),"VD","databases"), function(err, items) {
-      console.log(items);
         items.filter(extension_vrl).forEach(function(value) {
-          console.log(value);
           document.getElementById("currentv").value += value + "\n";
         });
     });
@@ -77,11 +75,19 @@
             <select  class="form-control" id="organism" name="organism">
               <option value=""></option>
               <option value="plant">Plant</option>
+              <option value="algae">Algae</option>
+              <option value="bacteria">Bacteria</option>
+              <option value="fungus">Fungus</option>
+              <option value="invertebrate">Invertebrate</option>
+              <option value="protozoa">Protozoa</option>
+              <option value="vertebrate">Vertebrate</option>
             </select><br>
     <label>Select redundancy level</label><br>
             <select  class="form-control" id="filtering" name="filtering">
               <option value=""></option>
               <option value="U95">U95</option>
+              <option value="U95">U97</option>
+              <option value="U95">U100</option>
             </select><br>
 	  
 	  <input type="submit" value="Update" onclick="update_db('organism','filtering','version')">

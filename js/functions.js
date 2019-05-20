@@ -12,7 +12,8 @@
     var files = $(name)[0].files;
     const path = require('path');
     var fs = require('fs');
-    var spawnSync = require('child_process').spawnSync;
+    var spawnSync = require('child_process').execSync;
+    var exec = require('child_process').execSync;
     var dir = document.getElementById("pname").value;
     var pfolder = path.join(process.cwd(),'results',dir); 
 

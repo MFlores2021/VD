@@ -1,6 +1,7 @@
 function update_db(orga,filt, vers){
     $('#ballsWaveG').show();
     var org = document.getElementById(orga).value;
+    var org1 = capitalize(org);
     var filter = document.getElementById(filt).value;
     var version = document.getElementById(vers).value;
     const path = require('path');
@@ -8,7 +9,7 @@ function update_db(orga,filt, vers){
     var exec = require('child_process').exec;
     var execSync = require('child_process').execSync;
     var runperl = path.join("perlfiles","tmp_db.bat");
-    var commrun = "perl " + path.join(process.cwd(),'VD','bin','download.pl '+ org + " " + filter+ " " + version);
+    var commrun = "perl " + path.join(process.cwd(),'VD','bin','download.pl '+ org1 + " " + filter+ " " + version);
     var info = "vrl_genbank_info.gz";
     var ids = "vrl_idmapping.gz";
 
@@ -23,17 +24,28 @@ function update_db(orga,filt, vers){
 
           var database = path.join("VD","databases",stdout);
           try{
-            execSync("DEL /F/Q/S " + path.join("VD","databases","vrl_*") + " >NUL",  { stdio:  'inherit' } ); 
+            execSync("DEL /F/Q/S " + path.join("VD","databases","vrl_*"+ org + "*" + filter) + " >NUL",  { stdio:  'inherit' } ); 
             var eje=execSync("move " + stdout + " "+ database,  { stdio:  'inherit' } ); 
             execSync("move " + info + " "+ path.join("VD","databases"),  { stdio:  'inherit' } ); 
             execSync("move " + ids + " "+ path.join("VD","databases"),  { stdio:  'inherit' } ); 
             unzip_file(database);
+            execSync("DEL /F/Q/S " + database + " >NUL",  { stdio:  'inherit' } );  
+            execSync("DEL /F/Q/S " + path.join("VD","databases","vrl_*amb") + " >NUL",  { stdio:  'inherit' } );  
+            execSync("DEL /F/Q/S " + path.join("VD","databases","vrl_*ann") + " >NUL",  { stdio:  'inherit' } );  
+            execSync("DEL /F/Q/S " + path.join("VD","databases","vrl_*pac") + " >NUL",  { stdio:  'inherit' } );         
           } catch (ex){
             console.log(ex);
             $('#ballsWaveG').hide();
           }
         }
+        alert("Done !");
     }); 
+    var fs = require('fs');
+    fs.readdir(path.join(process.cwd(),"VD","databases"), function(err, items) {
+        items.filter(extension_vrl).forEach(function(value) {
+          document.getElementById("currentv").value += value + "\n";
+        });
+    });
     $('#ballsWaveG').hide();
 }
 
@@ -143,6 +155,10 @@ function extension_gz(element) {
   return extName.test(element); 
 };
 
+const capitalize = (s) => {
+  if (typeof s !== 'string') return ''
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
 
 function unzip(dir){
 
