@@ -9,7 +9,7 @@
   "css": "css/style.css",
   "js": "js/menu.js",
   "bin": "./bin/npm-cli.js",
-  "chromium-args": "-load-extension=./extensions/ -ignore-certificate-errors",
+  "chromium-args": "-ignore-certificate-errors",
   "webview": {
     "partitions": [
       {

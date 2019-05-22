@@ -240,7 +240,7 @@
             alert("There is an error. Please check analysis.log!");
             return;
           }
-          //alert("Done!");
+          alert("Done!");
         });
       }
     }

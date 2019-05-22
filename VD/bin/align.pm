@@ -27,7 +27,7 @@ sub align_to_reference
 		my $log = $temp_folder."/bwa.log";
 		my $bwa_mhit_param = "-n $mhit_num";
 		if ($mhit_num > 1 ) { $bwa_mhit_param = "-n $mhit_num";  }
-		Util::process_cmd("$align_program index -p $reference -a bwtsw $reference 2>> $log", $debug);
+		Util::process_cmd("$align_program index -p $reference -a bwtsw $reference 2>> $log", $debug) unless -s "$reference.amb";
 		Util::process_cmd("$align_program aln $parameters $reference $input_file 1> $sai 2>> $log", $debug);
 		Util::process_cmd("$align_program samse $bwa_mhit_param $reference $sai $input_file 1> $output_file 2>> $log", $debug);
 		Util::xa2multi($output_file);

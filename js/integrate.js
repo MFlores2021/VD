@@ -2,19 +2,22 @@
 
   function run_all(name){
 	
-	var validation = true; //validate();
+	var validation = validate();
 	var fs = require('fs');
 	const path = require('path');
 
 	if (validation){
-		//$('#ballsWaveG').show();
-		// upload(name); 
-		var folder = path.join(process.cwd(),'results','nombre'); //document.getElementById("ruta").value;
+		$('#ballsWaveG').show();
+		upload(name);  
+		var folder = document.getElementById("ruta").value;
 		var clean =false;
 		console.log("created folder:" + folder);
 
 		if (fs.existsSync(folder)) {
-			unzip(folder);
+			execSync("IF EXIST "+ path.join("VD","databases","vrl_*amb") +" DEL /F/Q/S " + path.join("VD","databases","vrl_*amb") + " >NUL",  { stdio:  'inherit' } );  
+	        execSync("IF EXIST "+ path.join("VD","databases","vrl_*ann") +" DEL /F/Q/S " + path.join("VD","databases","vrl_*ann") + " >NUL",  { stdio:  'inherit' } );  
+	        execSync("IF EXIST "+ path.join("VD","databases","vrl_*pac") +" DEL /F/Q/S " + path.join("VD","databases","vrl_*pac") + " >NUL",  { stdio:  'inherit' } );   
+	        unzip(folder);
 			console.log("creo folder");
 			run_fastqc(folder);
 			console.log("fastqc ed");
@@ -30,25 +33,26 @@
 				run_analysis(folder,clean);
 			}
 		}
-		var files = fs.readdirSync(folder);
-    
-	    files.filter(extension_result).forEach(function(value) {
-	      	var folder2 = path.join(folder,value);
-	      	var files2 = fs.readdirSync(folder2);
-	      	var filesTrim =""; 
-			var filesspike ="";
-	      	files2.filter(extension_trim).forEach(function(value) {
-		      	filesTrim = path.join(folder2,value);
+		if (fs.existsSync(folder)) {
+			var files = fs.readdirSync(folder);
+	    
+		    files.filter(extension_result).forEach(function(value) {
+		      	var folder2 = path.join(folder,value);
+		      	var files2 = fs.readdirSync(folder2);
+		      	var filesTrim =""; 
+				var filesspike ="";
+		      	files2.filter(extension_trim).forEach(function(value) {
+			      	filesTrim = path.join(folder2,value);
+			    });
+			    files2.filter(extension_spike).forEach(function(value) {
+			      	filesspike = path.join(folder2,value);
+			    }); 
+			   	draw_summary(filesTrim,filesspike);
 		    });
-		    files2.filter(extension_spike).forEach(function(value) {
-		      	filesspike = path.join(folder2,value);
-		    }); 
-		   	draw_summary(filesTrim,filesspike);
-	    });
-	    $('#ballsWaveG').hide();
-			
-		alert('Analysis done !');
-		save_html(folder);
+		    $('#ballsWaveG').hide();
+			alert('Check your results!');
+			save_html(folder);
+		}
 	}
 	
 }
@@ -86,10 +90,15 @@ function validate(){
 	}
 	if (document.getElementById("inputtext").value != ''){
 		if(!alphabets(document.getElementById("spike").value)){
-			alert("Insert only ATGC for the adaptor");
+			alert("Insert only ATGC sequences.");
 			return false;
 		}
 	}
+
+	if (document.getElementById("databases").value != ''){
+		alert("Select a database.");
+		return false;
+	}	
 }
 
 //check perl and java
