@@ -199,7 +199,7 @@ my $WORKING_DIR   = cwd();									# set current folder as working folder
 my $DATABASE_DIR  = ${FindBin::RealBin}."/databases";		# set database folder
 my $BIN_DIR       = ${FindBin::RealBin}."/bin";				# set script folder
 $reference		  = $DATABASE_DIR."/".$reference;			# set reference
-my $seq_info	  = $DATABASE_DIR."/vrl_genbank.info.gz";	# set vrl info
+my $seq_info	  = $DATABASE_DIR."/vrl_genbank_info.gz";	# set vrl info
 
 # check host reference & format 
 if ( $host_reference ) {
@@ -305,7 +305,7 @@ foreach my $sample (@ARGV)
 				Util::print_user_submessage("No unique contig was generated");
 			}
 		} else {
-			system("touch $sample.aligned");
+			system("type nul >$sample.aligned");
 			Util::print_user_submessage("No unique contig was generated");
 		}
 	} else {
@@ -321,7 +321,7 @@ foreach my $sample (@ARGV)
 		if ($data_type eq 'mRNA') {
 			my $hisat_file_type = ''; # fasta or fastq
 			$hisat_file_type = '-q' if $file_type eq 'fastq';
-			Util::process_cmd("hisat --time -p $thread_num --un $sample.unmapped --no-unal $hisat_file_type -k 1 --mp 1,1 --rdg 0,1 --rfg 0,1 --np 1 --score-min C,-$hisat_ed,0 --ignore-quals -x $host_reference -U $sample -S $sample.sam 1> $sample.hisat.report.txt 2>&1");
+			Util::process_cmd("$BIN_DIR/hisat --time -p $thread_num --un $sample.unmapped --no-unal $hisat_file_type -k 1 --mp 1,1 --rdg 0,1 --rfg 0,1 --np 1 --score-min C,-$hisat_ed,0 --ignore-quals -x $host_reference -U $sample -S $sample.sam 1> $sample.hisat.report.txt 2>&1");
 
 			my $total_num = 0;
 			my $unmap_num = 0;

@@ -1,10 +1,10 @@
-function save_html(){
-
+function save_html(folder){
+    const path = require('path');
     var fs = require('fs');
     var x = $('#graph').html();
     var y = $('#graph1').html();
     var bb = $("head").html();
-    fs.writeFileSync('fallback.html', bb+x+y , 'utf-8');
+    fs.writeFileSync(path.join(folder,'results.html'), bb+x+y , 'utf-8');
 
 }
 

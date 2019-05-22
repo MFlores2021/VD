@@ -22,7 +22,7 @@
     } else{
       
       var commitMessage = (function(){
-        var spawn = spawnSync('md', [pfolder]);
+        var spawn = spawnSync('md ' +pfolder);
         var errorText = spawn.error;
         if (errorText) {
           $('#ballsWaveG').hide();
@@ -53,8 +53,7 @@
               }
             }); 
         }
-      };
-      
+      };  
     }
   }
 
@@ -95,7 +94,7 @@
 
       if (!fs.existsSync(folder)) {
         alert('Folder ' +dir+ ' does not exists');
-      } else{
+      } else {
           for (var i = 0; i < files.length; ++i){ 
           var tmp = files[i].name;
           var tmp1 = tmp.replace(".fasta", "");
@@ -241,7 +240,7 @@
             alert("There is an error. Please check analysis.log!");
             return;
           }
-          alert("Done!");
+          //alert("Done!");
         });
       }
     }

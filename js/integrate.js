@@ -4,11 +4,12 @@
 	
 	var validation = true; //validate();
 	var fs = require('fs');
+	const path = require('path');
 
 	if (validation){
-		$('#ballsWaveG').show();
-		upload(name); 
-		var folder = document.getElementById("ruta").value;
+		//$('#ballsWaveG').show();
+		// upload(name); 
+		var folder = path.join(process.cwd(),'results','nombre'); //document.getElementById("ruta").value;
 		var clean =false;
 		console.log("created folder:" + folder);
 
@@ -29,8 +30,27 @@
 				run_analysis(folder,clean);
 			}
 		}
+		var files = fs.readdirSync(folder);
+    
+	    files.filter(extension_result).forEach(function(value) {
+	      	var folder2 = path.join(folder,value);
+	      	var files2 = fs.readdirSync(folder2);
+	      	var filesTrim =""; 
+			var filesspike ="";
+	      	files2.filter(extension_trim).forEach(function(value) {
+		      	filesTrim = path.join(folder2,value);
+		    });
+		    files2.filter(extension_spike).forEach(function(value) {
+		      	filesspike = path.join(folder2,value);
+		    }); 
+		   	draw_summary(filesTrim,filesspike);
+	    });
+	    $('#ballsWaveG').hide();
+			
+		alert('Analysis done !');
+		save_html(folder);
 	}
-	$('#ballsWaveG').hide();
+	
 }
 
 function validate(){

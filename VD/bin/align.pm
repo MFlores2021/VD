@@ -739,7 +739,7 @@ sub contigStats
 sub remove_redundancy
 {
 	my ($contig_file, $read_file, $parameters, $max_end_clip, $min_overlap, $min_identity, $perfix, $bin_dir, $temp_dir, $data_type, $debug) = @_;
-
+	$contig_file =~ s/\//\\/g; 
 	# guess thread number used for blast, or using default 20
 	my $cpu_num = 8;
     if ($parameters =~ m/-a\s+(\d+)/) { $cpu_num = $1; }
@@ -856,7 +856,7 @@ sub base_correction
 
         my $file_size = -s "$read_file.pileup";
         if( $file_size == 0 ){                     # if file size = 0, create blank file, and exit the loop
-                Util::process_cmd("touch $contig_file.blank");
+                Util::process_cmd("type nul >$contig_file.blank");
                 next;
         }
 

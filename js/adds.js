@@ -151,6 +151,22 @@ function extension_cleanfastq(element) {
   return extName.test(element); 
 };
 
+function extension_result(element) {
+  var extName = new RegExp('^result_');
+  return extName.test(element); 
+};
+
+function extension_trim(element) {
+  var extName = new RegExp('sRNA_length\\.txt$');
+  return extName.test(element); 
+};
+
+function extension_spike(element) {
+  var extName = new RegExp('spike\\.txt$');
+  return extName.test(element); 
+};
+
+
 function extension_gz(element) {
   var extName = new RegExp('.\\.gz$');
   return extName.test(element); 
