@@ -4,13 +4,14 @@
 	var validation = true; // validate();
 	var fs = require('fs');
 	const path = require('path');
-	var execSync = require('child_process').exec;
-	var spawnSync = require('child_process').execSync;
+	var execSync = require('child_process').execSync;
+	var spawnSync = require('child_process').spawnSync;
+	var spawn1 = require('child_process').spawn;
 
 	if (validation){
 		//$('#ballsWaveG').show();
-		upload(name);  
-		var folder = document.getElementById("ruta").value;
+		//upload(name);  
+		var folder = "c:\\git\\VD\\results\\tyutyu"; //document.getElementById("ruta").value;
 		console.log("created folder:" + folder);
 
 		if (fs.existsSync(folder)) {
@@ -38,41 +39,38 @@
 			commrun = (param != "") ? commrun + param + " ": commrun + "NA ";
 	  
 			create_analysisbat(runperl, commrun);
-			/* execSync(runperl, function(error,stdout,stderr){
-				console.log('stdout :', stdout); 
-				console.log('stderr :', stderr);
-				console.log("get inside");
-				if(error != null){
-					console.log("ENTRA TRIM;", stderr);
-				}
-			}); */
-			var spawn = spawnSync(runperl);
-			var errorText = spawn.error;
-			if (errorText) {
-			 // $('#ballsWaveG').hide();
-			  alert('Fatal error: Folder cannot be created!');
-			}
-			else {
-			  return spawn.stdout;
-			}
-		
-			var files = fs.readdirSync(folder);
-		    files.filter(extension_result).forEach(function(value) {
-		      	var folder2 = path.join(folder,value);
-		      	var files2 = fs.readdirSync(folder2);
-		      	var filesTrim =""; 
+
+			console.log(runperl);
+
+			const { spawn } =require("child_process");
+			//var analysis = spawn(runperl,{shell:true}, {windowsHide:true}); 
+			var analysis = spawn("dir",{shell:true}, {windowsHide:true});
+			analysis.stdout.on('data',(data) =>{ console.log('stdout:' + data);});
+			analysis.stderr.on('data',(data) =>{ console.log('trimming stderr:'+data);});
+			analysis.on('close',function(code){
+			   console.log("poner algo:", code);
+			    var fs1 = require('fs');
+				var files = fs1.readdirSync(folder);
+				const path1 = require('path');console.log(files);
+
+				var filesTrim =""; 
 				var filesspike ="";
-		      	files2.filter(extension_trim).forEach(function(value) {
-			      	filesTrim = path.join(folder2,value);
-			    });
-			    files2.filter(extension_spike).forEach(function(value) {
-			      	filesspike = path.join(folder2,value);
-			    }); 
-			   	draw_summary(filesTrim,filesspike);
-		    });
+				files.filter(extension_trim).forEach(function(value) {
+					filesTrim = path1.join(folder,value); console.log("rna:",value);
+				});
+				files.filter(extension_spike).forEach(function(value) {
+					filesspike = path1.join(folder,value);console.log("spike:",value);
+				}); 
+				draw_summary(filesTrim,filesspike);
+
+				alert('Done ! Check your results!');
+			});
+		
+			console.log("paso");
+			
 		    //$('#ballsWaveG').hide();
-			alert('Done ! Check your results!');
-			save_html(folder);
+			/* 
+			save_html(folder); */
 		}
 
 	}

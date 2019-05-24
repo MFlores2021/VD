@@ -8,10 +8,10 @@ function save_html(folder){
 
 }
 
-function draw_summary(sRNA_length,spike_file){
-
+function draw_summary(sRNA_length,spike_file){ console.log(sRNA_length,"-",spike_file);
+	if (sRNA_length != ""){
     d3.tsv(sRNA_length).then(function(data) {
-
+console.log(data);
       var margin = {top: 50, right: 50, bottom: 50, left: 50}
       , width = window.innerWidth - margin.left - margin.right 
       , height = window.innerHeight - margin.top - margin.bottom; 
@@ -74,9 +74,10 @@ function draw_summary(sRNA_length,spike_file){
         .text("Sample: Sequence lenght distribution after trimming");  
     
   });
-
+	}
+	//if(spike_file!= ""){
   d3.tsv(spike_file).then(function(data_sum) {
-
+console.log(data_sum);
       var data = d3.nest()
         .key(function(d) { return d.pattern; })
           .rollup(function(v) { return v.length; })
@@ -139,4 +140,5 @@ function draw_summary(sRNA_length,spike_file){
         .attr("font-weight",700)
         .text("Sample: Spike frequency");    
   });
+//	}
 }
