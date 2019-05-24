@@ -1,13 +1,93 @@
 /* integrate tools */
+  function run_VD(name){
+	
+	var validation = true; // validate();
+	var fs = require('fs');
+	const path = require('path');
+	var execSync = require('child_process').exec;
+	var spawnSync = require('child_process').execSync;
+
+	if (validation){
+		//$('#ballsWaveG').show();
+		upload(name);  
+		var folder = document.getElementById("ruta").value;
+		console.log("created folder:" + folder);
+
+		if (fs.existsSync(folder)) {
+
+	        unzip(folder);
+			var runperl = path.join("perlfiles","tmp.bat");
+			var cn = path.join(process.cwd(),'perl','analysis.pl ');
+			
+			var spike = document.getElementById("spiketext").value;
+				spike = spike.replace(/\n/g, ",");
+			var adaptor = document.getElementById("adaptor").value;
+			var length = document.getElementById("length").value;
+			var db = document.getElementById("databases").value;
+			var ref = document.getElementById("references").value;
+			var cores = document.getElementById("cores").value;
+			var param = document.getElementById("param").value;
+			
+			var commrun = 'perl ' + cn + ' '+ folder + " ";
+			commrun = (spike != "") ? commrun + spike + " ": commrun + "NA ";
+			commrun = (adaptor != "") ? commrun + adaptor + " ": commrun + "NA ";
+			commrun = (length != "") ? commrun + length + " ": commrun + "NA ";
+			commrun = commrun + db + " ";
+			commrun = (ref != "") ? commrun + ref + " ": commrun + "NA ";
+			commrun = (cores != "") ? commrun + cores + " ": commrun + "NA ";
+			commrun = (param != "") ? commrun + param + " ": commrun + "NA ";
+	  
+			create_analysisbat(runperl, commrun);
+			/* execSync(runperl, function(error,stdout,stderr){
+				console.log('stdout :', stdout); 
+				console.log('stderr :', stderr);
+				console.log("get inside");
+				if(error != null){
+					console.log("ENTRA TRIM;", stderr);
+				}
+			}); */
+			var spawn = spawnSync(runperl);
+			var errorText = spawn.error;
+			if (errorText) {
+			 // $('#ballsWaveG').hide();
+			  alert('Fatal error: Folder cannot be created!');
+			}
+			else {
+			  return spawn.stdout;
+			}
+		
+			var files = fs.readdirSync(folder);
+		    files.filter(extension_result).forEach(function(value) {
+		      	var folder2 = path.join(folder,value);
+		      	var files2 = fs.readdirSync(folder2);
+		      	var filesTrim =""; 
+				var filesspike ="";
+		      	files2.filter(extension_trim).forEach(function(value) {
+			      	filesTrim = path.join(folder2,value);
+			    });
+			    files2.filter(extension_spike).forEach(function(value) {
+			      	filesspike = path.join(folder2,value);
+			    }); 
+			   	draw_summary(filesTrim,filesspike);
+		    });
+		    //$('#ballsWaveG').hide();
+			alert('Done ! Check your results!');
+			save_html(folder);
+		}
+
+	}
+	
+}
 
   function run_all(name){
 	
 	var validation = validate();
 	var fs = require('fs');
 	const path = require('path');
+	var execSync = require('child_process').execSync;
 
 	if (validation){
-		$('#ballsWaveG').show();
+		//$('#ballsWaveG').show();
 		upload(name);  
 		var folder = document.getElementById("ruta").value;
 		var clean =false;
@@ -33,26 +113,7 @@
 				run_analysis(folder,clean);
 			}
 		}
-		if (fs.existsSync(folder)) {
-			var files = fs.readdirSync(folder);
-	    
-		    files.filter(extension_result).forEach(function(value) {
-		      	var folder2 = path.join(folder,value);
-		      	var files2 = fs.readdirSync(folder2);
-		      	var filesTrim =""; 
-				var filesspike ="";
-		      	files2.filter(extension_trim).forEach(function(value) {
-			      	filesTrim = path.join(folder2,value);
-			    });
-			    files2.filter(extension_spike).forEach(function(value) {
-			      	filesspike = path.join(folder2,value);
-			    }); 
-			   	draw_summary(filesTrim,filesspike);
-		    });
-		    $('#ballsWaveG').hide();
-			alert('Check your results!');
-			save_html(folder);
-		}
+
 	}
 	
 }

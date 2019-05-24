@@ -113,8 +113,10 @@
             </select>
             <label for="cores">Number of threads</label>
             <input type="text" id="cores" name="cores" placeholder="1" onkeypress="return onlyNos(event,this);">
+			<label for="cores">Additional parameters</label>
+            <textarea type="text" id="param" name="param" placeholder="" ></textarea>
         </div>
-        <input type="submit" value="Run" onclick="run_all('#fileDialog')">
+        <input type="submit" value="Run" onclick="run_VD('#fileDialog')">
     </div>
 
   </div>

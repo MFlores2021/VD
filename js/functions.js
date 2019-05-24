@@ -188,7 +188,7 @@
 
     const path = require('path');
     var fs = require('fs');
-    var exec = require('child_process').exec; 
+    var exec = require('child_process').execSync; 
     var cfiles = "";
     var runperl = path.join("perlfiles","tmp.bat");
     var commrun = "perl " + path.join(process.cwd(),'VD','virus_detect.pl ');
@@ -240,7 +240,25 @@
             alert("There is an error. Please check analysis.log!");
             return;
           }
-          alert("Done!");
+		  
+		  	var files = fs.readdirSync(folder);
+	    console.log(folder);
+		    files.filter(extension_result).forEach(function(value) {
+		      	var folder2 = path.join(folder,value);
+		      	var files2 = fs.readdirSync(folder2);
+		      	var filesTrim =""; 
+				var filesspike ="";
+		      	files2.filter(extension_trim).forEach(function(value) {
+			      	filesTrim = path.join(folder2,value);
+			    });
+			    files2.filter(extension_spike).forEach(function(value) {
+			      	filesspike = path.join(folder2,value);
+			    }); 
+			   	draw_summary(filesTrim,filesspike);
+		    });
+		    //$('#ballsWaveG').hide();
+			alert('Done ! Check your results!');
+			save_html(folder);
         });
       }
     }
@@ -258,16 +276,17 @@
     var files = fs.readdirSync(dir);
 
     if(cfiles == ""){
-      files.filter(extension_fastq).forEach(function(value) {
-          cfiles = cfiles + path.join(dir , value) + " "; 
-      }); 
-    }
-
-    if(cfiles != ""){
       var adapt = document.getElementById("adaptor").value;
       var len = document.getElementById("length").value;
-      var commrun = commrun + ' -s '+ adapt + ' -l ' + len + ' ' + cfiles;
+      
 
+      files.filter(extension_fastq).forEach(function(value) {
+          cfiles = cfiles + path.join(dir , value) + " "; 
+
+    if(cfiles != ""){
+
+	  var commrun = commrun + ' -s '+ adapt + ' -l ' + len + ' ' + cfiles;
+	
       commrun += cfiles; console.log(commrun);
       
       create_analysisbat(runperl, commrun);
@@ -288,12 +307,15 @@
             return;
           }
 
-    		  run_analysis(dir,true);
-    		  if(document.getElementById("spiketext").value != ''){
-    			   spike_analysis(dir,true);
-    		  }		  
+    		  	  
         });
       }
+    }
+	      }); 
+		  run_analysis(dir,true);
+    		  if(document.getElementById("spiketext").value != ''){
+    			   spike_analysis(dir,true);
+    		  }	
     }
   }
   
@@ -390,7 +412,7 @@
 		    var stats1 = fs.statSync(path.join(dir , value)).size;
         if (stats1>50){
           cfiles = path.join(dir , value); 
-          var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
+          var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);console.log(cn+' locate '+' -p '+adapt+cfiles+' -o '+cfiles+".spike.txt");
 		    }
       }); 
     } 
@@ -400,7 +422,7 @@
       		var stats1 = fs.statSync(path.join(dir , value)).size;
       		if (stats1>50){
                 cfiles = path.join(dir , value); 
-                var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);
+                var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);console.log(cn+' locate '+' -p '+adapt+cfiles+' -o '+cfiles+".spike.txt");
       		}
         }); 
     }
