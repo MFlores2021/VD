@@ -8,7 +8,7 @@ use Cwd qw(getcwd);
 
 my $localdir = getcwd;
 
-# my $dir = 'C:\git\VD\results\trimbyone'; #$ARGV[0]; # 'plant';
+# my $dir = 'C:\git\VD\results\yora'; #$ARGV[0]; # 'plant';
 # my $spike = 'ATGGAGCCAGTTC'; #$ARGV[1]; #'U95';
 # my $adaptor = 'CAGATCGGAAGAGCACA'; #$ARGV[2]; #'v229';
 # my $length  = '15'; #$ARGV[3];
@@ -42,8 +42,8 @@ my @files
 } readdir(DIR);
 
 # Loop through the array printing out the filenames
-foreach my $file (@files) {
-	$file = catfile($dir,$file);
+foreach my $file1 (@files) {
+	my $file = catfile($dir,$file1);
     $trim = 0;
     my $fqcdir = catfile($localdir,'VD', 'bin','fastQC');
     my $commfqc = "java -Xmx250m -classpath " . $fqcdir . ";" . catfile($fqcdir,"sam-1.103.jar") . ";" . catfile($fqcdir,"jbzip2-0.9.jar") . " uk.ac.babraham.FastQC.FastQCApplication " . $file;
@@ -62,6 +62,8 @@ foreach my $file (@files) {
     if($trim == 1){
      $file =~ s/\.fq$/\.clean\.fq/;
      $file =~ s/\.fastq$/\.clean\.fq/;
+     $file1 =~ s/\.fq$/\.clean\.fq/;
+     $file1 =~ s/\.fastq$/\.clean\.fq/;	 
     } 
 
 	if($spike ne 'NA'){
@@ -74,20 +76,17 @@ foreach my $file (@files) {
 	 $commvd = $database ne 'NA' ?  $commvd . " --reference " . $database . " " : $commvd;
 	 $commvd = $host ne 'NA' ? $commvd . " --host_reference " . $host . " ": $commvd;
 	 $commvd = $cores ne 'NA' ? $commvd . " --thread_num " . $cores . " ": $commvd;
-	 $commvd = $commvd . " " . $file; print $commvd ."\n";
+	 $commvd = $commvd . " " . $file; 
 	 system($commvd) == 0
 	  or die next;
+	  
+	 my $folderm = catfile($localdir,"results","result_". $file1);
+	 if ( -e $folderm ){ 
+		system("move ". $folderm ." ". $dir) == 0
+			or die next;
+	 };
 }
 
 closedir(DIR); 
 print $ARGV[0];
-# if ($cfile ne ''){
 
-# my $commvd = "perl " . catfile($localdir,'VD','virus_detect.pl ');
- # $commvd = $database ne 'NA' ?  $commvd . " --reference " . $database . " " : $commvd;
- # $commvd = $host ne 'NA' ? $commvd . " --host_reference " . $host . " ": $commvd;
- # $commvd = $cores ne 'NA' ? $commvd . " --thread_num " . $cores . " ": $commvd;
- # $commvd = $commvd . " " . $cfile;
- # system($commvd) == 0
-  # or die "Error: $commvd . $?";
-# }

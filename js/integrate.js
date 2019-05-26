@@ -10,9 +10,9 @@
 	if (validation){
 		document.getElementById("run").style.display='none';
 		document.getElementById("container").style.display='none';
-		$('#ballsWaveG').show();
+		//$('#ballsWaveG').show();
 		upload(name);  
-		var folder = document.getElementById("ruta").value;
+		var folder = document.getElementById("ruta").value; //'C:\\git\\VD\\results\\yora';
 		console.log("created folder:" + folder);
 
 		if (fs.existsSync(folder)) {
@@ -71,8 +71,8 @@
 			});
 			
 		}
-		$('#ballsWaveG').hide();
-		document.getElementById("run").style.display='block';
+		//$('#ballsWaveG').hide();
+		//document.getElementById("run").style.display='block';
 	}
 	
 }
