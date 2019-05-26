@@ -125,6 +125,8 @@ GetOptions(
 	'novel-len-cutoff=i'	=> \$novel_len_cutoff,
 	'siRNA-percent=f'		=> \$siRNA_percent,
 	'f|force'				=> \$debug_force,
+	'seq-info=s'			=> \$seq_info,
+	'prot-tab=s' 			=> \$prot_tab,
 
 	'email=s'	=> \$email,
 	'user=s'	=> \$user,

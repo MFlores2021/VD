@@ -131,6 +131,8 @@ my $diff_contig_cover = 0.5;
 my $diff_contig_length= 100; 
 my $debug=0; my $email; my $user;
 my $exp_valuexs;
+my $seq_info = "vrl_genbank_info.gz";
+my $prot_tab = "vrl_idmapping.gz";
 
 my $siRNA_percent = 0.5;		# Proportion cutoff of 21-nt and 22-nt siRNAs for 
                          		# viral-like contigs [0.5]
@@ -185,7 +187,9 @@ GetOptions(
 	'norm_depth_cutoff=f'	=> \$norm_depth_cutoff,
 	'novel_len_cutoff=i'=> \$novel_len_cutoff,
 	'siRNA_percent=f'	=> \$siRNA_percent,
-
+	'seq_info=s' 		=> \$seq_info,
+	'prot_tab=s' 			=> \$prot_tab,
+	
 	'email=s' 			=> \$email,
 	'user=s'  			=> \$user,
 );
@@ -199,7 +203,8 @@ my $WORKING_DIR   = cwd();									# set current folder as working folder
 my $DATABASE_DIR  = ${FindBin::RealBin}."/databases";		# set database folder
 my $BIN_DIR       = ${FindBin::RealBin}."/bin";				# set script folder
 $reference		  = $DATABASE_DIR."/".$reference;			# set reference
-my $seq_info	  = $DATABASE_DIR."/vrl_genbank_info.gz";	# set vrl info
+$seq_info	 	  = $DATABASE_DIR."/".$seq_info;	# set vrl info
+$prot_tab		  = $DATABASE_DIR."/".$prot_tab;
 
 # check host reference & format 
 if ( $host_reference ) {
@@ -442,6 +447,7 @@ foreach my $sample (@ARGV)
 	$cmd_identify .= "--hsp-cover $hsp_cover --diff-ratio $diff_ratio --diff-contig-cover $diff_contig_cover --diff-contig-length $diff_contig_length ";
 	$cmd_identify .= "--coverage-cutoff $coverage_cutoff --depth-cutoff $depth_cutoff --siRNA-percent $siRNA_percent ";
 	$cmd_identify .= "--novel-len-cutoff $novel_len_cutoff ";
+	$cmd_identify .= "--seq-info $seq_info --prot-tab $prot_tab ";
 	$cmd_identify .= "-d " if $debug;
 	$cmd_identify .= "$sample $sample.combined ";
 	if (-s "$sample.combined") {

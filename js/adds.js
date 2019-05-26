@@ -211,4 +211,11 @@ function unzip_file(file){
     var ff = execSync(commrun);
     console.log(ff);
 }
+function zip_file(file,file2){
+    const path = require('path');
+    var execSync = require('child_process').execSync; 
+	var tooldir = path.join(process.cwd(),'VD', 'bin','gzip.exe ');
+    var commrun = tooldir + file + " " + file2;
+    var ff = execSync(commrun);
+}
 

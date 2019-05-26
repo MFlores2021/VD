@@ -80,9 +80,9 @@
     }
   }
 
-  function upload_localdb(name,prot_name,info,ids,dir) {
+  function upload_localdb(name,prot_name,dir,info,ids) {
 
-   if (!($(prot_name)[0].value =="") && !($(name)[0].value =="" )){
+   if (!($(prot_name)[0].value =="") && !($(name)[0].value =="" ) && !($(info)[0].value =="" ) && !($(ids)[0].value =="" )){
       const path = require('path');
       var folder = path.join(process.cwd(),'VD',dir);
       var files = $(name)[0].files;
@@ -98,25 +98,26 @@
           for (var i = 0; i < files.length; ++i){ 
           var tmp = files[i].name;
           var tmp1 = tmp.replace(".fasta", "");
-          var dbname  = "l_" +  tmp.replace(".fa", "");
-          var commrun = "copy " + files[i].path + " "+ path.join(folder,dbname) +
-             " & copy " + files_prot[i].path + " "+ path.join(folder,dbname + "_prot") +
-             " & copy " + linfo[i].path + " "+ folder +
-             " & copy " + lids[i].path + " "+ folder  ;
+          var dbname  = "l_" +  tmp1.replace(".fa", "");
+		  var db = path.join(folder,dbname);
+          var commrun = "copy " + files[i].path + " "+ db +
+             " & copy " + files_prot[i].path + " "+ db + "_prot" +
+             " & copy " + linfo[i].path + " "+ db + "_genbank_info" +
+             " & copy " + lids[i].path + " "+ db + "_idmapping";
           
           exec(commrun, function(error,stdout,stderr){
             document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
             if(error!=null){
               alert('Error :', error);
             } 
-          }); 
-
-          if (dir == 'databases'){
-                format_db(path.join(folder,dbname),"nucl");
-                format_db(path.join(folder,dbname + "_prot"),"prot");
-  			        format_faidx(path.join(folder,dbname));
-          }
-           document.getElementById("subject").innerHTML += files[i].name +"\n";
+			  if (dir == 'databases'){
+					format_db(db,"nucl");
+					format_db(db + "_prot","prot");
+					format_faidx(db);
+					zip_file(db + "_genbank_info",db + "_idmapping");
+			  }
+			   document.getElementById("subject").innerHTML = "Done!\n";
+		   }); 
         }
       }
     }
@@ -131,7 +132,7 @@
 
     exec(cmd, function(error,stdout,stderr){
       if(error!=null){
-        alert('Error :', error);
+        console.log('Error :', error);console.log('Error :', stderr);
       }
     }); 
   }
