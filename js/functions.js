@@ -1,11 +1,3 @@
-  function return_folder(){
-
-    var dir = document.getElementById("pname").value;
-    const path = require('path');
-    var folder = path.join(process.cwd(),'results',dir);
-
-    return folder;
-  }
 
   function upload(name){
 
@@ -154,7 +146,7 @@
     console.log("entra fastqc");
     const path = require('path');
     var fs = require('fs');
-	  var fqcdir = path.join(process.cwd(),'VD', 'bin','fastQC');  
+	var fqcdir = path.join(process.cwd(),'VD', 'bin','fastQC');  
     var files = fs.readdirSync(dir);
     var cfiles =""; 
     
@@ -184,186 +176,7 @@
       }
     
   }
-
-  function run_analysis(dir,trim){
-
-    const path = require('path');
-    var fs = require('fs');
-    var exec = require('child_process').execSync; 
-    var cfiles = "";
-    var runperl = path.join("perlfiles","tmp.bat");
-    var commrun = "perl " + path.join(process.cwd(),'VD','virus_detect.pl ');
-
-    var files = fs.readdirSync(dir);
-     
-    if(trim){
-      files.filter(extension_cleanfastq).forEach(function(value) {
-        var stats1 = fs.statSync(path.join(dir , value)).size;console.log(stats1);
-        if (stats1>50){
-          cfiles = cfiles + path.join(dir , value) + " "; 
-        }
-      }); 
-    }
-
-    if(cfiles == ""){
-      files.filter(extension_fastq).forEach(function(value) {
-		    var stats1 = fs.statSync(path.join(dir , value)).size;
-    		if (stats1>50){
-    		  cfiles = cfiles + path.join(dir , value) + " "; 
-    		}
-      }); 
-    }
-
-    if(cfiles != ""){
-      var db1 = document.getElementById("databases").value;
-      var db = db1.replace(".nin", "");
-      var ref = document.getElementById("references").value;
-      var cores = document.getElementById("cores").value;
-      commrun = (db != "") ?  commrun + " --reference " + db + " " : commrun;
-      commrun = (ref != "") ? commrun + " --host_reference " + ref + " ": commrun;
-      commrun = (cores != "") ? commrun + " --thread_num " + cores + " ": commrun;
-      
-      commrun += cfiles; console.log(commrun);
-      
-      create_analysisbat(runperl, commrun);
-
-      if(fs.existsSync(runperl)){
-
-        exec(runperl, function(error,stdout,stderr){
-          console.log('stdout :', stdout); 
-          console.log('stderr :', stderr); 
-          fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + stdout, (err) => {   if (err) throw err; });
-
-          if(error != null){
-            $('#ballsWaveG').hide();
-            alert('analysis error :', error); 
-            fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + error, (err) => {   if (err) throw err; });
-            alert("There is an error. Please check analysis.log!");
-            return;
-          }
-		  
-		  	var files = fs.readdirSync(folder);
-	    console.log(folder);
-		    files.filter(extension_result).forEach(function(value) {
-		      	var folder2 = path.join(folder,value);
-		      	var files2 = fs.readdirSync(folder2);
-		      	var filesTrim =""; 
-				var filesspike ="";
-		      	files2.filter(extension_trim).forEach(function(value) {
-			      	filesTrim = path.join(folder2,value);
-			    });
-			    files2.filter(extension_spike).forEach(function(value) {
-			      	filesspike = path.join(folder2,value);
-			    }); 
-			   	draw_summary(filesTrim,filesspike);
-		    });
-		    //$('#ballsWaveG').hide();
-			alert('Done ! Check your results!');
-			save_html(folder);
-        });
-      }
-    }
-  }
-
-  function run_trim(dir){
-
-    const path = require('path');
-    var fs = require('fs');
-    var exec = require('child_process').exec; 
-    var cfiles = "";
-    var runperl = path.join("perlfiles","tmp2.bat");
-	  var commrun = 'perl ' + path.join(process.cwd(),'VD','tools','sRNA_clean','sRNA_clean.pl ');
-
-    var files = fs.readdirSync(dir);
-
-    if(cfiles == ""){
-      var adapt = document.getElementById("adaptor").value;
-      var len = document.getElementById("length").value;
-      
-
-      files.filter(extension_fastq).forEach(function(value) {
-          cfiles = cfiles + path.join(dir , value) + " "; 
-
-    if(cfiles != ""){
-
-	  var commrun = commrun + ' -s '+ adapt + ' -l ' + len + ' ' + cfiles;
-	
-      commrun += cfiles; console.log(commrun);
-      
-      create_analysisbat(runperl, commrun);
-
-      if(fs.existsSync(runperl)){
-    		// exec(runperl); 
-		
-        exec(runperl, function(error,stdout,stderr){
-          console.log('stdout :', stdout); 
-		  
-          fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + stdout, (err) => {   if (err) throw err; });
-
-          if(error != null){
-            $('#ballsWaveG').hide();
-            alert('Trimming error :', error); 
-            fs.writeFile(path.join(dir,"analysis.log"), commrun + "\n" + error, (err) => {   if (err) throw err; });
-            alert("There is an error. Please check analysis.log!");
-            return;
-          }
-
-    		  	  
-        });
-      }
-    }
-	      }); 
-		  run_analysis(dir,true);
-    		  if(document.getElementById("spiketext").value != ''){
-    			   spike_analysis(dir,true);
-    		  }	
-    }
-  }
   
-  function trimming(dir){
-
-    const path = require('path');
-    var fs = require('fs');
-    var spawn = require('child_process').spawn;
-	   var exec = require('child_process').execSync;
-    var cfiles = "";
-    var cn = path.join(process.cwd(),'VD','tools','sRNA_clean','sRNA_clean.pl ');
-    var runperl = path.join("perlfiles","tmp.bat");
-
-    var files = fs.readdirSync(dir);
-
-    files.filter(extension_fastq).forEach(function(value) {
-        cfiles = cfiles + path.join(dir , value) + " "; 
-    }); 
-	
-    if(cfiles != ""){
-      console.log("FASTQ:", cfiles);
-      var adapt = document.getElementById("adaptor").value;
-      var len = document.getElementById("length").value;
-      var commrun = 'perl ' + cn + ' -s '+ adapt + ' -l ' + len + ' ' + cfiles;
-
-      create_analysisbat(runperl, commrun);
-	  if(fs.existsSync(runperl)){
-	
-		exec(runperl, function(error,stdout,stderr){
-			console.log('stdout :', stdout); 
-            console.log('stderr :', stderr);
-			console.log("get inside");
-			if(error != null){
-				console.log("ENTRA TRIM;", stderr);
-			}
-		});
-/*       var comando = spawn(runperl,[],{shell:true});
-      comando.stdout.on('data',(data) =>{ console.log('stdout:' + data);});
-      comando.stderr.on('data',(data) =>{ console.log('trimming stderr:'+data);});
-      comando.on('close',function(code){
-       console.log("trimx after run_a code:", code);
-      }); */
-     console.log("termina trimming");
-	  }
-    }
-  }
-
   function get_nro_reads(fq,name){
     const path = require('path');
         var dir = document.getElementById(name).value;
@@ -394,45 +207,6 @@
         return Number(y);
     }
   }
-
-
-  function spike_analysis(dir,trim){
-
-    const path = require('path');
-    var fs = require('fs');
-    var spawn = require('child_process').spawn;
-    var cfiles = "";
-    var cn = path.join(process.cwd(),'VD','bin','seqkit.exe ');
-    var adapt = document.getElementById("spiketext").value;
-        adapt = adapt.replace(/\n/g, ",");
-
-    var files = fs.readdirSync(dir);
-    
-    if(trim){
-      files.filter(extension_cleanfastq).forEach(function(value) {
-		    var stats1 = fs.statSync(path.join(dir , value)).size;
-        if (stats1>50){
-          cfiles = path.join(dir , value); 
-          var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);console.log(cn+' locate '+' -p '+adapt+cfiles+' -o '+cfiles+".spike.txt");
-		    }
-      }); 
-    } 
-
-  	if(cfiles == ""){
-        files.filter(extension_fastq).forEach(function(value) {
-      		var stats1 = fs.statSync(path.join(dir , value)).size;
-      		if (stats1>50){
-                cfiles = path.join(dir , value); 
-                var comando = spawn(cn,['locate','-p',adapt,cfiles,'-o',cfiles+".spike.txt"],{shell:true}); console.log(comando);console.log(cn+' locate '+' -p '+adapt+cfiles+' -o '+cfiles+".spike.txt");
-      		}
-        }); 
-    }
-
-    if(cfiles != ""){
-        document.getElementById("spiketext").disabled = true;
-    }
-  }
-
 
   function control(name){
 
@@ -470,12 +244,11 @@
       });
     });
 
-    function extension(element) {
-        var extName = path.extname(element);
-	      var rege = new RegExp('^host_');
-      return rege.test(element); 
-
-    };
+	function extension(element) {
+		var extName = path.extname(element);
+		var rege = new RegExp('^host_');
+		return rege.test(element); 
+	};
   }
 
   function read_control(){
@@ -512,3 +285,25 @@
     location.href = './analysis.html?folder=' + path1;
   }
 
+  function check_java(){
+	  
+	  const path = require('path');
+	  var fqcdir = path.join(process.cwd(),'VD', 'bin','fastQC');  
+      var exec = require('child_process').exec;
+  	  var commrun = "java -Xmx250m -classpath " + fqcdir + ";" + path.join(fqcdir,"sam-1.103.jar") + ";" + path.join(fqcdir,"jbzip2-0.9.jar") + " uk.ac.babraham.FastQC.FastQCApplication --help";
+  	  
+      exec(commrun , function(error,stdout,stderr){
+        if(error!=null){
+            alert("Check your Java installation",error);
+        } 
+      });
+  }
+	
+	function check_perl(){
+		let fs = require('fs');
+		let path = require('path');
+		let dir = path.join(process.cwd(),'perlfiles'); 
+		if(!fs.existsSync(dir)){
+			alert("Perl libraries error.\nMake sure perlfiles directory exists.");
+		} 
+	}

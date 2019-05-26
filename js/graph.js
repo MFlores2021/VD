@@ -80,7 +80,7 @@ function draw_sRNA_summary(sRNA_length,name){ console.log(sRNA_length);
 	function draw_spike_summary(spike_file,name){
 		if(spike_file!= ""){
 		  d3.tsv(spike_file).then(function(data_sum) {
-console.log(data_sum);
+
 		if(data_sum.length>0){
 		  var data = d3.nest()
 			.key(function(d) { return d.pattern; })

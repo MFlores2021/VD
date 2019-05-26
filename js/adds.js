@@ -1,4 +1,5 @@
 function update_db(orga,filt, vers){
+	
     $('#ballsWaveG').show();
     var org = document.getElementById(orga).value;
     var org1 = capitalize(org);
@@ -82,11 +83,11 @@ function create_analysisbat(file, commrun){
 }
 
 
-function removeElement(elementId) {
+  function removeElement(elementId) {
     // Removes an element from the document
     var element = document.getElementById(elementId);
     element.parentNode.removeChild(element);
-}
+  }
 
 
   function onlyNos(e, t) {
