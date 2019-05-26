@@ -1,17 +1,18 @@
 /* integrate tools */
   function run_VD(name){
 	
-	var validation = true; // validate();
+	var validation = validate();
 	var fs = require('fs');
 	const path = require('path');
-	var execSync = require('child_process').execSync;
-	var spawnSync = require('child_process').spawnSync;
-	var spawn1 = require('child_process').spawn;
+	var dir = document.getElementById("pname").value;
+
 
 	if (validation){
-		//$('#ballsWaveG').show();
-		//upload(name);  
-		var folder = "c:\\git\\VD\\results\\tyutyu"; //document.getElementById("ruta").value;
+		document.getElementById("run").style.display='none';
+		document.getElementById("container").style.display='none';
+		$('#ballsWaveG').show();
+		upload(name);  
+		var folder = document.getElementById("ruta").value;
 		console.log("created folder:" + folder);
 
 		if (fs.existsSync(folder)) {
@@ -43,36 +44,35 @@
 			console.log(runperl);
 
 			const { spawn } =require("child_process");
-			//var analysis = spawn(runperl,{shell:true}, {windowsHide:true}); 
-			var analysis = spawn("dir",{shell:true}, {windowsHide:true});
+			var analysis = spawn(runperl,{shell:true}, {windowsHide:true}); 
+			//var analysis = spawn("dir",{shell:true}, {windowsHide:true});
 			analysis.stdout.on('data',(data) =>{ console.log('stdout:' + data);});
 			analysis.stderr.on('data',(data) =>{ console.log('trimming stderr:'+data);});
-			analysis.on('close',function(code){
-			   console.log("poner algo:", code);
+			analysis.on('close',function(){
 			    var fs1 = require('fs');
 				var files = fs1.readdirSync(folder);
-				const path1 = require('path');console.log(files);
+				const path1 = require('path');
 
 				var filesTrim =""; 
 				var filesspike ="";
+				document.getElementById("graph").innerHTML='<h2 align=center>Sequence lenght distribution after trimming</h2>';
 				files.filter(extension_trim).forEach(function(value) {
-					filesTrim = path1.join(folder,value); console.log("rna:",value);
+					filesTrim = path1.join("results",dir,value); console.log("rna:",value);
+					draw_sRNA_summary(filesTrim,value);
 				});
+				document.getElementById("graph1").innerHTML='<h2 align=center><br>Spike frequency</h2>';
 				files.filter(extension_spike).forEach(function(value) {
-					filesspike = path1.join(folder,value);console.log("spike:",value);
+					filesspike = path1.join("results",dir,value);console.log("spike:",value);
+					draw_spike_summary(filesspike,value);
 				}); 
-				draw_summary(filesTrim,filesspike);
 
-				alert('Done ! Check your results!');
+				setTimeout(save_html,10000,folder);
+				//alert("Done !");
 			});
-		
-			console.log("paso");
 			
-		    //$('#ballsWaveG').hide();
-			/* 
-			save_html(folder); */
 		}
-
+		$('#ballsWaveG').hide();
+		document.getElementById("run").style.display='block';
 	}
 	
 }

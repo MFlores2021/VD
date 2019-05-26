@@ -11,23 +11,11 @@
     <script type="text/javascript" src="js/functions.js"></script>
     <script type="text/javascript" src="js/adds.js"></script>
     <script type="text/javascript" src="js/graph.js"></script>
-    <div id="ballsWaveG" class="overlay">
-       <div id="ballsWaveG_1" class="ballsWaveG"></div>
-       <div id="ballsWaveG_2" class="ballsWaveG"></div>
-       <div id="ballsWaveG_3" class="ballsWaveG"></div>
-       <div id="ballsWaveG_4" class="ballsWaveG"></div>
-       <div id="ballsWaveG_5" class="ballsWaveG"></div>
-       <div id="ballsWaveG_6" class="ballsWaveG"></div>
-       <div id="ballsWaveG_7" class="ballsWaveG"></div>
-       <div id="ballsWaveG_8" class="ballsWaveG"></div>
-     </div>
+
     <style type="text/css">
       body, html {
         height: 100%;
       }
-      /* 13. Basic Styling with CSS */
-
-      /* Style the lines by removing the fill and applying a stroke */
       .line {
           fill: none;
           stroke: #ffab90;
@@ -62,6 +50,16 @@
         display: none;
       }
     </style>
+	<div id="ballsWaveG" class="overlay">
+       <div id="ballsWaveG_1" class="ballsWaveG"></div>
+       <div id="ballsWaveG_2" class="ballsWaveG"></div>
+       <div id="ballsWaveG_3" class="ballsWaveG"></div>
+       <div id="ballsWaveG_4" class="ballsWaveG"></div>
+       <div id="ballsWaveG_5" class="ballsWaveG"></div>
+       <div id="ballsWaveG_6" class="ballsWaveG"></div>
+       <div id="ballsWaveG_7" class="ballsWaveG"></div>
+       <div id="ballsWaveG_8" class="ballsWaveG"></div>
+     </div>
 </head>
 <body>
 
@@ -81,7 +79,6 @@
 <!-- Use any element to open the sidenav -->
   <span onclick="openNav()">Menu</span>
 
-  <label>Upload fastq files</label>
   <div id="main">
     <div class="container" id="container"><br>
         <label id="ruta"></label>
@@ -116,11 +113,12 @@
 			<label for="cores">Additional parameters</label>
             <textarea type="text" id="param" name="param" placeholder="" ></textarea>
         </div>
-        <input type="submit" value="Run" onclick="run_VD('#fileDialog')">
+        <input type="submit" id="run" value="Run" onclick="run_VD('#fileDialog')">
     </div>
 
-  </div>
-    <div id="graph"></div>
+	</div>
+
+    <div id="graph"> </div>
     <div id="graph1"></div>
 </body>
 </html>
