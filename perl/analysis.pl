@@ -52,11 +52,18 @@ foreach my $file1 (@files) {
         or die "Error: $commfqc . $?";
 
     if($adaptor ne 'NA' && $length ne 'NA'){
-     my $trimdir = 'perl ' . catfile($localdir,'VD','tools','sRNA_clean','sRNA_clean.pl ');
-     my $commtrim = $trimdir .'-s '. $adaptor . ' -l ' . $length . ' ' . $file;
-     system($commtrim) == 0
-         or die "Error: $commtrim . $?";
-     $trim = 1;
+	    my $trimdir = 'perl ' . catfile($localdir,'VD','tools','sRNA_clean','sRNA_clean.pl ');
+	    my $commtrim = $trimdir .'-s '. $adaptor . ' -l ' . $length . ' ' . $file;
+	    system($commtrim) == 0
+	         or die "Error: $commtrim . $?";
+	    my $temp = $file;
+	    $temp =~ s/\.fq$/\.clean\.fq/;
+	    $temp =~ s/\.fastq$/\.clean\.fq/;
+	    if (!-s $temp){
+	     	$trim = 0;
+	 	} else {
+			$trim = 1;
+		}
     } 
 
     if($trim == 1){
