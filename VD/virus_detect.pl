@@ -129,7 +129,7 @@ my $objective_type='maxLen';	# objective type for Velvet assembler:
 my $diff_ratio= 0.25;
 my $diff_contig_cover = 0.5;
 my $diff_contig_length= 100; 
-my $debug=0; my $email; my $user;
+my $debug; my $email; my $user;
 my $exp_valuexs;
 my $seq_info = "vrl_genbank_info.gz";
 my $prot_tab = "vrl_idmapping.gz";
