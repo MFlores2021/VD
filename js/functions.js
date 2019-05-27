@@ -246,7 +246,7 @@
 
 	function extension(element) {
 		var extName = path.extname(element);
-		var rege = new RegExp('^host_');
+		var rege = new RegExp('^host_.+nin');
 		return rege.test(element); 
 	};
   }
