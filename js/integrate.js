@@ -28,6 +28,7 @@
 			var ref = document.getElementById("references").value;
 			var cores = document.getElementById("cores").value;
 			var param = document.getElementById("param").value;
+			var control = document.getElementById("control").value;
 			
 			var commrun = 'perl ' + cn + ' '+ folder + " ";
 			commrun = (spike != "") ? commrun + spike + " ": commrun + "NA ";
@@ -36,7 +37,8 @@
 			commrun = commrun + db + " ";
 			commrun = (ref != "") ? commrun + ref + " ": commrun + "NA ";
 			commrun = (cores != "") ? commrun + cores + " ": commrun + "NA ";
-			commrun = (param != "") ? commrun + param + " ": commrun + "NA ";
+			commrun = (control != "") ? commrun + control + " ": commrun + "NA ";
+			commrun = (param != "") ? commrun + "'"+ param + "' ": commrun + "NA ";
 	  
 			create_analysisbat(runperl, commrun);
 

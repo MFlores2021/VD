@@ -72,6 +72,30 @@
     }
   }
 
+  function upload_control(name,dir) {
+
+    const path = require('path');
+    var folder = path.join(process.cwd(),'VD',dir);
+    var files = $(name)[0].files;
+    var fs = require('fs');
+    var exec = require('child_process').exec; 
+
+    if (!fs.existsSync(folder)) {
+      alert('Folder ' +dir+ ' does not exists');
+    } else{
+        for (var i = 0; i < files.length; ++i){
+        exec("copy " + files[i].path + " "+ path.join(folder,"c_"+files[i].name), function(error,stdout,stderr){
+          if(error!=null){
+            alert("Error:" + error);
+            return;
+          } 
+          format_faidx(path.join(folder,"control_"+files[i].name));
+          alert("Done!");
+        }); 
+      }
+    }
+  }
+
   function upload_localdb(name,prot_name,dir,info,ids) {
 
    if (!($(prot_name)[0].value =="") && !($(name)[0].value =="" ) && !($(info)[0].value =="" ) && !($(ids)[0].value =="" )){
@@ -91,7 +115,7 @@
           var tmp = files[i].name;
           var tmp1 = tmp.replace(".fasta", "");
           var dbname  = "l_" +  tmp1.replace(".fa", "");
-		  var db = path.join(folder,dbname);
+		      var db = path.join(folder,dbname);
           var commrun = "copy " + files[i].path + " "+ db +
              " & copy " + files_prot[i].path + " "+ db + "_prot" +
              " & copy " + linfo[i].path + " "+ db + "_genbank_info" +
@@ -208,9 +232,6 @@
     }
   }
 
-  function control(name){
-
-  }
 
   function read_db(){
 
@@ -260,12 +281,11 @@
       fs.readdir(dir, function(err, files) {
         var select = document.getElementById("databases");
         files.filter(extension).forEach(function(value) {
-          value = value.replace(/_prot.pin/, "");
           select.options[select.options.length] = new Option(value, value);
         });
       });
       function extension(element) {
-      var rege = new RegExp('^c_');
+      var rege = new RegExp('^control_.+fa|^control_.+fasta');
         return rege.test(element); 
       };
   }
