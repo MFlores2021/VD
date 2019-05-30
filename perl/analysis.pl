@@ -50,7 +50,7 @@ foreach my $file1 (@files) {
 
     ### FastQC
     my $fqcdir = catfile($localdir,'VD', 'bin','fastQC');
-    my $commfqc = "java -Xmx250m -classpath " . $fqcdir . ";" . catfile($fqcdir,"sam-1.103.jar") . ";" . catfile($fqcdir,"jbzip2-0.9.jar") . " uk.ac.babraham.FastQC.FastQCApplication " . $file;
+    my $commfqc = "java -Xmx250m -classpath " . $fqcdir . ";" . catfile($fqcdir,"sam-1.103.jar") . ";" . catfile($fqcdir,"jbzip2-0.9.jar") . " uk.ac.babraham.FastQC.FastQCApplication " . $file . " 2>NULL";
 	
     system($commfqc) == 0
         or warn "Error: $commfqc . $?";
@@ -58,7 +58,7 @@ foreach my $file1 (@files) {
     ### Trimming
     if($adaptor ne 'NA' && $length ne 'NA'){
 	    my $trimdir = 'perl ' . catfile($localdir,'VD','tools','sRNA_clean','sRNA_clean.pl ');
-	    my $commtrim = $trimdir .'-s '. $adaptor . ' -l ' . $length . ' ' . $file;
+	    my $commtrim = $trimdir .'-s '. $adaptor . ' -l ' . $length . ' ' . $file ;
 	    system($commtrim) == 0
 	         or warn "Error: $commtrim . $?";
 	    my $temp = $file;
@@ -77,7 +77,7 @@ foreach my $file1 (@files) {
 	     $file1 =~ s/\.fq$/\.clean\.fq/;
 	     $file1 =~ s/\.fastq$/\.clean\.fq/;	 
 	        
-	     my $commfqc1 = "java -Xmx250m -classpath " . $fqcdir . ";" . catfile($fqcdir,"sam-1.103.jar") . ";" . catfile($fqcdir,"jbzip2-0.9.jar") . " uk.ac.babraham.FastQC.FastQCApplication " . $file;
+	     my $commfqc1 = "java -Xmx250m -classpath " . $fqcdir . ";" . catfile($fqcdir,"sam-1.103.jar") . ";" . catfile($fqcdir,"jbzip2-0.9.jar") . " uk.ac.babraham.FastQC.FastQCApplication " . $file  . " 2>NULL";
 		
 	     system($commfqc1) == 0
 	        or warn "Error: $commfqc1 . $?";
@@ -85,10 +85,10 @@ foreach my $file1 (@files) {
 
     ### run spiking
 	if($spike ne 'NA'){
-	 my $spkdir = catfile($localdir,'VD','bin','seqkit.exe ');
-	 my $commspk = $spkdir .'locate -p '. $spike . " " . $file .' -o ' . $file .".spike.txt";
-	 system($commspk) == 0
-		  or warn "Error: $commspk . $?";
+		my $spkdir = catfile($localdir,'VD','bin','seqkit.exe ');
+		my $commspk = $spkdir .'locate -p '. $spike . " " . $file .' -o ' . $file .".spike.txt";
+		system($commspk) == 0
+			or warn "Error: $commspk . $?";
 	}
 
 	### Run virus detect 
@@ -162,7 +162,7 @@ foreach my $file1 (@files) {
 			}
 		}
 		if ($controout ne ""){
-			my $cresult = $file. ".control";
+			my $cresult = $file. ".control.html";
 			open (my $fh2, '>', $cresult) or warn "could not open file";
 			print $fh2 "Control results for $file1 \n $controout";
 			close $fh2;

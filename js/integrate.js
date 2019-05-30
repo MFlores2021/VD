@@ -10,12 +10,12 @@
 		document.getElementById("run").style.display='none';
 		document.getElementById("running").innerHTML = "Running ...";
 		
-		$('#ballsWaveG').show();
+		
 		upload(name);  
 		var folder = document.getElementById("ruta").value;
 		console.log("created folder:" + folder);
 
-		if (fs.existsSync(folder)) {
+		if (fs.existsSync(folder)) { 
 
 	        unzip(folder);
 			var runperl = path.join("perlfiles","tmp.bat");
@@ -46,10 +46,11 @@
 			console.log(runperl);
 
 			const { spawn } =require("child_process");
+			//var analysis = spawn("ls ",{shell:true}, {windowsHide:true}); 
 			var analysis = spawn(runperl,{shell:true}, {windowsHide:true}); 
 			//analysis.stdout.on('data',(data) =>{ console.log('stdout:' + data);});
 			analysis.stderr.on('data',(data) =>{ console.log('trimming stderr:'+data);});
-			analysis.on('close',function(){
+			analysis.on('close',function(){ alert("something");
 			    var fs1 = require('fs');
 				var files = fs1.readdirSync(folder);
 				const path1 = require('path');
@@ -67,14 +68,16 @@
 					draw_spike_summary(filesspike,value);
 				}); 
 
-				setTimeout(save_html,10000,folder);
+				setTimeout(save_html,1000,folder); console.log(folder);
+				var mergehtml = "type "+folder + "\\*.html >"+folder+"\\result.html";console.log(mergehtml);
+				var analysis1 = spawn(mergehtml,{shell:true}, {windowsHide:true}); 
 				setTimeout(alert,1000,"Done!");
 				document.getElementById("container").style.display='none';
 
 			});
 			
 		}
-		$('#ballsWaveG').hide();
+		
 		//document.getElementById("run").style.display='block';
 	}
 }
