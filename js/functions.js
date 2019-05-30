@@ -66,10 +66,10 @@
         exec("copy " + files[i].path + " "+ path.join(folder,"host_"+files[i].name), function(error,stdout,stderr){
           if(error!=null){
             alert("Error:" + error);
-            return;
+            //return;
           } 
-          alert("Done!");
         }); 
+		document.getElementById("subject").innerHTML = "Done !";
       }
     }
   }
@@ -272,7 +272,7 @@
 
 	function extension(element) {
 		var extName = path.extname(element);
-		var rege = new RegExp('^host_.+nin');
+		var rege = new RegExp('^host_.+fasta$|^host_.+fa$');
 		return rege.test(element); 
 	};
   }
@@ -290,7 +290,7 @@
         });
       });
       function extension(element) {
-      var rege = new RegExp('^control_.+fa|^control_.+fasta');
+      var rege = new RegExp('^control_.+fa$|^control_.+fasta$');
         return rege.test(element); 
       };
   }

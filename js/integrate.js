@@ -12,7 +12,7 @@
 		
 		$('#ballsWaveG').show();
 		upload(name);  
-		var folder = document.getElementById("ruta").value; //'C:\\git\\VD\\results\\yora';
+		var folder = document.getElementById("ruta").value;
 		console.log("created folder:" + folder);
 
 		if (fs.existsSync(folder)) {

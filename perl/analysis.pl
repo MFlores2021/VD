@@ -20,7 +20,7 @@ my $database = $ARGV[4];
 my $host  = $ARGV[5];
 my $cores = $ARGV[6];
 my $control = $ARGV[7];
-my $add_parameters = $ARGV[8]; print $add_parameters."\n";
+my $add_parameters = $ARGV[8]; 
 
 my $BIN_DIR  = catfile("VD","bin"); 
 my $align_program    = catfile("$BIN_DIR","bwa");
@@ -53,14 +53,14 @@ foreach my $file1 (@files) {
     my $commfqc = "java -Xmx250m -classpath " . $fqcdir . ";" . catfile($fqcdir,"sam-1.103.jar") . ";" . catfile($fqcdir,"jbzip2-0.9.jar") . " uk.ac.babraham.FastQC.FastQCApplication " . $file;
 	
     system($commfqc) == 0
-        or die "Error: $commfqc . $?";
+        or warn "Error: $commfqc . $?";
 
     ### Trimming
     if($adaptor ne 'NA' && $length ne 'NA'){
 	    my $trimdir = 'perl ' . catfile($localdir,'VD','tools','sRNA_clean','sRNA_clean.pl ');
 	    my $commtrim = $trimdir .'-s '. $adaptor . ' -l ' . $length . ' ' . $file;
 	    system($commtrim) == 0
-	         or die "Error: $commtrim . $?";
+	         or warn "Error: $commtrim . $?";
 	    my $temp = $file;
 	    $temp =~ s/\.fq$/\.clean\.fq/;
 	    $temp =~ s/\.fastq$/\.clean\.fq/;
@@ -80,7 +80,7 @@ foreach my $file1 (@files) {
 	     my $commfqc1 = "java -Xmx250m -classpath " . $fqcdir . ";" . catfile($fqcdir,"sam-1.103.jar") . ";" . catfile($fqcdir,"jbzip2-0.9.jar") . " uk.ac.babraham.FastQC.FastQCApplication " . $file;
 		
 	     system($commfqc1) == 0
-	        or die "Error: $commfqc1 . $?";
+	        or warn "Error: $commfqc1 . $?";
     }
 
     ### run spiking
@@ -88,7 +88,7 @@ foreach my $file1 (@files) {
 	 my $spkdir = catfile($localdir,'VD','bin','seqkit.exe ');
 	 my $commspk = $spkdir .'locate -p '. $spike . " " . $file .' -o ' . $file .".spike.txt";
 	 system($commspk) == 0
-		  or die "Error: $commspk . $?";
+		  or warn "Error: $commspk . $?";
 	}
 
 	### Run virus detect 
@@ -110,7 +110,7 @@ foreach my $file1 (@files) {
 	 my $folderm = catfile($localdir,"results","result_". $file1);
 	 if ( -e $folderm ){
 		system("move ". $folderm ." ". $dir) == 0
-			or die next;
+			or warn next;
 	 }
 	 
 	 
@@ -131,17 +131,47 @@ foreach my $file1 (@files) {
 			 Util::process_cmd("$samtools flagstat $file.sam >$file.stats.txt", $debug);
 		
 		} 
-		
-		if (-s "$file.pileup")
-		{
-			my $commvd = 'find /v /c "" '. $file.'.pileup >'.$file.'.cover.txt';
-			system($commvd) == 0
-			  or die next;
+		my $controout = '';
+		if (-s "$file.pileup" && -s "$control.fai"){	
+			my $num=0; my $den=0;
+			open my $fh, '<', "$file.pileup" or warn "couldn't open: $!";
+			while (<$fh>){
+				my @F = split;
+				$num=$num+$F[3];
+				$den++;
+			}
+			open my $fh1, '<', "$control.fai" or warn "couldn't open: $!";
+			my $size = '';
+			while (<$fh1>){
+				my @G = split;
+				$size=$G[1];
+			}
+			$controout = $controout . "\nControl sequence length: ". $size;
+			$controout = $controout . "\nControl sequence coverage: ". sprintf("%.2f",($den/$size*100)) . "%";
+			my $depth=$num/$den;
+			$controout = $controout . "\nDepth: ". sprintf("%.2f",$depth);
 		}
-	
+		
+		if (-s "$file.stats.txt"){
+			open my $fh, '<', "$file.stats.txt" or warn "couldn't open: $!";
+			while (my $line = <$fh>){
+				if(index $line, 'mapped (', >=0){
+					$line =~ m/(\d+.\d+\%)/; 
+					$controout = $controout . "\nMapped reads: ".$1;
+				}
+			}
+		}
+		if ($controout ne ""){
+			my $cresult = $file. ".control";
+			open (my $fh2, '>', $cresult) or warn "could not open file";
+			print $fh2 "Control results for $file1 \n $controout";
+			close $fh2;
+		}
+		
 		if ( -e "$file.sam"){ unlink "$file.sam"};
 		if ( -e "$file.bam"){ unlink "$file.bam"};
 		if ( -e "$file.sorted.bam"){ unlink "$file.sorted.bam"};
+		if ( -e "$file.stats.txt"){ unlink "$file.stats.txt"};
 		if ( -e "$file.pileup"){ unlink "$file.pileup"};
 		if ( -e catfile("$TEMP_DIR","bwa.log")){ unlink catfile("$TEMP_DIR","bwa.log")};
 		if ( -e catfile("$TEMP_DIR","samtools.log")){ unlink catfile("$TEMP_DIR","samtools.log")};
@@ -152,7 +182,7 @@ foreach my $file1 (@files) {
 		rmtree(catfile($localdir,$file1."_temp")) or warn "couldn't: $!";
 	}
   
-}
 
+}
 closedir(DIR); 
 
