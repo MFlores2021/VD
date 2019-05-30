@@ -106,24 +106,25 @@
             <select  class="form-control" id="control" name="control">
               <option value=""></option>
             </select><br>
+			<label>Select host reference</label><br>
+            <select  class="form-control" id="references" name="references">
+              <option value=""></option>
+            </select>
             <label>Select virus sequence database</label><br>
             <select  class="form-control" id="databases" name="databases">
               <option value=""></option>
             </select><br>
-            <label>Select host reference</label><br>
-            <select  class="form-control" id="references" name="references">
-              <option value=""></option>
-            </select>
             <label for="cores">Number of threads</label>
             <input type="text" id="cores" name="cores" placeholder="1" onkeypress="return onlyNos(event,this);">
 			<label for="cores">Additional parameters</label>
             <textarea type="text" id="param" name="param" placeholder="" ></textarea>
         </div>
         <input type="submit" id="run" value="Run" onclick="run_VD('#fileDialog')">
+		<label id="running"></label>
     </div>
 
 	</div>
-
+	
     <div id="graph"> </div>
     <div id="graph1"></div>
 </body>

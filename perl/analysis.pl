@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use File::Copy;
 use File::Spec::Functions 'catfile';
+use File::Path;
 use Cwd qw(getcwd);
 use lib catfile("VD","bin");
 use Util;
@@ -68,7 +69,7 @@ foreach my $file1 (@files) {
 	 	} else {
 			$trim = 1;
 		}
-    } 
+    }
 
     if($trim == 1){
 	     $file =~ s/\.fq$/\.clean\.fq/;
@@ -78,10 +79,9 @@ foreach my $file1 (@files) {
 	        
 	     my $commfqc1 = "java -Xmx250m -classpath " . $fqcdir . ";" . catfile($fqcdir,"sam-1.103.jar") . ";" . catfile($fqcdir,"jbzip2-0.9.jar") . " uk.ac.babraham.FastQC.FastQCApplication " . $file;
 		
-	    system($commfqc1) == 0
+	     system($commfqc1) == 0
 	        or die "Error: $commfqc1 . $?";
-
-    } 
+    }
 
     ### run spiking
 	if($spike ne 'NA'){
@@ -101,19 +101,27 @@ foreach my $file1 (@files) {
 	 }
 	 $commvd = $host ne 'NA' ? $commvd . " --host_reference " . $host . " ": $commvd;
 	 $commvd = $cores ne 'NA' ? $commvd . " --thread_num " . $cores . " ": $commvd;
+	 $commvd = $add_parameters ne 'NA' ? $commvd . " " . $add_parameters . " ": $commvd;
 	 $commvd = $commvd . " " . $file; 
 	 system($commvd) == 0
 	  or die next;
 	  
-
+	### move final folder to results
+	 my $folderm = catfile($localdir,"results","result_". $file1);
+	 if ( -e $folderm ){
+		system("move ". $folderm ." ". $dir) == 0
+			or die next;
+	 }
+	 
+	 
 	 ### Control aligment to create statistic
-
-	 $control = catfile($localdir,"VD","databases",$control);
+	if ( $control ne 'NA'){
+	  $control = catfile($localdir,"VD","databases",$control);
 
 	  my $align_parameters = $cores ne 'NA' ?  " -t $cores  " : " -t 1 ";
 	  my $samtools = catfile("$BIN_DIR","samtools"); 
 
-	 align::align_to_reference($align_program, $file, $control, "$file.sam", $align_parameters, 10000, $TEMP_DIR, $debug);
+	  align::align_to_reference($align_program, $file, $control, "$file.sam", $align_parameters, 10000, $TEMP_DIR, $debug);
 
 		if (-s "$file.sam")
 		{
@@ -122,10 +130,7 @@ foreach my $file1 (@files) {
 			 Util::process_cmd("$samtools mpileup $file.sorted.bam > $file.pileup 2> $TEMP_DIR/samtools.log", $debug);
 			 Util::process_cmd("$samtools flagstat $file.sam >$file.stats.txt", $debug);
 		
-		} else {
-			Util::print_user_submessage("No unique contig was generated");
-		}
-		}
+		} 
 		
 		if (-s "$file.pileup")
 		{
@@ -142,15 +147,12 @@ foreach my $file1 (@files) {
 		if ( -e catfile("$TEMP_DIR","samtools.log")){ unlink catfile("$TEMP_DIR","samtools.log")};
 		if ( -e catfile("$TEMP_DIR","bwa.sai")){ unlink catfile("$TEMP_DIR","bwa.sai")};
 
-
-	### move final folder to results
-	 my $folderm = catfile($localdir,"results","result_". $file1);
-	 if ( -e $folderm ){ 
-		system("move ". $folderm ." ". $dir) == 0
-			or die next;
-	 };
+	}
+	if (-e catfile($localdir,$file1."_temp")){
+		rmtree(catfile($localdir,$file1."_temp")) or warn "couldn't: $!";
+	}
+  
 }
 
 closedir(DIR); 
-print $ARGV[0];
 

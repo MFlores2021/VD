@@ -10,6 +10,8 @@
     var pfolder = path.join(process.cwd(),'results',dir); 
 
     if (fs.existsSync(pfolder)) {
+		document.getElementById("run").style.display='block';
+		document.getElementById("running").innerHTML = "";
       alert('Folder name already exists, choose another folder name.');
     } else{
       
@@ -84,14 +86,17 @@
       alert('Folder ' +dir+ ' does not exists');
     } else{
         for (var i = 0; i < files.length; ++i){
-        exec("copy " + files[i].path + " "+ path.join(folder,"c_"+files[i].name), function(error,stdout,stderr){
+        exec("copy " + files[i].path + " "+ path.join(folder,"control_"+files[i].name), function(error,stdout,stderr){
           if(error!=null){
             alert("Error:" + error);
-            return;
+            //return;
           } 
-          format_faidx(path.join(folder,"control_"+files[i].name));
-          alert("Done!");
+		  
         }); 
+		  
+		var filem = path.join(folder,"control_"+files[i].name); 
+        format_faidx(filem);
+        document.getElementById("subject").value = "Done !";
       }
     }
   }
@@ -153,13 +158,13 @@
     }); 
   }
   
-  function format_faidx(file){
+  function format_faidx(file){ 
     const path = require('path');
     var formatdb = path.join(process.cwd(),'VD','bin','samtools');
     var exec = require('child_process').exec; 
-    var cmd = formatdb + " faidx " + file; console.log(cmd);
+    var cmd = formatdb + " faidx " + file; 
 
-    exec(cmd, function(error,stdout,stderr){
+    exec(cmd, function(error,stdout,stderr){ 
       if(error!=null){
         alert('Error :', error);
       } 
@@ -279,7 +284,7 @@
       var fs = require('fs');
 
       fs.readdir(dir, function(err, files) {
-        var select = document.getElementById("databases");
+        var select = document.getElementById("control");
         files.filter(extension).forEach(function(value) {
           select.options[select.options.length] = new Option(value, value);
         });

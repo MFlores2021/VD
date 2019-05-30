@@ -8,6 +8,7 @@
 
 	if (validation){
 		document.getElementById("run").style.display='none';
+		document.getElementById("running").innerHTML = "Running ...";
 		
 		$('#ballsWaveG').show();
 		upload(name);  
@@ -38,7 +39,7 @@
 			commrun = (ref != "") ? commrun + ref + " ": commrun + "NA ";
 			commrun = (cores != "") ? commrun + cores + " ": commrun + "NA ";
 			commrun = (control != "") ? commrun + control + " ": commrun + "NA ";
-			commrun = (param != "") ? commrun + "'"+ param + "' ": commrun + "NA ";
+			commrun = (param != "") ? commrun + ' "'+ param + '" ' : commrun + "NA ";
 	  
 			create_analysisbat(runperl, commrun);
 
@@ -69,6 +70,7 @@
 				setTimeout(save_html,10000,folder);
 				setTimeout(alert,1000,"Done!");
 				document.getElementById("container").style.display='none';
+
 			});
 			
 		}
