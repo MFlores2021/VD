@@ -210,7 +210,6 @@ function unzip_file(file){
     var commrun = "tar -zxvf " + file + " --strip-components 1 -C " + path.join(process.cwd(),'VD','databases');
 
     var ff = execSync(commrun);
-    console.log(ff);
 }
 function zip_file(file,file2){
     const path = require('path');

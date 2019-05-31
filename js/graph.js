@@ -4,7 +4,7 @@ function save_html(folder){
     var x = $('#graph').html();
     var y = $('#graph1').html();
     var bb = $("head").html();
-    fs.writeFileSync(path.join(folder,'results.html'), bb+x+y , 'utf-8');
+    fs.writeFileSync(path.join(folder,'res.1html'), bb+x+y , 'utf-8');
 
 }
 

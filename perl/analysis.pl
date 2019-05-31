@@ -19,7 +19,7 @@ my $length  = $ARGV[3];
 my $database = $ARGV[4];
 my $host  = $ARGV[5];
 my $cores = $ARGV[6];
-my $control = $ARGV[7];
+my $controlseq = $ARGV[7];
 my $add_parameters = $ARGV[8]; 
 
 my $BIN_DIR  = catfile("VD","bin"); 
@@ -110,13 +110,13 @@ foreach my $file1 (@files) {
 	 my $folderm = catfile($localdir,"results","result_". $file1);
 	 if ( -e $folderm ){
 		system("move ". $folderm ." ". $dir) == 0
-			or warn next;
+			or warn "Error moving folder";
 	 }
 	 
 	 
 	 ### Control aligment to create statistic
-	if ( $control ne 'NA'){
-	  $control = catfile($localdir,"VD","databases",$control);
+	if ( $controlseq ne 'NA'){
+	  my $control = catfile($localdir,"VD","databases",$controlseq);
 
 	  my $align_parameters = $cores ne 'NA' ?  " -t $cores  " : " -t 1 ";
 	  my $samtools = catfile("$BIN_DIR","samtools"); 
@@ -146,10 +146,10 @@ foreach my $file1 (@files) {
 				my @G = split;
 				$size=$G[1];
 			}
-			$controout = $controout . "\nControl sequence length: ". $size;
-			$controout = $controout . "\nControl sequence coverage: ". sprintf("%.2f",($den/$size*100)) . "%";
+			$controout = $controout . "Control sequence length: ". $size;
+			$controout = $controout . "<br>Control sequence coverage: ". sprintf("%.2f",($den/$size*100)) . "%";
 			my $depth=$num/$den;
-			$controout = $controout . "\nDepth: ". sprintf("%.2f",$depth);
+			$controout = $controout . "<br>Depth: ". sprintf("%.2f",$depth);
 		}
 		
 		if (-s "$file.stats.txt"){
@@ -157,14 +157,14 @@ foreach my $file1 (@files) {
 			while (my $line = <$fh>){
 				if(index $line, 'mapped (', >=0){
 					$line =~ m/(\d+.\d+\%)/; 
-					$controout = $controout . "\nMapped reads: ".$1;
+					$controout = $controout . "<br>Mapped reads: ".$1;
 				}
 			}
 		}
 		if ($controout ne ""){
-			my $cresult = $file. ".control.html";
+			my $cresult = $file. ".control.1html";
 			open (my $fh2, '>', $cresult) or warn "could not open file";
-			print $fh2 "Control results for $file1 \n $controout";
+			print $fh2 "<p><h3 align=center>Control results for $file1 </h3> <br> $controout</p>";
 			close $fh2;
 		}
 		

@@ -10,19 +10,20 @@
 		document.getElementById("run").style.display='none';
 		document.getElementById("running").innerHTML = "Running ...";
 		
-		
 		upload(name);  
-		var folder = document.getElementById("ruta").value;
+		var folder = document.getElementById("ruta").value; //'C:\\git\\VD\\results\\AGTC'
 		console.log("created folder:" + folder);
 
-		if (fs.existsSync(folder)) { 
+		if (fs.existsSync(folder)) {
 
 	        unzip(folder);
 			var runperl = path.join("perlfiles","tmp.bat");
 			var cn = path.join(process.cwd(),'perl','analysis.pl ');
 			
 			var spike = document.getElementById("spiketext").value;
-				spike = spike.replace(/\n/g, ",");
+				spike = spike.replace(/\n/g, ","); 
+				spike = spike.replace(/,,/g, ",");
+				spike = spike.replace(/,$/, ""); 
 			var adaptor = document.getElementById("adaptor").value;
 			var length = document.getElementById("length").value;
 			var db = document.getElementById("databases").value;
@@ -32,14 +33,14 @@
 			var control = document.getElementById("control").value;
 			
 			var commrun = 'perl ' + cn + ' '+ folder + " ";
-			commrun = (spike != "") ? commrun + spike + " ": commrun + "NA ";
-			commrun = (adaptor != "") ? commrun + adaptor + " ": commrun + "NA ";
-			commrun = (length != "") ? commrun + length + " ": commrun + "NA ";
+			commrun = (spike.trim() != "") ? commrun + spike + " ": commrun + "NA ";
+			commrun = (adaptor.trim() != "") ? commrun + adaptor + " ": commrun + "NA ";
+			commrun = (length.trim() != "") ? commrun + length + " ": commrun + "NA ";
 			commrun = commrun + db + " ";
-			commrun = (ref != "") ? commrun + ref + " ": commrun + "NA ";
-			commrun = (cores != "") ? commrun + cores + " ": commrun + "NA ";
-			commrun = (control != "") ? commrun + control + " ": commrun + "NA ";
-			commrun = (param != "") ? commrun + ' "'+ param + '" ' : commrun + "NA ";
+			commrun = (ref.trim() != "") ? commrun + ref + " ": commrun + "NA ";
+			commrun = (cores.trim() != "") ? commrun + cores + " ": commrun + "NA ";
+			commrun = (control.trim() != "") ? commrun + control + " ": commrun + "NA ";
+			commrun = (param.trim() != "") ? commrun + ' "'+ param + '" ' : commrun + "NA ";
 	  
 			create_analysisbat(runperl, commrun);
 
@@ -50,7 +51,7 @@
 			var analysis = spawn(runperl,{shell:true}, {windowsHide:true}); 
 			//analysis.stdout.on('data',(data) =>{ console.log('stdout:' + data);});
 			analysis.stderr.on('data',(data) =>{ console.log('trimming stderr:'+data);});
-			analysis.on('close',function(){ alert("something");
+			analysis.on('close',function(){ 
 			    var fs1 = require('fs');
 				var files = fs1.readdirSync(folder);
 				const path1 = require('path');
@@ -68,14 +69,31 @@
 					draw_spike_summary(filesspike,value);
 				}); 
 
-				setTimeout(save_html,1000,folder); console.log(folder);
-				var mergehtml = "type "+folder + "\\*.html >"+folder+"\\result.html";console.log(mergehtml);
-				var analysis1 = spawn(mergehtml,{shell:true}, {windowsHide:true}); 
+				setTimeout(save_html,1000,folder); 
+				setTimeout(merge,1000);
+				setTimeout(del,1000);
 				setTimeout(alert,1000,"Done!");
+				
+				function merge(){
+					var mergehtml = "type "+ path.join(folder,"*1html") +" >>"+path.join(folder,"result.html");
+					var analysis1 = spawn(mergehtml,{shell:true}, {windowsHide:true});
+				}
+				function del(){
+					var fs2 = require('fs');
+					fs2.readdir(folder, function(err, files) {
+						files.filter(extensionhtml).forEach(function(value) {
+							fs2.unlinkSync(path.join(folder,value)); console.log(value);
+						});
+					});
+				}					
 				document.getElementById("container").style.display='none';
 
 			});
 			
+			function extensionhtml(element) {
+				  var rege = new RegExp('\.1html$');
+					return rege.test(element); 
+			};
 		}
 		
 		//document.getElementById("run").style.display='block';
