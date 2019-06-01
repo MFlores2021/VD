@@ -24,7 +24,6 @@
   <script>
   	$( document ).ready(function() {
       $("#Menu").load("menu.html");  
-      document.getElementById("outputtext").style.display = "none";
 	  });
 
     function extension_vrl(element) {
@@ -90,8 +89,8 @@
               <option value="U95">U100</option>
             </select><br>
 	  
-	  <input type="submit" value="Update" onclick="update_db('organism','filtering','version')">
-	  <textarea id="outputtext"></textarea>
+	  <input type="submit" id="Update" value="Update" onclick="update_db('organism','filtering','version')">
+	  <br><label id="running"></label>
 	</div>
   </div>
 

@@ -1,6 +1,5 @@
 function update_db(orga,filt, vers){
 	
-    $('#ballsWaveG').show();
     var org = document.getElementById(orga).value;
     var org1 = capitalize(org);
     var filter = document.getElementById(filt).value;
@@ -13,13 +12,14 @@ function update_db(orga,filt, vers){
     var commrun = "perl " + path.join(process.cwd(),'VD','bin','download.pl '+ org1 + " " + filter+ " " + version);
     var info = "vrl_genbank_info.gz";
     var ids = "vrl_idmapping.gz";
+	document.getElementById("running").innerHTML = "Downloading ...";
+	document.getElementById("Update").style.display='none';
 
     create_analysisbat(runperl, commrun);
 
     exec(runperl, function(error,stdout,stderr){
         if(error!=null){
           console.log('error :', error);
-          $('#ballsWaveG').hide();
           alert('Something went wrong. ' + error);
         } else{
 
@@ -37,18 +37,16 @@ function update_db(orga,filt, vers){
             execSync("IF EXIST "+ path.join("VD","databases","vrl_*pac") +" DEL /F/Q/S " + path.join("VD","databases","vrl_*pac") + " >NUL",  { stdio:  'inherit' } );         
           } catch (ex){
             console.log(ex);
-            $('#ballsWaveG').hide();
           }
         }
-        alert("Done !");
+       document.getElementById("running").innerHTML = "Done!";
     }); 
     var fs = require('fs');
     fs.readdir(path.join(process.cwd(),"VD","databases"), function(err, items) {
         items.filter(extension_vrl).forEach(function(value) {
           document.getElementById("currentv").value += value + "\n";
         });
-    });
-    $('#ballsWaveG').hide();
+    });	
 }
 
 function create_analysisbat(file, commrun){

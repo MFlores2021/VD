@@ -19,7 +19,6 @@
         var spawn = spawnSync('md ' +pfolder);
         var errorText = spawn.error;
         if (errorText) {
-          $('#ballsWaveG').hide();
           alert('Fatal error: Folder cannot be created!');
         }
         else {
@@ -39,7 +38,6 @@
             exec("copy " + files[i].path + " "+  path.join(pfolder,newname) , function(error,stdout,stderr){
               // document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
               if(error!=null){
-                $('#ballsWaveG').hide();
                 alert('Something went wrong while copying files.' + error);
               } else{
                 console.log("entra pfolder");
@@ -190,7 +188,6 @@
         exec(commrun + cfiles, function(error,stdout,stderr){
 
           if(error!=null){ console.log(commrun);
-            $('#ballsWaveG').hide();
             alert("Fastqc error:",error);
           }
         });

@@ -11,7 +11,7 @@
 		document.getElementById("running").innerHTML = "Running ...";
 		
 		upload(name);  
-		var folder = document.getElementById("ruta").value; //'C:\\git\\VD\\results\\AGTC'
+		var folder = document.getElementById("ruta").value;
 		console.log("created folder:" + folder);
 
 		if (fs.existsSync(folder)) {
@@ -72,7 +72,7 @@
 				setTimeout(save_html,1000,folder); 
 				setTimeout(merge,1000);
 				setTimeout(del,1000);
-				setTimeout(alert,1000,"Done!");
+				document.getElementById("running").innerHTML = "Done!";
 				
 				function merge(){
 					var mergehtml = "type "+ path.join(folder,"*1html") +" >>"+path.join(folder,"result.html");
