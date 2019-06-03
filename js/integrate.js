@@ -33,8 +33,8 @@
 			var control = document.getElementById("control").value;
 			
 			var commrun = 'perl ' + cn + ' '+ folder + " ";
-			commrun = (spike.trim() != "") ? commrun + spike + " ": commrun + "NA ";
-			commrun = (adaptor.trim() != "") ? commrun + adaptor + " ": commrun + "NA ";
+			commrun = (spike.trim() != "") ? commrun + spike.toUpperCase() + " ": commrun + "NA ";
+			commrun = (adaptor.trim() != "") ? commrun + adaptor.toUpperCase() + " ": commrun + "NA ";
 			commrun = (length.trim() != "") ? commrun + length + " ": commrun + "NA ";
 			commrun = commrun + db + " ";
 			commrun = (ref.trim() != "") ? commrun + ref + " ": commrun + "NA ";
@@ -69,9 +69,9 @@
 					draw_spike_summary(filesspike,value);
 				}); 
 
-				setTimeout(save_html,1000,folder); 
+				setTimeout(save_html,100,folder); 
 				setTimeout(merge,1000);
-				setTimeout(del,1000);
+				setTimeout(del,5000);
 				document.getElementById("running").innerHTML = "Done!";
 				
 				function merge(){
@@ -102,11 +102,11 @@
 
   function validate(){
 	if(!alphanumeric(document.getElementById("pname").value)) {
-		alert("Please enter an alphanumber value as folder name. Do not use spaces.");
+		document.getElementById("running").innerHTML = "Enter an alphanumeric folder name. Do not use spaces.";
 		return false;
 	} else {
 		if (document.getElementById("databases").value == ''){
-			alert("Select a database.");
+			document.getElementById("running").innerHTML = "Select a database.";
 			return false;
 		}
 		
@@ -114,19 +114,19 @@
 		if(document.getElementById("fileDialog").value != ''){ 
 			if (adaptor != '' && document.getElementById("length").value != '' ){
 				if(!alphabets(adaptor)){
-					alert("Insert only ATGC adaptor");
+					document.getElementById("running").innerHTML = "Insert only ATGC adaptor";
 					return false;
 				} else {
 					if (adaptor.length<15){
-						alert('Adaptor sequence too short');
+						document.getElementById("running").innerHTML = 'Adaptor sequence too short';
 						return false;
 					}
 				}
 			} else if (adaptor == '' && document.getElementById("length").value != ''){
-				alert('Trimming: Provide both adaptor and length');
+				document.getElementById("running").innerHTML = 'Trimming: Provide both adaptor and length';
 				return false;
 			} else if(adaptor != '' && document.getElementById("length").value == ''){
-				alert('Trimming: Provide both adaptor and length');
+				document.getElementById("running").innerHTML = 'Trimming: Provide both adaptor and length';
 				return false;
 			} 
 /* 			if (document.getElementById("spiketext").value != ''){ 
@@ -137,7 +137,7 @@
 			} */
 			return true;
 		} else {
-			alert('Select Fastq files to upload');
+			document.getElementById("running").innerHTML = 'Select Fastq files to upload';
 			return false;
 		}
 	}

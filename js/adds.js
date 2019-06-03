@@ -20,7 +20,7 @@ function update_db(orga,filt, vers){
     exec(runperl, function(error,stdout,stderr){
         if(error!=null){
           console.log('error :', error);
-          alert('Something went wrong. ' + error);
+          document.getElementById("running").value = 'Something went wrong. ' + error;
         } else{
 
           var database = path.join("VD","databases",stdout);

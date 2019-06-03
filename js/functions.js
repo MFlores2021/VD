@@ -10,16 +10,15 @@
     var pfolder = path.join(process.cwd(),'results',dir); 
 
     if (fs.existsSync(pfolder)) {
-		document.getElementById("run").style.display='block';
-		document.getElementById("running").innerHTML = "";
-      alert('Folder name already exists, choose another folder name.');
+		 document.getElementById("run").style.display='block';
+      document.getElementById("running").innerHTML = 'Folder name already exists, choose another folder name.';
     } else{
       
       var commitMessage = (function(){
         var spawn = spawnSync('md ' +pfolder);
         var errorText = spawn.error;
         if (errorText) {
-          alert('Fatal error: Folder cannot be created!');
+          document.getElementById("running").innerHTML = 'Fatal error: Folder cannot be created!';
         }
         else {
           return spawn.stdout;
@@ -38,7 +37,7 @@
             exec("copy " + files[i].path + " "+  path.join(pfolder,newname) , function(error,stdout,stderr){
               // document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
               if(error!=null){
-                alert('Something went wrong while copying files.' + error);
+                document.getElementById("running").innerHTML = 'Something went wrong while copying files.' + error;
               } else{
                 console.log("entra pfolder");
                 
@@ -58,12 +57,12 @@
     var exec = require('child_process').exec; 
 
     if (!fs.existsSync(folder)) {
-      alert('Folder ' +dir+ ' does not exists');
+      document.getElementById("subject").innerHTML = 'Folder ' +dir+ ' does not exists';
     } else{
         for (var i = 0; i < files.length; ++i){
         exec("copy " + files[i].path + " "+ path.join(folder,"host_"+files[i].name), function(error,stdout,stderr){
           if(error!=null){
-            alert("Error:" + error);
+            document.getElementById("running").innerHTML = "Error:" + error;
             //return;
           } 
         }); 
@@ -81,12 +80,12 @@
     var exec = require('child_process').exec; 
 
     if (!fs.existsSync(folder)) {
-      alert('Folder ' +dir+ ' does not exists');
+      document.getElementById("subject").value = 'Folder ' +dir+ ' does not exists';
     } else{
         for (var i = 0; i < files.length; ++i){
         exec("copy " + files[i].path + " "+ path.join(folder,"control_"+files[i].name), function(error,stdout,stderr){
           if(error!=null){
-            alert("Error:" + error);
+            document.getElementById("subject").value = "Error:" + error;
             //return;
           } 
 		  
@@ -112,7 +111,7 @@
       var exec = require('child_process').exec; 
 
       if (!fs.existsSync(folder)) {
-        alert('Folder ' +dir+ ' does not exists');
+        document.getElementById("subject").value = 'Folder ' +dir+ ' does not exists';
       } else {
           for (var i = 0; i < files.length; ++i){ 
           var tmp = files[i].name;
@@ -127,7 +126,7 @@
           exec(commrun, function(error,stdout,stderr){
             document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
             if(error!=null){
-              alert('Error :', error);
+              document.getElementById("subject").value = 'Error :', error;
             } 
 			  if (dir == 'databases'){
 					format_db(db,"nucl");
@@ -140,7 +139,7 @@
         }
       }
     }
-    else alert("Select nucleotide and protein files");
+    else document.getElementById("subject").value = "Select nucleotide and protein files";
   }
 
   function format_db(file,dbtype){
@@ -188,7 +187,7 @@
         exec(commrun + cfiles, function(error,stdout,stderr){
 
           if(error!=null){ console.log(commrun);
-            alert("Fastqc error:",error);
+            document.getElementById("running").value = "Fastqc error:",error;
           }
         });
 
@@ -316,7 +315,7 @@
   	  
       exec(commrun , function(error,stdout,stderr){
         if(error!=null){
-            alert("Check your Java installation",error);
+            document.getElementById("running").value = "Check your Java installation",error;
         } 
       });
   }
@@ -326,6 +325,6 @@
 		let path = require('path');
 		let dir = path.join(process.cwd(),'perlfiles'); 
 		if(!fs.existsSync(dir)){
-			alert("Perl libraries error.\nMake sure perlfiles directory exists.");
+			document.getElementById("running").value = "Perl libraries error.\nMake sure perlfiles directory exists.";
 		} 
 	}

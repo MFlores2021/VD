@@ -41,7 +41,7 @@
     exec(runperl, function(error,stdout,stderr){
         if(error!=null){
           console.log('error :', error);
-          alert('Something went wrong readying external database version. ' + error);
+          document.getElementById("running").innerHTML = 'Something went wrong readying external database version. ' + error;
         } else{
           document.getElementById("version").value = stdout;
           console.log("output:" + stdout);
@@ -65,7 +65,7 @@
   <div id="main">
     <div class="container" id="container">
 	  <label>Current local NCBI Database version</label><br>
-    <textarea type="text" id="currentv" name="currentv" placeholder=""></textarea>
+    <textarea type="text" id="currentv" name="currentv" placeholder="">No database available.</textarea>
     <br><br>
     <label>Update to NCBI Database version</label><br>
 	  <input type="text" id="version" name="version" placeholder="">
