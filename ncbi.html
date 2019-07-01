@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>NCBI database update</title>
+  <title>Download/Update NCBI database</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <link rel="stylesheet" type="text/css" href="css/style.css">
@@ -9,16 +9,6 @@
     <script type="text/javascript" src="js/menu.js"></script>
     <script type="text/javascript" src="js/functions.js"></script>
     <script type="text/javascript" src="js/adds.js"></script>
-    <div id="ballsWaveG" class="overlay">
-       <div id="ballsWaveG_1" class="ballsWaveG"></div>
-       <div id="ballsWaveG_2" class="ballsWaveG"></div>
-       <div id="ballsWaveG_3" class="ballsWaveG"></div>
-       <div id="ballsWaveG_4" class="ballsWaveG"></div>
-       <div id="ballsWaveG_5" class="ballsWaveG"></div>
-       <div id="ballsWaveG_6" class="ballsWaveG"></div>
-       <div id="ballsWaveG_7" class="ballsWaveG"></div>
-       <div id="ballsWaveG_8" class="ballsWaveG"></div>
-    </div>
 </head>
 <body>
   <script>
@@ -62,15 +52,18 @@
   <div id="Menu"></div>
 <!-- Use any element to open the sidenav -->
   <span onclick="openNav()">Menu</span>
-  <div id="main">
+  <h3 align="center">Download/Update NCBI database</h3>
+  <div id="main">     
     <div class="container" id="container">
-	  <label>Current local NCBI Database version</label><br>
-    <textarea type="text" id="currentv" name="currentv" placeholder="">No database available.</textarea>
+      <p>This option enables you to download classified and non-redundant databases available on the VirusDetect <a href="ftp://bioinfo.bti.cornell.edu/pub/program/VirusDetect/">ftp</a> site. This virus reference database is generated from the GenBank virus database (gbvrl) and updated on an occasional basis. The virus sequence databases have been classified into different kingdoms including plant, vertebrate, invertebrate, fungus, bacteria, algae, archaea and protozoa using a <a href="https://github.com/kentnf/virus-detect-new/tree/master/tools/genbank_vrl_classification">Virus Classification Pipeline</a>. Subdividing the different virus sequences by host reduces their size and increases the speed of analysis. Unique virus sequence databases were generated for each host kingdom by removing redundant sequences of 100%, 97% and 95% identity, respectively. Reducing the redundancy level reduces the database size, increasing the speed of analysis as well as complexity of results.
+      </p><br>
+	  <label>Current local NCBI database version installed on this computer</label><br>
+    <textarea type="text" id="currentv" name="currentv" placeholder=""></textarea>
     <br><br>
-    <label>Update to NCBI Database version</label><br>
+    <label>Update to NCBI database version (latest available version is automatically displayed)</label><br>
 	  <input type="text" id="version" name="version" placeholder="">
 	  <br>
-    <label>Organism</label><br>
+    <label>Select virus host organism</label><br>
             <select  class="form-control" id="organism" name="organism">
               <option value=""></option>
               <option value="plant">Plant</option>
@@ -81,7 +74,7 @@
               <option value="protozoa">Protozoa</option>
               <option value="vertebrate">Vertebrate</option>
             </select><br>
-    <label>Select redundancy level</label><br>
+    <label>Select level of redundancy reduction for virus sequences (% identity)</label><br>
             <select  class="form-control" id="filtering" name="filtering">
               <option value=""></option>
               <option value="U95">U95</option>
