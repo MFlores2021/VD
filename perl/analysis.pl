@@ -43,6 +43,16 @@ my @files
     && -f "$dir/$_"   # and is a file
 } readdir(DIR);
 
+my $stringFile = join " $dir\\", @files; 
+
+### Trimming
+if($adaptor ne 'NA' && $length ne 'NA'){
+	my $trimdir = 'perl ' . catfile($localdir,'VD','tools','sRNA_clean','sRNA_clean.pl ');
+	my $commtrim = $trimdir .'-s '. $adaptor . ' -l ' . $length . ' '. $dir.'\\' . $stringFile ;
+	system($commtrim) == 0
+		 or die "Error: $commtrim . $?";
+}
+
 # Loop through the array printing out the filenames
 foreach my $file1 (@files) {
 	my $file = catfile($dir,$file1);
@@ -57,10 +67,6 @@ foreach my $file1 (@files) {
 
     ### Trimming
     if($adaptor ne 'NA' && $length ne 'NA'){
-	    my $trimdir = 'perl ' . catfile($localdir,'VD','tools','sRNA_clean','sRNA_clean.pl ');
-	    my $commtrim = $trimdir .'-s '. $adaptor . ' -l ' . $length . ' ' . $file ;
-	    system($commtrim) == 0
-	         or warn "Error: $commtrim . $?";
 	    my $temp = $file;
 	    $temp =~ s/\.fq$/\.clean\.fq/;
 	    $temp =~ s/\.fastq$/\.clean\.fq/;
@@ -92,19 +98,19 @@ foreach my $file1 (@files) {
 	}
 
 	### Run virus detect 
-	my $commvd = "perl " . catfile($localdir,'VD','virus_detect.pl ');
-	 $commvd = $database ne 'NA' ?  $commvd . " --reference " . $database . " " : $commvd;
-	 if ($database =~ /^l_/){
-		my $info = $database. "_genbank_info.gz";
-		my $ids = $database . "_idmapping.gz";
-		$commvd = $commvd . " --seq_info " . $info . " --prot_tab " . $ids;
-	 }
-	 $commvd = $host ne 'NA' ? $commvd . " --host_reference " . $host . " ": $commvd;
-	 $commvd = $cores ne 'NA' ? $commvd . " --thread_num " . $cores . " ": $commvd;
-	 $commvd = $add_parameters ne 'NA' ? $commvd . " " . $add_parameters . " ": $commvd;
-	 $commvd = $commvd . " " . $file; 
-	 system($commvd) == 0
-	  or die next;
+	# my $commvd = "perl " . catfile($localdir,'VD','virus_detect.pl ');
+	 # $commvd = $database ne 'NA' ?  $commvd . " --reference " . $database . " " : $commvd;
+	 # if ($database =~ /^l_/){
+		# my $info = $database. "_genbank_info.gz";
+		# my $ids = $database . "_idmapping.gz";
+		# $commvd = $commvd . " --seq_info " . $info . " --prot_tab " . $ids;
+	 # }
+	 # $commvd = $host ne 'NA' ? $commvd . " --host_reference " . $host . " ": $commvd;
+	 # $commvd = $cores ne 'NA' ? $commvd . " --thread_num " . $cores . " ": $commvd;
+	 # $commvd = $add_parameters ne 'NA' ? $commvd . " " . $add_parameters . " ": $commvd;
+	 # $commvd = $commvd . " " . $file; 
+	 # system($commvd) == 0
+	  # or die next;
 	  
 	### move final folder to results
 	 my $folderm = catfile($localdir,"results","result_". $file1);
@@ -132,6 +138,7 @@ foreach my $file1 (@files) {
 		
 		} 
 		my $controout = '';
+		#$controout = $controout . "Control sequence length\tControl sequence coverage\tDepth\tMapped reads\n";
 		if (-s "$file.pileup" && -s "$control.fai"){	
 			my $num=0; my $den=0;
 			open my $fh, '<', "$file.pileup" or warn "couldn't open: $!";
@@ -147,9 +154,9 @@ foreach my $file1 (@files) {
 				$size=$G[1];
 			}
 			$controout = $controout . "Control sequence length: ". $size;
-			$controout = $controout . "<br>Control sequence coverage: ". sprintf("%.2f",($den/$size*100)) . "%";
+			$controout = $controout . "\tControl sequence coverage: ". sprintf("%.2f",($den/$size*100)) . "%";
 			my $depth=$num/$den;
-			$controout = $controout . "<br>Depth: ". sprintf("%.2f",$depth);
+			$controout = $controout . "\tDepth: ". sprintf("%.2f",$depth);
 		}
 		
 		if (-s "$file.stats.txt"){
@@ -157,21 +164,21 @@ foreach my $file1 (@files) {
 			while (my $line = <$fh>){
 				if(index $line, 'mapped (', >=0){
 					$line =~ m/(\d+.\d+\%)/; 
-					$controout = $controout . "<br>Mapped reads: ".$1;
+					$controout = $controout . "\tMapped reads: ".$1;
 				}
 			}
 		}
 		if ($controout ne ""){
-			my $cresult = $file. ".control.1html";
-			open (my $fh2, '>', $cresult) or warn "could not open file";
-			print $fh2 "<p><h3 align=center>Control results for $file1 </h3> <br> $controout</p>";
+			my $cresult = "$dir\\control.1html";
+			open (my $fh2, '>>', $cresult) or warn "could not open file";
+			print $fh2 "$file1\t$controout";
 			close $fh2;
 		}
 		
 		if ( -e "$file.sam"){ unlink "$file.sam"};
 		if ( -e "$file.bam"){ unlink "$file.bam"};
 		if ( -e "$file.sorted.bam"){ unlink "$file.sorted.bam"};
-		if ( -e "$file.stats.txt"){ unlink "$file.stats.txt"};
+		#if ( -e "$file.stats.txt"){ unlink "$file.stats.txt"};
 		if ( -e "$file.pileup"){ unlink "$file.pileup"};
 		if ( -e catfile("$TEMP_DIR","bwa.log")){ unlink catfile("$TEMP_DIR","bwa.log")};
 		if ( -e catfile("$TEMP_DIR","samtools.log")){ unlink catfile("$TEMP_DIR","samtools.log")};

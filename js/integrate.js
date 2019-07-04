@@ -71,7 +71,7 @@
 
 				setTimeout(save_html,100,folder); 
 				setTimeout(merge,1000);
-				setTimeout(del,5000);
+				//setTimeout(del,5000);
 				document.getElementById("running").innerHTML = "Done!";
 				
 				function merge(){
