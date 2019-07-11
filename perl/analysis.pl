@@ -5,10 +5,12 @@ use warnings;
 use File::Copy;
 use File::Spec::Functions 'catfile';
 use File::Path;
+use File::Basename;
 use Cwd qw(getcwd);
-use lib catfile("VD","bin");
-use Util;
-use align;
+use Data::Dumper;
+# use lib catfile("VD","bin");
+# use Util;
+# use align;
 
 my $localdir = getcwd;
 
@@ -52,9 +54,9 @@ if($adaptor ne 'NA' && $length ne 'NA'){
 	system($commtrim) == 0
 		 or die "Error: $commtrim . $?";
 }
-
+# print Dumper(@files);
 # Loop through the array printing out the filenames
-foreach my $file1 (@files) {
+foreach my $file1 (@files) { 
 	my $file = catfile($dir,$file1);
     $trim = 0;
 
@@ -95,24 +97,28 @@ foreach my $file1 (@files) {
 		my $commspk = $spkdir .'locate -p '. $spike . " " . $file .' -o ' . $file .".spike.txt";
 		system($commspk) == 0
 			or warn "Error: $commspk . $?";
+
+		if (-s "$file.spike.txt"){
+			format_spike("$file.spike.txt");
+		}
 	}
 
 	### Run virus detect 
-	# my $commvd = "perl " . catfile($localdir,'VD','virus_detect.pl ');
-	 # $commvd = $database ne 'NA' ?  $commvd . " --reference " . $database . " " : $commvd;
-	 # if ($database =~ /^l_/){
-		# my $info = $database. "_genbank_info.gz";
-		# my $ids = $database . "_idmapping.gz";
-		# $commvd = $commvd . " --seq_info " . $info . " --prot_tab " . $ids;
-	 # }
-	 # $commvd = $host ne 'NA' ? $commvd . " --host_reference " . $host . " ": $commvd;
-	 # $commvd = $cores ne 'NA' ? $commvd . " --thread_num " . $cores . " ": $commvd;
-	 # $commvd = $add_parameters ne 'NA' ? $commvd . " " . $add_parameters . " ": $commvd;
-	 # $commvd = $commvd . " " . $file; 
-	 # system($commvd) == 0
-	  # or die next;
+	my $commvd = "perl " . catfile($localdir,'VD','virus_detect.pl ');
+	 $commvd = $database ne 'NA' ?  $commvd . " --reference " . $database . " " : $commvd;
+	 if ($database =~ /^l_/){
+		my $info = $database. "_genbank_info.gz";
+		my $ids = $database . "_idmapping.gz";
+		$commvd = $commvd . " --seq_info " . $info . " --prot_tab " . $ids;
+	 }
+	 $commvd = $host ne 'NA' ? $commvd . " --host_reference " . $host . " ": $commvd;
+	 $commvd = $cores ne 'NA' ? $commvd . " --thread_num " . $cores . " ": $commvd;
+	 $commvd = $add_parameters ne 'NA' ? $commvd . " " . $add_parameters . " ": $commvd;
+	 $commvd = $commvd . " " . $file; 
+	 system($commvd) == 0
+	  or die next;
 	  
-	### move final folder to results
+	# move final folder to results
 	 my $folderm = catfile($localdir,"results","result_". $file1);
 	 if ( -e $folderm ){
 		system("move ". $folderm ." ". $dir) == 0
@@ -121,8 +127,9 @@ foreach my $file1 (@files) {
 	 
 	 
 	 ### Control aligment to create statistic
-	if ( $controlseq ne 'NA'){
+	if ( $controlseq ne 'NA'){ 
 	  my $control = catfile($localdir,"VD","databases",$controlseq);
+	  #my $control = $dir."/".$controlseq;
 
 	  my $align_parameters = $cores ne 'NA' ?  " -t $cores  " : " -t 1 ";
 	  my $samtools = catfile("$BIN_DIR","samtools"); 
@@ -138,7 +145,7 @@ foreach my $file1 (@files) {
 		
 		} 
 		my $controout = '';
-		#$controout = $controout . "Control sequence length\tControl sequence coverage\tDepth\tMapped reads\n";
+		$controout = $controout . "File\tControl sequence length\tControl sequence coverage\tDepth\tNorm deph\tNorm deph kb\tMapped reads to control\n";
 		if (-s "$file.pileup" && -s "$control.fai"){	
 			my $num=0; my $den=0;
 			open my $fh, '<', "$file.pileup" or warn "couldn't open: $!";
@@ -153,10 +160,13 @@ foreach my $file1 (@files) {
 				my @G = split;
 				$size=$G[1];
 			}
+			$controout = $controout . "$file1\t";
 			$controout = $controout . "Control sequence length: ". $size;
 			$controout = $controout . "\tControl sequence coverage: ". sprintf("%.2f",($den/$size*100)) . "%";
 			my $depth=$num/$den;
 			$controout = $controout . "\tDepth: ". sprintf("%.2f",$depth);
+			$controout = $controout . "\tNorm deph: ". $depth/1000000;
+			$controout = $controout . "\tNorm deph kb: ". $depth/$size;
 		}
 		
 		if (-s "$file.stats.txt"){
@@ -169,9 +179,10 @@ foreach my $file1 (@files) {
 			}
 		}
 		if ($controout ne ""){
+			#my $cresult = "$dir/control.1html";
 			my $cresult = "$dir\\control.1html";
 			open (my $fh2, '>>', $cresult) or warn "could not open file";
-			print $fh2 "$file1\t$controout";
+			print $fh2 $controout;
 			close $fh2;
 		}
 		
@@ -179,7 +190,7 @@ foreach my $file1 (@files) {
 		if ( -e "$file.bam"){ unlink "$file.bam"};
 		if ( -e "$file.sorted.bam"){ unlink "$file.sorted.bam"};
 		#if ( -e "$file.stats.txt"){ unlink "$file.stats.txt"};
-		if ( -e "$file.pileup"){ unlink "$file.pileup"};
+		#if ( -e "$file.pileup"){ unlink "$file.pileup"};
 		if ( -e catfile("$TEMP_DIR","bwa.log")){ unlink catfile("$TEMP_DIR","bwa.log")};
 		if ( -e catfile("$TEMP_DIR","samtools.log")){ unlink catfile("$TEMP_DIR","samtools.log")};
 		if ( -e catfile("$TEMP_DIR","bwa.sai")){ unlink catfile("$TEMP_DIR","bwa.sai")};
@@ -192,4 +203,29 @@ foreach my $file1 (@files) {
 
 }
 closedir(DIR); 
+
+sub format_spike {
+	my %count;
+	my $file = shift or die "Usage: $0 FILE\n";
+	open my $fh, '<', $file or die "Could not open '$file' $!";
+	while (my $line = <$fh>) {
+	    chomp $line;
+	    my @str = split /\s+/, $line;
+	        $count{$str[2]}++;
+	}
+	
+	my $spikef ='';
+	my $name = $file;
+	$name =~ s/\.spike\.txt//;
+
+	open my $fh1, '>', "$name.spikeSum.txt" or warn "couldn't open: $!";
+
+	foreach my $str (sort keys %count) {
+	    $spikef = $spikef . basename($name) ."\t".$str."\t".($count{$str}/1000000) . "\t".($count{$str}) . "\n"; 
+	    #$spikef . "%s\t%s\t%s\n", $name, $str, $count{$str};
+	}
+	print $fh1 $spikef;
+
+}
+
 
