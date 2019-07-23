@@ -10,15 +10,15 @@
   </div>
     <a href="reference.html"> Host reference (optional)</a>
   <a href="control.html"> Control virus (optional)</a>
-  <a href="vd_analysis.html">Analysis</a>
-  <a href="results.html">Results</a>
+  <a href="vd_analysis.html"> Analysis</a>
+  <a onclick="gui.Shell.showItemInFolder(path.join(process.cwd(),'results'))">Results</a>
   <button class="dropdown-btn">About VDW
     <i class="fa fa-caret-down"></i>
   </button>
   <div class="dropdown-container">
   <a href="about.html">About/citation</a>
-  <a href="results.html">User manual</a>
-  <a href="updates.html">Check for updates</a>
+  <a onclick="gui.Shell.openItem('VDW_manual.pdf')">User manual</a>
+  <a href="http://potpathodiv.org/vd_download.html" target="_blank">Check for updates</a>
   <a href="contact.html">Contact us</a>
   </div>
 </div>
@@ -37,4 +37,6 @@
       }
     });
   }
+  var path = require("path");
+  var gui = require('nw.gui');
 </script>
