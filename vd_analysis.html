@@ -77,14 +77,14 @@
       content.style.maxHeight = content.scrollHeight + "px";
     } 
   };
-
+	document.getElementById("outputtext").style.visibility="hidden";
   </script>
 
   <div id="Menu"></div>
 
 
 <!-- Use any element to open the sidenav -->
-  <span onclick="openNav()">Menu</span>
+  <span onclick="openNav()" style="color: chartreuse;background-color: black;"><B>&nbsp;&#9776;&nbsp;Menu&nbsp;&nbsp;</B> </span>
   <h4 align="center">Analysis</h4>
   <div id="main">
     <!-- <div class="container" id="container"> -->
@@ -143,6 +143,8 @@
 
         <input type="submit" id="run" value="Run" onclick="run_VD('#fileDialog')">
 		<label id="running"></label>
+		<textarea id="outputtext" style="height: 150px;overflow-y:scroll" readonly></textarea>
+		
     </div>
 
 	</div>

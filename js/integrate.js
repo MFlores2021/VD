@@ -61,6 +61,10 @@
 				document.getElementById("container").style.display='none';
 
 			});
+			document.getElementById("outputtext").style.visibility="visible";
+			analysis.stdout.on('data', function(data) {
+				 document.getElementById("outputtext").value += data.toString();
+			});
 		}
 	}
 }

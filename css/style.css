@@ -22,6 +22,7 @@ body {
   overflow-x: hidden; /* Disable horizontal scroll */
   padding-top: 60px; /* Place content 60px from the top */
   transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+
 }
 
 /* The navigation menu links */
@@ -39,18 +40,21 @@ body {
   color: #f1f1f1;
 }
 
+.dropdown-btn:hover {
+  color: #f1f1f1;
+}
+
 /* Position and style the close button (top right corner) */
 .sidenav .closebtn {
   position: absolute;
   top: 0;
   right: 25px;
-  font-size: 36px;
+  font-size: 30px;
   margin-left: 50px;
 }
 .sidenav a, .dropdown-btn {
   padding: 6px 8px 6px 16px;
   text-decoration: none;
-  font-size: 20px;
   color: #818181;
   display: block;
   border: none;
@@ -59,6 +63,8 @@ body {
   text-align: left;
   cursor: pointer;
   outline: none;
+  font-family: "Verdana";
+  font-size:17px;
 }
 
 .active {
@@ -86,7 +92,7 @@ body {
 /* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
 @media screen and (max-height: 600px) {
   .sidenav {padding-top: 20px;}
-  .sidenav a {font-size: 20px;}
+  .sidenav a {font-size: 17px;}
 }
 
 /* Style inputs with type="text", select elements and textareas */

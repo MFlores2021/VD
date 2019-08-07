@@ -42,6 +42,8 @@ if ( -e catfile($localdir,"VD","databases","vrl_*ann")){ unlink catfile($localdi
 if ( -e catfile($localdir,"VD","databases","vrl_*pac")){ unlink catfile($localdir,"VD","databases","vrl_*pac")};
 
 
+### Geting fastq files
+
 opendir(DIR, $dir) or die $!;
 
 my @files 
@@ -52,11 +54,31 @@ my @files
 
 if ($controlfile ne 'NA'){
 	if ( !grep( /^$controlfile$/, @files ) ) {
-		print "Control file not specifyor incorrect.";
-	  die;
+		print "Control file name not provided or incorrect.";
 	} 
 }
 
+### Save options in a file.
+open my $writef, '>', catfile($dir,"running_options.txt") or warn "couldn't open: $!";
+
+my $logoptions = "Options for runnign VDW:\n" .
+	"========================\n" .
+	"Results are in folder: " . $dir  . "\n" .
+	"Files: ". join(",",@files) . "\n" .
+	"Spike in sequences: " . $spike  . "\n" .
+	"Adaptor for trimming: " . $adaptor . "\n" .
+	"Minimun length: " . $length . "\n" .
+	"Database: " . $database            . "\n" .
+	"Host reference: ".  $host    . "\n" .
+	"Control sequence file: " . $controlseq  . "\n" .
+	"Control sample file name: " . $controlfile  . "\n" .
+	"Additional parameters: " . $add_parameters . "\n" .
+	"Number of cores: " . $cores  . "\n" ;
+	
+print $writef $logoptions;
+
+
+### Adding path to files
 my $stringFile = join " $dir\\", @files; 
 
 ### Trimming
@@ -555,16 +577,16 @@ sub graph_cumulative{
 		title           => "Cleanning statistics",
 		cumulate		=> 1,
 		transparent     => 0,
-		bar_spacing=>50,
-		fgclr        => 'black',
-        boxclr       => 'white',
-		box_axis	=>0,
+		bar_spacing		=>50,
+		fgclr        	=> 'black',
+        boxclr       	=> 'white',
+		box_axis		=>0,
 		x_label_position=>.5,
-		b_margin=>10,
-		t_margin=>10,
-		l_margin=>10,
-		r_margin=>10,
-        accentclr    => 'white',
+		b_margin		=>10,
+		t_margin		=>10,
+		l_margin		=>10,
+		r_margin		=>10,
+        accentclr    	=> 'white',
 	) or die $graph->error;
   
 	$graph->set_legend( qw(3Punmatch 3Pnull baseN short cleaned));
