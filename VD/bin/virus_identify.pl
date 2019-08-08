@@ -705,7 +705,7 @@ sub get_contig_mapped_depth
 	# Util::process_cmd("$BIN_DIR/bowtie --quiet $contig -v 1 -p $cpu_num -a --best --strata $format $sample -S --sam-nohead $sample.sam", $debug);
 
 	Util::process_cmd("$BIN_DIR/samtools faidx $contig");
-	Util::process_cmd("$BIN_DIR/samtools view -@ 5 -bt $contig.fai $sample.sam > $sample.bam 2>$sample.samtools.log");
+	Util::process_cmd("$BIN_DIR/samtools view -@ $cpu_num -bt $contig.fai $sample.sam > $sample.bam 2>$sample.samtools.log");
 	Util::process_cmd("$BIN_DIR/samtools sort $sample.bam -o $sample.sorted.bam 2>$sample.samtools.log");
 	Util::process_cmd("$BIN_DIR/samtools mpileup -f $contig $sample.sorted.bam > $sample.pileup 2>$sample.samtools.log"); 
 	# parse pileup file to save depth info to hash
