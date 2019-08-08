@@ -15,7 +15,7 @@
 		console.log("created folder:" + folder);
 
 		if (fs.existsSync(folder)) {
-
+			document.getElementById('outputtext').style.display = "block";
 	        unzip(folder);
 			var runperl = path.join("perlfiles","tmp.bat");
 			var cn = path.join(process.cwd(),'perl','analysis.pl ');
