@@ -326,7 +326,7 @@ foreach my $sample (@ARGV)
 		if ($data_type eq 'mRNA') {
 			my $hisat_file_type = ''; # fasta or fastq
 			$hisat_file_type = '-q' if $file_type eq 'fastq';
-			Util::process_cmd("$BIN_DIR/hisat --time -p $thread_num --un $sample.unmapped --no-unal $hisat_file_type -k 1 --mp 1,1 --rdg 0,1 --rfg 0,1 --np 1 --score-min C,-$hisat_ed,0 --ignore-quals -x $host_reference -U $sample -S $sample.sam 1> $sample.hisat.report.txt 2>&1");
+			Util::process_cmd("perl $BIN_DIR/hisat2 --time -p $thread_num --un $sample.unmapped --no-unal $hisat_file_type -k 1 --mp 1,1 --rdg 0,1 --rfg 0,1 --np 1 --score-min C,-$hisat_ed,0 --ignore-quals -x $host_reference -U $sample -S $sample.sam 1> $sample.hisat.report.txt 2>&1");
 
 			my $total_num = 0;
 			my $unmap_num = 0;
@@ -334,7 +334,8 @@ foreach my $sample (@ARGV)
 			if ($hisat_rpt =~ m/(\d+) reads; of these:/) { $total_num = $1; }
 			if ($hisat_rpt =~ m/\s+(\d+) .*aligned 0 times/) { $unmap_num = $1; }
 			my $mapped_num = $total_num - $unmap_num;
-			Util::print_user_submessage("$mapped_num reads aligned");
+			Util::print_user_submessage("Reads aligned");
+			#Util::print_user_submessage("$mapped_num reads aligned");
 		} else {
 			align::align_to_reference($align_program, $sample, $host_reference, "$sample.sam", $align_parameters, 1, $TEMP_DIR, $debug);
 			align::generate_unmapped_reads("$sample.sam", "$sample.unmapped");

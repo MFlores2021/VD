@@ -99,8 +99,8 @@ foreach my $file1 (@files) {
     my $fqcdir = catfile($localdir,'VD', 'bin','fastQC');
     my $commfqc = "java -Xmx250m -classpath " . $fqcdir . ";" . catfile($fqcdir,"sam-1.103.jar") . ";" . catfile($fqcdir,"jbzip2-0.9.jar") . " uk.ac.babraham.FastQC.FastQCApplication " . $file . " 2>NULL";
 	
-    system($commfqc) == 0
-        or warn "Error: $commfqc . $?";
+    # system($commfqc) == 0
+        # or warn "Error: $commfqc . $?";
 
     ### Trimming
     if($adaptor ne 'NA' && $length ne 'NA'){
@@ -295,10 +295,12 @@ sub print_summary {
 
 	opendir(DIR, $dir) or die $!;
 
-	open FILE1, "$trim" or warn;
+	#Get trimmed data
 	my %dataFile;
-
-	if (-s $trim){
+	
+	if (-e -s $trim){
+		open FILE1, "$trim" or warn;
+	
 		while (my $line1=<FILE1>) {   
 			# chomp;
 			my @field = split /\t/, $line1;  
@@ -313,26 +315,29 @@ sub print_summary {
 		}
 	}
 
-	open FILE2, "$control" or warn;
+	#Get control results
 	my %dataFile1;
 
-	if (-s $control){
-	while (my $line1=<FILE2>) {   
-	    # chomp;
-	    my @field = split /\t/, $line1;  
-		   if (length(trim($field[0])) > 0){
-		   	$dataFile1{trim($field[0])}{concov}   = trim($field[2]); 
-		   	$dataFile1{trim($field[0])}{seq}   = trim($field[4]); 
-		   	$dataFile1{trim($field[0])}{kb}   = trim($field[5]); 
-			$dataFile1{trim($field[0])}{map}   = trim($field[6]);
+	if (-e -s $control){
+	
+		open FILE2, "$control" or warn;
+		while (my $line1=<FILE2>) {   
+			# chomp;
+			my @field = split /\t/, $line1;  
+			   if (length(trim($field[0])) > 0){
+				$dataFile1{trim($field[0])}{concov}   = trim($field[2]); 
+				$dataFile1{trim($field[0])}{seq}   = trim($field[4]); 
+				$dataFile1{trim($field[0])}{kb}   = trim($field[5]); 
+				$dataFile1{trim($field[0])}{map}   = trim($field[6]);
+			}
 		}
 	}
-	}
 
-	open FILE3, "$spikeFile" or warn;
+	#Get spike in results
 	my %dataFile2;
 
-	if (-s $spikeFile){
+	if (-e -s $spikeFile){
+		open FILE3, "$spikeFile" or warn;
 		while (my $line1=<FILE3>) {   
 			# chomp;
 			my @field = split /\t/, $line1;
@@ -343,13 +348,15 @@ sub print_summary {
 		}
 	}
 
-	open FILE4, "$sRNA" or warn;
-	my $sizes = <FILE4>; 
-	my @listFq = split /\t/, $sizes;
-
+	#Get sRNA results
 	my %dataFile3;
 	
-	if (-s $sRNA){
+	if (-e -s $sRNA){
+		
+		open FILE4, "$sRNA" or warn;
+		my $sizes = <FILE4>; 
+		my @listFq = split /\t/, $sizes;
+		
 		while (my $line1=<FILE4>) {   
 			# chomp;
 			my @field = split /\t/, $line1;
@@ -369,7 +376,7 @@ sub print_summary {
 
 	### Run summary
 	## Header
-	open my $fh1, '>', catfile($dir,"Summary.txt") or warn "couldn't open: $!";
+	open my $fh1, '>', catfile($dir,"Summary.tsv") or warn "couldn't open: $!";
 	my $out = "File\t#Raw reads\t#clean reads\t21\t22\t23\t24\t";
 	foreach my $spk (@spikes) {
 		$out = $out . "Spike: ". $spk. "\t";
@@ -511,97 +518,101 @@ sub graph_spike{
 
 sub graph_size{
 	my $dir = shift;
+	
+	if (-e -s catfile($dir ,'sRNA_length.txt')){
+		open FILE , catfile($dir ,'sRNA_length.txt') or die;
+		my $line = <FILE>;
+		my @field = split /\t/, $line;
 
-	open FILE , catfile($dir ,'sRNA_length.txt') or die;
-	my $line = <FILE>;
-	my @field = split /\t/, $line;
+		my $datax =GD::Graph::Data-> new() or die;
+		$datax->read(file => catfile($dir ,'sRNA_length.txt'), delimiter => '\t');
 
-	my $datax =GD::Graph::Data-> new() or die;
-	$datax->read(file => catfile($dir ,'sRNA_length.txt'), delimiter => '\t');
+		foreach my $i (1..$datax->num_sets()){
+			my $data = $datax->copy();
+			$data -> wanted($i);
+			my $graph = GD::Graph::lines->new(800,640);
 
-	foreach my $i (1..$datax->num_sets()){
-		my $data = $datax->copy();
-		$data -> wanted($i);
-		my $graph = GD::Graph::lines->new(800,640);
+			$graph->set(
+				x_label         => 'Read size',
+				y_label         => 'Frequency',
+				x_labels_vertical => 1,
+				title           => $field[$i],
+				transparent     => 0,
+				fgclr        => 'black',
+				boxclr       => 'white',
+				box_axis	=>0,
+				x_label_position=>.5,
+				b_margin=>10,
+				t_margin=>10,
+				l_margin=>10,
+				r_margin=>10,
+				accentclr    => 'white',
+			) or die $graph->error;
+		  
+			$graph->set_legend_font(gdMediumBoldFont, 20);
+			$graph->set_title_font(gdGiantFont);
+			$graph->set_y_label_font(gdMediumBoldFont);
+			$graph->set_x_label_font(gdMediumBoldFont);
+			$graph->set_values_font(gdMediumBoldFont);
+			$graph->plot($data) or die $graph->error;
 
-		$graph->set(
-			x_label         => 'Read size',
-			y_label         => 'Frequency',
-			x_labels_vertical => 1,
-			title           => $field[$i],
-			transparent     => 0,
-			fgclr        => 'black',
-			boxclr       => 'white',
-			box_axis	=>0,
-			x_label_position=>.5,
-			b_margin=>10,
-			t_margin=>10,
-			l_margin=>10,
-			r_margin=>10,
-			accentclr    => 'white',
-		) or die $graph->error;
-	  
-		$graph->set_legend_font(gdMediumBoldFont, 20);
-		$graph->set_title_font(gdGiantFont);
-		$graph->set_y_label_font(gdMediumBoldFont);
-		$graph->set_x_label_font(gdMediumBoldFont);
-		$graph->set_values_font(gdMediumBoldFont);
-		$graph->plot($data) or die $graph->error;
-
-		my $file = catfile($dir ,trim($field[$i]).'_reads.png');
-		open(my $out, '>', $file) or die "Cannot open '$file' for write: $!";
-		binmode $out;
-		print $out $graph->gd->png;
-		close $out;
+			my $file = catfile($dir ,trim($field[$i]).'_reads.png');
+			open(my $out, '>', $file) or die "Cannot open '$file' for write: $!";
+			binmode $out;
+			print $out $graph->gd->png;
+			close $out;
+		}
 	}
 }
 
 sub graph_cumulative{
 	my $dir = shift;
-
-	open FILE , catfile($dir ,'report_sRNA_trim.txt') or die;
-	my $line = <FILE>;
-	my @field = split /\t/, $line;
-
-	my $data =GD::Graph::Data-> new() or die;
-	$data->read(file => catfile($dir ,'report_sRNA_trim.txt'), delimiter => '\t');
-
-	#my $data = $datax->copy();
-	$data -> wanted(2,3,5,6,7);
-	my $graph = GD::Graph::bars->new(800,640);
-
-	$graph->set(
-		x_label         => 'Samples',
-		y_label         => 'Frequency',
-		x_labels_vertical => 1,
-		title           => "Cleanning statistics",
-		cumulate		=> 1,
-		transparent     => 0,
-		bar_spacing		=>50,
-		fgclr        	=> 'black',
-        boxclr       	=> 'white',
-		box_axis		=>0,
-		x_label_position=>.5,
-		b_margin		=>10,
-		t_margin		=>10,
-		l_margin		=>10,
-		r_margin		=>10,
-        accentclr    	=> 'white',
-	) or die $graph->error;
-  
-	$graph->set_legend( qw(3Punmatch 3Pnull baseN short cleaned));
-	$graph->set_legend_font(gdMediumBoldFont, 20);
-	$graph->set_title_font(gdGiantFont);
-	$graph->set_y_label_font(gdMediumBoldFont);
-	$graph->set_x_label_font(gdMediumBoldFont);
-	$graph->set_values_font(gdMediumBoldFont);
 	
-	$graph->plot($data) or die $graph->error;
+	if (-e -s catfile($dir ,'report_sRNA_trim.txt')){
 
-	my $file = catfile($dir ,'Trimming_graph.png');
-	open(my $out, '>', $file) or die "Cannot open '$file' for write: $!";
-	binmode $out;
-	print $out $graph->gd->png;
-	close $out;
+		open FILE , catfile($dir ,'report_sRNA_trim.txt') or die;
+		my $line = <FILE>;
+		my @field = split /\t/, $line;
 
+		my $data =GD::Graph::Data-> new() or die;
+		$data->read(file => catfile($dir ,'report_sRNA_trim.txt'), delimiter => '\t');
+
+		#my $data = $datax->copy();
+		$data -> wanted(2,3,5,6,7);
+		my $graph = GD::Graph::bars->new(800,640);
+
+		$graph->set(
+			x_label         => 'Samples',
+			y_label         => 'Frequency',
+			x_labels_vertical => 1,
+			title           => "Cleanning statistics",
+			cumulate		=> 1,
+			transparent     => 0,
+			bar_spacing		=>50,
+			fgclr        	=> 'black',
+			boxclr       	=> 'white',
+			box_axis		=>0,
+			x_label_position=>.5,
+			b_margin		=>10,
+			t_margin		=>10,
+			l_margin		=>10,
+			r_margin		=>10,
+			accentclr    	=> 'white',
+		) or die $graph->error;
+	  
+		$graph->set_legend( qw(3Punmatch 3Pnull baseN short cleaned));
+		$graph->set_legend_font(gdMediumBoldFont, 20);
+		$graph->set_title_font(gdGiantFont);
+		$graph->set_y_label_font(gdMediumBoldFont);
+		$graph->set_x_label_font(gdMediumBoldFont);
+		$graph->set_values_font(gdMediumBoldFont);
+		
+		$graph->plot($data) or die $graph->error;
+
+		my $file = catfile($dir ,'Trimming_graph.png');
+		open(my $out, '>', $file) or die "Cannot open '$file' for write: $!";
+		binmode $out;
+		print $out $graph->gd->png;
+		close $out;
+	}
 }
