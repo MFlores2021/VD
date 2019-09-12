@@ -38,10 +38,7 @@
               // document.getElementById("subject").innerHTML += stdout +"\n" + stderr +"\n";
               if(error!=null){
                 document.getElementById("running").innerHTML = 'Something went wrong while copying files.' + error;
-              } else{
-                console.log("entra pfolder");
-                
-              }
+              } 
             }); 
         }
       };  
@@ -52,6 +49,7 @@
 
     const path = require('path');
     var folder = path.join(process.cwd(),'VD',dir);
+	var hisat = path.join(process.cwd(),'VD','bin','hisat2-build-l.exe');
     var files = $(name)[0].files;
     var fs = require('fs');
     var exec = require('child_process').exec; 
@@ -60,7 +58,9 @@
       document.getElementById("subject").innerHTML = 'Folder ' +dir+ ' does not exists';
     } else{
         for (var i = 0; i < files.length; ++i){
-        exec("copy " + files[i].path + " "+ path.join(folder,"host_"+files[i].name), function(error,stdout,stderr){
+			var refPath = path.join(folder,"host_"+files[i].name); 
+			var command = "copy " + files[i].path + " "+ refPath + " && "+hisat + " "+ refPath + " " + refPath; console.log(command);
+        exec(command, function(error,stdout,stderr){
           if(error!=null){
             document.getElementById("running").innerHTML = "Error:" + error;
             //return;

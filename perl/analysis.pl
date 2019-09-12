@@ -59,8 +59,8 @@ if ($controlfile ne 'NA'){
 }
 
 ### Save options in a file.
-open my $writef, '>', catfile($dir,"running_options.txt") or warn "couldn't open: $!";
-
+open my $writef, '>>', catfile($dir,"running_options.txt") or warn "couldn't open: $!";
+my $datestring = localtime();
 my $logoptions = "Options for runnign VDW:\n" .
 	"========================\n" .
 	"Results are in folder: " . $dir  . "\n" .
@@ -73,7 +73,8 @@ my $logoptions = "Options for runnign VDW:\n" .
 	"Control sequence file: " . $controlseq  . "\n" .
 	"Control sample file name: " . $controlfile  . "\n" .
 	"Additional parameters: " . $add_parameters . "\n" .
-	"Number of cores: " . $cores  . "\n" ;
+	"Number of cores: " . $cores  . "\n\n".
+	"Start: ". $datestring . "\n" ;
 	
 print $writef $logoptions;
 
@@ -237,7 +238,12 @@ foreach my $file1 (@files) {
 	push @array_files , $file;
 }
 
-merge_spike_files($dir);
+my $datestringend = localtime();
+print $writef "End: $datestringend \n" ;
+
+if($spike ne 'NA'){
+	merge_spike_files($dir);
+}
 
 print_summary($dir,"report_sRNA_trim.txt","control.tsv","spikeSummary.txt", "sRNA_length.txt",$spike,$controlfile, @array_files);
 

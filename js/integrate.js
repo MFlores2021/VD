@@ -8,7 +8,7 @@
 
 	if (validation){
 		document.getElementById("run").style.display='none';
-		document.getElementById("running").innerHTML = "Running ...";
+		document.getElementById("running").innerHTML = "Running... Do not close the window until analysis is done.";
 		
 		upload(name);  
 		var folder = document.getElementById("ruta").value;

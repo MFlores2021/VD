@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Quality control</title>
+  <title>Adding control</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script> 
    <script src="https://d3js.org/d3.v5.min.js"></script>
     <link rel="stylesheet" type="text/css" href="css/style.css">
@@ -18,9 +18,11 @@
   <div id="Menu"></div>
 <!-- Use any element to open the sidenav -->
   <span onclick="openNav()" style="color: chartreuse;background-color: black;"><B>&nbsp;&#9776;&nbsp;Menu&nbsp;&nbsp;</B> </span>
+  <h3 align="center">Control sequence (optional)</h3>
   <div id="main">
     <div class="container" id="container">    
       <form>
+	  <p>Cross sample contamination can be a problem when running several indexed samples in a same lane of a flowcell. To control for cross-sample contamination and adjust the default threshold of average read depth and coverage for virus detection by VDW, one can include a control sample containing a known virus at high concentration and unrelated to the sample under investigation. If included VWD will provide a separate output on genome coverage and sequencing depth of the control over all samples selected for the run.</p>
       <label for="upload">Upload control sequence (fasta file)</label><br><br>
       <input id="fileDialog" type="file" accept=".fasta,.fa" nwworkingdir="C:\"  /><br><br>
       <input type="submit"  value="Submit" onclick="upload_control('#fileDialog','databases')"><br><br><br>

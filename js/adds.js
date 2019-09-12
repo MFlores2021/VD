@@ -12,7 +12,7 @@ function update_db(orga,filt, vers){
     var commrun = "perl " + path.join(process.cwd(),'VD','bin','download.pl '+ org1 + " " + filter+ " " + version);
     var info = "vrl_genbank_info.gz";
     var ids = "vrl_idmapping.gz";
-	document.getElementById("running").innerHTML = "Downloading ...";
+	document.getElementById("running").innerHTML = "Downloading... Do not close the window until it is done.";
 	document.getElementById("Update").style.display='none';
 
     create_analysisbat(runperl, commrun);
