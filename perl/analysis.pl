@@ -179,7 +179,7 @@ foreach my $file1 (@files) {
 		
 		} 
 		my $controout = '';
-		$controout = $controout . "File\tControl sequence length\tControl sequence coverage\tDepth\tNorm deph\tNorm deph kb\tMapped reads to control\n";
+		$controout = $controout . "File\tControl sequence length\tControl sequence coverage\tDepth\tNorm deph\tNorm deph kb\t#Mapped reads to control\t%Mapped reads to control\n";
 		
 		if (-s "$file.pileup" && -s "$control.fai"){	
 			my $num=0; my $den=0;
@@ -195,22 +195,40 @@ foreach my $file1 (@files) {
 				my @G = split;
 				$size=$G[1];
 			}
+			#File name
 			$controout = $controout . "$file1\t";
+			#Control sequence length
 			$controout = $controout .  $size;
+			#Control sequence coverage
 			$controout = $controout . "\t". sprintf("%.2f",($den/$size*100)) . "%";
 			my $depth=$num/$den;
+			#Depth
 			$controout = $controout . "\t". sprintf("%.2f",$depth);
-			$controout = $controout . "\t". $depth/1000000;
+			#Norm deph
+			$controout = $controout . "\t". $depth;
+			#Norm deph kb
 			$controout = $controout . "\t". $depth/$size;
 		}
 		
 		if (-s "$file.stats.txt"){
 			open my $fh, '<', "$file.stats.txt" or warn "couldn't open: $!";
 			while (my $line = <$fh>){
-				if(index $line, 'mapped (', >=0){
-					$line =~ m/(\d+.\d+\%)/; 
-					$controout = $controout . "\t".$1."\n";
+				if(index $line, 'total (QC', >=0){
+					$line =~ m/(\d+ )/;
+					##Mapped reads to control
+					$controout = $controout . "\t" . $1;
 				}
+				if(index $line, 'mapped (', >=0){
+					$line =~ m/(\d+ )/;
+					##Mapped reads to control
+					$controout = $controout . "\t".$1;
+				}
+				if(index $line, 'mapped (', >=0){
+					$line =~ m/(\d+.\d+\%)/;
+					#%Mapped reads to control
+					$controout = $controout . "\t".$1. "\n";
+				}
+				
 			}
 		}
 		if ($controout ne ""){
@@ -282,7 +300,7 @@ sub format_spike {
 	open my $fh1, '>', "$name.spikeSum.txt" or warn "couldn't open: $!";
 
 	foreach my $str (sort keys %count) {
-	    $spikef = $spikef . basename($name) ."\t".$str."\t".($count{$str}/1000000) . "\t".($count{$str}) . "\n"; 
+	    $spikef = $spikef . basename($name) ."\t".$str."\t".($count{$str}) . "\n"; 
 	}
 	print $fh1 $spikef;
 
@@ -329,12 +347,20 @@ sub print_summary {
 		open FILE2, "$control" or warn;
 		while (my $line1=<FILE2>) {   
 			# chomp;
-			my @field = split /\t/, $line1;  
+			my @field = split /\t/, $line1;
 			   if (length(trim($field[0])) > 0){
+			   	#Control sequence coverage
 				$dataFile1{trim($field[0])}{concov}   = trim($field[2]); 
+				#Norm deph
 				$dataFile1{trim($field[0])}{seq}   = trim($field[4]); 
+				#Norm deph kb
 				$dataFile1{trim($field[0])}{kb}   = trim($field[5]); 
-				$dataFile1{trim($field[0])}{map}   = trim($field[6]);
+				##Mapped reads to control
+				$dataFile1{trim($field[0])}{map}   = trim($field[7]);
+				#%Mapped reads to control
+				$dataFile1{trim($field[0])}{permap}   = trim($field[8]);
+				##Raw reads
+				$dataFile1{trim($field[0])}{raw}   = trim($field[6]);
 			}
 		}
 	}
@@ -385,12 +411,16 @@ sub print_summary {
 	open my $fh1, '>', catfile($dir,"Summary.tsv") or warn "couldn't open: $!";
 	my $out = "File\t#Raw reads\t#clean reads\t21\t22\t23\t24\t";
 	foreach my $spk (@spikes) {
-		$out = $out . "Spike: ". $spk. "\t";
+		$out = $out . "Norm. Spike: ". $spk. "\t"."# Spikes: ". $spk. "\t";
 	}
-	$out = $out ."Control coverage\tNormalized control deph\tNormalized depth/kb control coverage\t%Mapped to control\n";
+	$out = $out ."Control coverage\tNormalized control deph\tNormalized depth/kb control coverage\t#Mapped to control\t%Mapped to control\n";
 	
 	## Body
 	foreach my $file (@array_files) { 
+		my $clean =1;
+		if($dataFile1{$file}{raw}){
+			$clean = $dataFile1{$file}{raw};
+		}
 
 		$file = basename($file);
 		if ($controlfile ne 'NA' && $controlfile eq $file){
@@ -402,6 +432,8 @@ sub print_summary {
 		# raw and clean
 		if($dataFile{$file}{raw}){ 
 			$out = $out . $dataFile{$file}{raw}."\t".$dataFile{$file}{clean}."\t";
+			$clean = $dataFile{$file}{clean};
+			if ($clean == 0) { $clean = $dataFile1{$file}{raw} };
 		} else{
 			$out = $out . "NA\tNA\t";
 		}
@@ -418,17 +450,18 @@ sub print_summary {
 		#spikes
 		foreach my $spk (@spikes) {
 			if($dataFile2{$file}{$spk}){
-				$out = $out .$dataFile2{$file}{$spk}."\t";
+				$out = $out . ($dataFile2{$file}{$spk}/$clean*1000000) . "\t" . ($dataFile2{$file}{$spk}) ."\t";
 			} else {
-				$out = $out . "NA\t";
+				$out = $out . "NA\tNA\t";
 			}
 		}
 
 		#control
 		if($dataFile1{$file}{concov}){ 
-			$out = $out . $dataFile1{$file}{concov}."\t".$dataFile1{$file}{seq}."\t".$dataFile1{$file}{kb}."\t".$dataFile1{$file}{map}."\t";
+			#Control sequence coverage,Norm deph,Norm deph kb,#Mapped reads to control,%Mapped reads to control
+			$out = $out . $dataFile1{$file}{concov}."\t". ($dataFile1{$file}{seq}/$clean*1000000) ."\t".$dataFile1{$file}{kb}. "\t". $dataFile1{$file}{map}. "\t". $dataFile1{$file}{permap}."\t";
 		} else {
-			$out = $out . "NA\tNA\tNA\tNA\t";
+			$out = $out . "NA\tNA\tNA\tNA\tNA\t";
 		}
 
 		$out = $out ."\n";
