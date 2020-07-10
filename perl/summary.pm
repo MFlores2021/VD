@@ -39,6 +39,7 @@ sub create_html {
 			content:"\e080";
 		}
 		</style>
+		<h3>Results</h3><br>
   ';
 	
 	foreach my $file (@files){
@@ -66,7 +67,11 @@ sub _print_summaries {
 	my $fh = shift;
 	
 	print $fh "Trimming graph";
-	print $fh "<img src='Trimming_graph.png' />";
+	print $fh "<img src='Trimming_graph.png' /><br>";
+	print $fh "Spike in graph";
+	print $fh "<img src='spike_sum.png' /><br>";
+	print $fh "Norm spike in graph";
+	print $fh "<img src='norm_spike_sum.png' />";
 }
 
 sub _print_detail {
@@ -74,6 +79,7 @@ sub _print_detail {
 	my $fh = shift;
 	my $counter = shift;
 	
+	my $org_file = $file;
 	$file =~ s/.fastq//;
 	$file =~ s/.fq//;
 
@@ -86,8 +92,9 @@ sub _print_detail {
 		  </h4>
 		</div>
 		<div id="h-'. $counter . '" class="panel-collapse collapse">
-		  <div class="panel-body">Panel Body
-		  <img src="'. $file . '.clean_reads.png" />
+		  <div class="panel-body">Clean reads
+		  <img src="'. $file . '.clean_reads.png" /><br>
+		  <embed type="text/html" src="result_' . $org_file . '/blastn.html" width="500" height="500">
 		  </div>
 		</div>
 	  </div>
