@@ -274,14 +274,12 @@ my $logoptions = "Options for runnign VDW:\n" .
 
 # # Print
 # print_summary($dir,"report_sRNA_trim.txt","control.tsv","spikeSummary.txt", "sRNA_length.txt",$spike,$controlfile, @array_files);
-@files = ('adapt_180905_SNK268_A_L002_AMRW-22-10_R1.fastq','control_190206_SNK268_A_L004_AMRW-32-48_R1.fq','spike_190517_SNK268_B_L003_AMRW-37-7_R1.fastq');
 
 if ($spike ne 'NA') {
-	graph_spiking_sum($dir,$spike,\@files);
+	graph_spiking_sum($dir,$spike);
 }
-#print Dumper \@files;
 # graph_size($dir);
-graph_cumulative_clean_sum($dir,\@files);
+graph_cumulative_clean_sum($dir);
 create_html($dir,$spike,@files);
 
 # # Delete partial results

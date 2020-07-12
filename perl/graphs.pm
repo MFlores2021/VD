@@ -15,10 +15,8 @@ use Scalar::Util qw(looks_like_number);
 sub graph_spiking_sum {
 	my $dir = shift;
 	my $spike = shift;
-	my $files = shift;
 	
 	my $sum_file = catfile($dir ,'Summary.tsv');
-	my @files = @$files;
 	
 	my @spikes = split /,/, $spike;
 	my $spikes = scalar(@spikes);
@@ -46,21 +44,19 @@ sub graph_spiking_sum {
 			
 			my @line = split(/\t/,$line);
 			
-			#if ( $line =~ /^File/ ||  grep( /^$line[0]$/, @files )){
-				push @fastq, $line[0] if (!($line =~ /^File/));
-				foreach(@spike_col){
-					$line[$_] =~ s/#\ Spikes:\ //g;
-					push @value, $line[$_];
-					if(looks_like_number($line[$_]) && $max < $line[$_]) { $max = $line[$_]; }
-				}
-				foreach(@spike_col_n){
-					$line[$_] =~ s/Norm.\ Spike:\ //g;
-					push @value_n, $line[$_];
-					if(looks_like_number($line[$_]) && $max_n < $line[$_]) { $max_n = $line[$_]; }
-				}
-				push @data, [@value];
-				push @data_n, [@value_n];
-			#}
+			push @fastq, $line[0] if (!($line =~ /^File/));
+			foreach(@spike_col){
+				$line[$_] =~ s/#\ Spikes:\ //g;
+				push @value, $line[$_];
+				if(looks_like_number($line[$_]) && $max < $line[$_]) { $max = $line[$_]; }
+			}
+			foreach(@spike_col_n){
+				$line[$_] =~ s/Norm.\ Spike:\ //g;
+				push @value_n, $line[$_];
+				if(looks_like_number($line[$_]) && $max_n < $line[$_]) { $max_n = $line[$_]; }
+			}
+			push @data, [@value];
+			push @data_n, [@value_n];
 		}
 	
 		my $result = _draw_lines(\@data,$dir, 'Spikes summary','spike_sum.png',\@fastq,$max);
@@ -71,9 +67,7 @@ sub graph_spiking_sum {
 
 sub graph_cumulative_clean_sum{
 	my $dir = shift;
-	my $files = shift;
-	print Dumper $files;
-	my @files = @$files;
+
 	my $sum_file = catfile($dir ,'report_sRNA_trim.txt');
 	
 	if (-e -s catfile($dir ,'report_sRNA_trim.txt')){
@@ -90,13 +84,11 @@ sub graph_cumulative_clean_sum{
 			my @line = split(/\t/,$line);
 			my @value;
 			
-			#if ( $line =~ /^#sRNA/ ||  grep( /^$line[0]$/, @files )){
-				foreach(@col){
-					push @value, $line[$_];
-					if(looks_like_number($line[$_]) && $max < $line[$_]) { $max = $line[$_]; }
-				}
-				push @data, [@value];
-			#}
+			foreach(@col){
+				push @value, $line[$_];
+				if(looks_like_number($line[$_]) && $max < $line[$_]) { $max = $line[$_]; }
+			}
+			push @data, [@value];
 		}
 		for my $row (0..@data-2){
 			for my $col (0..@{$data[$row]}-1){
