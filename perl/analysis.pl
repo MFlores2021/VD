@@ -12,10 +12,11 @@ use GD::Graph::Data;
 use GD::Graph::lines;
 use Cwd qw(getcwd);
 use Data::Dumper;
-use lib catfile("VD","bin");
+use lib catfile("..","VD","bin");
 use Util;
 use align;
 use summary;
+use graphs;
 
 my $localdir = getcwd;
 
@@ -273,9 +274,14 @@ my $logoptions = "Options for runnign VDW:\n" .
 
 # # Print
 # print_summary($dir,"report_sRNA_trim.txt","control.tsv","spikeSummary.txt", "sRNA_length.txt",$spike,$controlfile, @array_files);
-# graph_spike($dir);
+@files = ('adapt_180905_SNK268_A_L002_AMRW-22-10_R1.fastq','control_190206_SNK268_A_L004_AMRW-32-48_R1.fq','spike_190517_SNK268_B_L003_AMRW-37-7_R1.fastq');
+
+if ($spike ne 'NA') {
+	graph_spiking_sum($dir,$spike,\@files);
+}
+#print Dumper \@files;
 # graph_size($dir);
-# graph_cumulative_clean_reads($dir);
+graph_cumulative_clean_sum($dir,\@files);
 create_html($dir,$spike,@files);
 
 # # Delete partial results
@@ -495,7 +501,7 @@ sub merge_spike_files{
 	#closedir(DIR);
 }
 
-sub graph_spike{
+sub graph_spikex{
 	my $dir = shift;
 	
 	open FILE4 , catfile($dir ,'Summary.tsv') or die;
@@ -613,7 +619,7 @@ sub graph_size{
 	}
 }
 
-sub graph_cumulative_clean_reads{
+sub graph_cumulative_clean_readsx{
 	my $dir = shift;
 	
 	if (-e -s catfile($dir ,'report_sRNA_trim.txt')){
