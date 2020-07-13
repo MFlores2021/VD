@@ -22,9 +22,9 @@ sub create_html {
 			<title>VDW</title>
 			<meta charset="utf-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1">
-			<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+			<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
 			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-			<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 			<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
 			<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
 			<script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
@@ -41,33 +41,60 @@ sub create_html {
 			} );
 		</script>
 		<style type="text/css">
-		@media all {
-			.lightbox { display: none; }
-		}
-		.panel-heading a:after {
-		content:"\e114";
-		float: right;
-		color: grey;
-		}
-		.panel-heading a.collapsed:after {
-			content:"\e080";
-		}
+			@media all {
+				.lightbox { display: none; }
+			}
+			.panel-heading a:after {
+			content:"\e114";
+			float: right;
+			color: grey;
+			}
+			.panel-heading a.collapsed:after {
+				content:"\e080";
+			}
 		</style>
-		<h3>Results</h3><br>
+
+		<header>
+		</header>
+		<main role="main">
+			<div class="container marketing">
+		       
   ';
 	
 	foreach my $file (@files){
 		_print_name($file,$fh);
 	}
 	_print_table($fh,$sum_file);
-	
-	_print_summaries($dir,$fh);
+	_print_cleaning_summaries($dir,$fh);
+	_print_spike_summaries($dir,$fh);
 	
 	my $counter = 1;
-	foreach my $file (@files){
-		_print_detail($file,$fh,$counter);$counter++;
+	if (scalar(@files)>0){
+		my $detail = '<div class="row featurette">
+			          <div class="col-md-7">
+			            <h2 class="featurette-heading">Samples detail</h2>
+			            <p class="lead">.</p>
+			          </div><div class="col-md-5">';
+		print $fh $detail;
+
+		foreach my $file (@files){
+			_print_detail($file,$fh,$counter);$counter++;
+		}
+
+		$detail = '</div>
+		      </div>
+		      <hr class="featurette-divider">';
+		print $fh $detail;
 	}
-	
+
+	print $fh '<footer class="container">
+	        <p class="float-right"><a href="#">Back to top</a></p>
+	        <p>&copy; 2020 VDW &middot; <a href="#">Privacy</a> &middot; <a href="#">Terms</a></p>
+	      </footer>
+	    </div></main>
+	    </body>
+	</html>';
+
 	return 1;
 }
 
@@ -80,9 +107,11 @@ sub _print_name {
 sub _print_table {
 	my $fh = shift;
 	my $sum_file = shift;
-	
-	my $table = '<div class="row"><div class="col-lg-12">';
 
+	my $table = '<div class="row" id="summary">
+		          <h2 class="featurette-heading">Summary report</h2>
+		          <p class="lead">.</p>';
+	
 	$table .= '<table class="table table-striped table-bordered table-hover" width="100%" id="sumTable" style="width:100%">';
 
 	open(FILE,$sum_file) || die "WRONG FILE";
@@ -104,20 +133,51 @@ sub _print_table {
 			$table .= '</tr>';
 		}
 	$table .= '</table>';
-	$table .= '</div></div>';
+	$table .= '</div>
+		       <hr class="featurette-divider">';
 	print $fh $table . "\n";
 
 }
-sub _print_summaries {
+
+sub _print_cleaning_summaries {
 	my $dir = shift;
 	my $fh = shift;
 	
-	print $fh "Trimming graph";
-	print $fh "<img src='Trimming_graph.png' /><br>";
-	print $fh "Spike in graph";
-	print $fh "<img src='spike_sum.png' /><br>";
-	print $fh "Norm spike in graph";
-	print $fh "<img src='norm_spike_sum.png' />";
+	my $figures = '<div class="row featurette">
+		          <div class="col-md-7">
+		            <h2 class="featurette-heading">Cleaning summary</h2>
+		            <p class="lead">.</p>
+		          </div>';
+
+	$figures .= '<div class="col-md-5">
+				<img class="featurette-image img-fluid mx-auto" src="Trimming_graph.png" alt="Generic placeholder image">
+		       </div>
+		      </div>
+		      <hr class="featurette-divider">';
+
+	print $fh $figures;
+}
+
+sub _print_spike_summaries {
+	my $dir = shift;
+	my $fh = shift;
+	
+	my $figures = '<div class="row featurette">
+		          <div class="col-md-7">
+		            <h2 class="featurette-heading">Cleaning summary</h2>
+		            <p class="lead">.</p>
+		          </div>';
+
+    $figures .= '<div class="col-md-5">
+    			<img class="featurette-image img-fluid mx-auto" src="spike_sum.png" alt="Generic placeholder image">
+		       </div>';
+	$figures .= '<div class="col-md-5">
+				<img class="featurette-image img-fluid mx-auto" src="norm_spike_sum.png" alt="Generic placeholder image">
+		       </div>
+		      </div>
+		      <hr class="featurette-divider">';
+
+	print $fh $figures;
 }
 
 sub _print_detail {
