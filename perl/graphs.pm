@@ -76,7 +76,8 @@ sub graph_cumulative_clean_sum{
 		my (@data,@data_n);
 		my $max = 0;
 		my $max_n = 0;
-		my @col = (0,2,3,5,6,7);
+		my @col = (0,7,5,6,3,2);
+		my @col_names = ("cleaned reads", "contains N", "short reads", "adapter only","no adapter");
 				
 		while(my $line = <FILE>){
 			chomp $line;
@@ -95,9 +96,8 @@ sub graph_cumulative_clean_sum{
 				$data_n[$col][$row] = $data[$row+1][$col];
 			}
 		}
-		my $x_axes = $data[0];
-		splice @$x_axes, 0,1;
-		my $result = _draw_bars(\@data_n,$dir,'Cleanning statistics','trimming_graph.png',$data[0]);
+
+		my $result = _draw_bars(\@data_n,$dir,'Cleanning statistics','trimming_graph.png',\@col_names);
 
 	}
 }
@@ -151,14 +151,14 @@ sub _draw_lines {
 }
 
 sub _draw_bars {
-	my $data = shift;
+	my $table = shift;
 	my $dir = shift;
 	my $title = shift;
 	my $out_name = shift;
 	my $x = shift;
 	my @x_axes = @$x;
 
-	my $graph = GD::Graph::bars->new(400,600);
+	my $graph = GD::Graph::bars->new(500,600);
 
 	$graph->set(
 			y_label         => 'Frequency',
@@ -176,6 +176,8 @@ sub _draw_bars {
 			l_margin		=>10,
 			r_margin		=>10,
 			accentclr    	=> 'white',
+			dclrs			=> ['green','lblue','lyellow', 'orange','lred'],
+
 	) or die $graph->error;
 	
 	$graph->set_legend(@x_axes);
@@ -184,7 +186,7 @@ sub _draw_bars {
 	$graph->set_y_label_font('gdMediumBoldFont');
 	$graph->set_x_label_font('gdMediumBoldFont');
 	$graph->set_values_font('gdMediumBoldFont');
-	$graph->plot($data) or die $graph->error;
+	$graph->plot($table) or die $graph->error;
 
 	my $file = catfile($dir , $out_name);
 	open(my $out, '>', $file) or die "Cannot open '$file' for write: $!";
