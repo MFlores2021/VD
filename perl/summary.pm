@@ -144,12 +144,12 @@ sub _print_cleaning_summaries {
 	my $fh = shift;
 	
 	my $figures = '<div class="row featurette">
-		          <div class="col-md-7">
+		          <div class="col-md-4">
 		            <h2 class="featurette-heading">Cleaning summary</h2>
 		            <p class="lead">.</p>
 		          </div>';
 
-	$figures .= '<div class="col-md-5">
+	$figures .= '<div class="col-md-8">
 				<img class="featurette-image img-fluid mx-auto" src="Trimming_graph.png" alt="Generic placeholder image">
 		       </div>
 		      </div>
@@ -163,15 +163,15 @@ sub _print_spike_summaries {
 	my $fh = shift;
 	
 	my $figures = '<div class="row featurette">
-		          <div class="col-md-7">
-		            <h2 class="featurette-heading">Cleaning summary</h2>
+		          <div class="col-md-12">
+		            <h2 class="featurette-heading">Spikes summary</h2>
 		            <p class="lead">.</p>
 		          </div>';
 
-    $figures .= '<div class="col-md-5">
+    $figures .= '<div class="col-md-6">
     			<img class="featurette-image img-fluid mx-auto" src="spike_sum.png" alt="Generic placeholder image">
 		       </div>';
-	$figures .= '<div class="col-md-5">
+	$figures .= '<div class="col-md-6">
 				<img class="featurette-image img-fluid mx-auto" src="norm_spike_sum.png" alt="Generic placeholder image">
 		       </div>
 		      </div>
