@@ -22,10 +22,15 @@ sub create_html {
 			<title>VDW</title>
 			<meta charset="utf-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1">
-			<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
 			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 			<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+			
+			<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+			<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
 			<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
 			<script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
 			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css">
@@ -35,8 +40,11 @@ sub create_html {
 		<script>
 			$(document).ready(function() {
 				$("#sumTable").DataTable({
-					scrollX : true,
-					responsive : true;
+					"lengthMenu": false,            
+                    "bLengthChange": false,
+                    "scrollX": true,
+                    "scrollY": false,
+                    "responsive": true
 				});
 			} );
 		</script>
@@ -54,16 +62,16 @@ sub create_html {
 			}
 		</style>
 
-		<header>
+		<header><h2 style="text-align: center">Summary</h2>
 		</header>
 		<main role="main">
 			<div class="container marketing">
 		       
   ';
 	
-	foreach my $file (@files){
-		_print_name($file,$fh);
-	}
+	# foreach my $file (@files){
+	# 	_print_name($file,$fh);
+	# }
 	_print_table($fh,$sum_file);
 	_print_cleaning_summaries($dir,$fh);
 	_print_spike_summaries($dir,$fh);
@@ -110,9 +118,9 @@ sub _print_table {
 
 	my $table = '<div class="row" id="summary">
 		          <h2 class="featurette-heading">Summary report</h2>
-		          <p class="lead">.</p>';
+		          <p class="lead"></p>';
 	
-	$table .= '<table class="table table-striped table-bordered table-hover" width="100%" id="sumTable" style="width:100%">';
+	$table .= '<div class="container"><table class="table table-striped table-bordered table-hover display nowrap" width="100%" id="sumTable" style="width:100%">';
 
 	open(FILE,$sum_file) || die "WRONG FILE";
 		my (@data,@data_n);
@@ -132,7 +140,7 @@ sub _print_table {
 			if ($line =~ /^File/){ $table .= '</thead>'; }
 			$table .= '</tr>';
 		}
-	$table .= '</table>';
+	$table .= '</table></div>';
 	$table .= '</div>
 		       <hr class="featurette-divider">';
 	print $fh $table . "\n";
