@@ -62,7 +62,7 @@ sub create_html {
 			}
 		</style>
 
-		<header><h2 style="text-align: center">Summary</h2>
+		<header><br><h2 style="text-align: center">Summary</h2>
 		</header>
 		<main role="main">
 			<div class="container marketing">
@@ -79,10 +79,10 @@ sub create_html {
 	my $counter = 1;
 	if (scalar(@files)>0){
 		my $detail = '<div class="row featurette">
-			          <div class="col-md-7">
+			          <div class="col-md-12">
 			            <h2 class="featurette-heading">Samples detail</h2>
-			            <p class="lead">.</p>
-			          </div><div class="col-md-5">';
+			            <p class="lead"></p>
+			          </div><div class="col-md-12">';
 		print $fh $detail;
 
 		foreach my $file (@files){
