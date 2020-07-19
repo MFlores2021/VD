@@ -11,8 +11,8 @@ sub create_html {
 
 	my $sum_file = catfile($dir,"Summary.tsv");	
 	my @spikes = split /,/, $spike;
-	# print Dumper \@files;
-	# print Dumper $spike;
+
+
 	print scalar @spikes;
 	open my $fh, '>', catfile($dir,"Summary.html") or warn "couldn't open: $!";
 	
@@ -86,7 +86,7 @@ sub create_html {
 		print $fh $detail;
 
 		foreach my $file (@files){
-			_print_detail($file,$fh,$counter);$counter++;
+			_print_detail($file,$fh,$counter,$dir);$counter++;
 		}
 
 		$detail = '</div>
@@ -192,6 +192,7 @@ sub _print_detail {
 	my $file = shift;
 	my $fh = shift;
 	my $counter = shift;
+	my $dir = shift;
 	
 	my $org_file = $file;
 	$file =~ s/.fastq//;
@@ -205,11 +206,31 @@ sub _print_detail {
 			<a data-toggle="collapse" href="#h-'. $counter . '">' . $file . '</a>
 		  </h4>
 		</div>
-		<div id="h-'. $counter . '" class="panel-collapse collapse">
-		  <div class="panel-body">Clean reads
-		  <img src="'. $file . '.clean_reads.png" /><br>
-		  <embed type="text/html" src="result_' . $org_file . '/blastn.html" width="500" height="500">
-		  </div>
+	  <div id="h-'. $counter . '" class="panel-collapse collapse">
+	  <div class="panel-body">';
+	
+	#Print reads size
+	my $file_clean = catfile($dir,$file . '.clean_reads.png');
+	if (-e -s $file_clean){
+		$content .= '<h3>Clean reads</h3><br>
+			  <img width="100%" src="'. $file . '.clean_reads.png" /><br>';
+	}
+	
+	#Print blastn
+	my $file_blastn = catfile($dir,'result_' . $org_file ,'blastn.html');
+	if (-e -s $file_blastn){
+		$content .= '<h3>BLASTN results </h3><br>
+					<embed type="text/html" src="result_' . $org_file . '/blastn.html" width="100%" height="500">';
+	}
+	
+	#Print blastx
+	my $file_blastx = catfile($dir,'result_' . $org_file ,'blastx.html');
+	if (-e -s $file_blastx){
+		$content .= '<h3>BLASTX results </h3><br>
+					<embed type="text/html" src="result_' . $org_file . '/blastx.html" width="100%" height="500">';
+	}
+	
+	$content .=  '</div>
 		</div>
 	  </div>
 	</div> ';
