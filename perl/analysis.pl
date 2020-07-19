@@ -6,6 +6,7 @@ use File::Copy;
 use File::Spec::Functions 'catfile';
 use File::Path;
 use File::Basename;
+use List::MoreUtils qw(first_index);
 use GD;
 use GD::Graph::bars;
 use GD::Graph::Data;
@@ -17,6 +18,7 @@ use Util;
 use align;
 use summary;
 use graphs;
+use formulas;
 
 my $localdir = getcwd;
 
@@ -278,6 +280,13 @@ my $logoptions = "Options for runnign VDW:\n" .
 if ($spike ne 'NA') {
 	graph_spiking_sum($dir,$spike);
 }
+
+# if ($control ne 'NA'){
+	my $sum_file = catfile($dir ,'Summary.tsv');
+	# get_control_cutoff($sum_file);
+# }
+get_control_cutoff($sum_file,2);
+
 # graph_size($dir);
 graph_cumulative_clean_sum($dir);
 create_html($dir,$spike,@files);
@@ -499,7 +508,6 @@ sub merge_spike_files{
 	#closedir(DIR);
 }
 
-
 sub graph_size{
 	my $dir = shift;
 	
@@ -549,3 +557,31 @@ sub graph_size{
 	}
 }
 
+sub get_control_cutoff{
+	my $file = shift;
+	my $const = shift;
+	
+	my $control_col;
+	my $max=0;
+	my @control_percent;
+	open(FILE,$sum_file) || die "WRONG FILE";
+	while(my $line = <FILE>){
+		chomp $line;
+		next if $line =~ /^\s*$/;
+		my @line = split(/\t/,$line);
+		if ($line =~ /^File/){
+			$control_col = first_index { $_ eq '%Mapped to control' } @line;
+			next;
+		}
+		next if $line[$control_col] eq 'NA';
+		$line[$control_col] =~ s/%//g;
+		push @control_percent, $line[$control_col];
+		if ($max < $line[$control_col]) { $max = $line[$control_col]; }		
+	}
+	my $av = average(\@control_percent);
+	my $std = stdev(\@control_percent);
+	
+	my $cutoff = $av + ($std * $const);
+
+	return $cutoff;
+}
