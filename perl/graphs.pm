@@ -102,6 +102,55 @@ sub graph_cumulative_clean_sum{
 	}
 }
 
+sub graph_size{
+	my $dir = shift;
+	
+	if (-e -s catfile($dir ,'sRNA_length.txt')){
+		open FILE , catfile($dir ,'sRNA_length.txt') or die;
+		my $line = <FILE>;
+		my @field = split /\t/, $line;
+
+		my $datax =GD::Graph::Data-> new() or die;
+		$datax->read(file => catfile($dir ,'sRNA_length.txt'), delimiter => '\t');
+
+		foreach my $i (1..$datax->num_sets()){
+			my $data = $datax->copy();
+			$data -> wanted($i);
+			my $graph = GD::Graph::lines->new(450,400);
+
+			$graph->set(
+				x_label         => 'Read size',
+				y_label         => 'Frequency',
+				x_labels_vertical => 1,
+				title           => $field[$i],
+				transparent     => 0,
+				fgclr        => 'black',
+				boxclr       => 'white',
+				box_axis	=>0,
+				x_label_position=>.5,
+				b_margin=>10,
+				t_margin=>10,
+				l_margin=>10,
+				r_margin=>10,
+				accentclr    => 'white',
+			) or die $graph->error;
+		  
+			$graph->set_legend_font(gdMediumBoldFont, 20);
+			$graph->set_title_font(gdGiantFont);
+			$graph->set_y_label_font(gdMediumBoldFont);
+			$graph->set_x_label_font(gdMediumBoldFont);
+			$graph->set_values_font(gdMediumBoldFont);
+			$graph->plot($data) or die $graph->error;
+
+			my $file = catfile($dir ,trim($field[$i]).'_reads.png');
+			open(my $out, '>', $file) or die "Cannot open '$file' for write: $!";
+			binmode $out;
+			print $out $graph->gd->png;
+			close $out;
+		}
+	}
+}
+
 sub _draw_lines {
 	my $data = shift;
 	my $dir = shift;
@@ -114,7 +163,7 @@ sub _draw_lines {
 	my $graph = GD::Graph::lines->new(400,450);
 
 	$graph->set(
-		x_label         => 'Spikes',
+		x_label         => 'Spike in',
 		y_label         => 'Frequency',
 		x_labels_vertical => 1,
 		y_max_value		=> $max+10,

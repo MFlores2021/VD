@@ -7,10 +7,10 @@ use File::Spec::Functions 'catfile';
 use File::Path;
 use File::Basename;
 use List::MoreUtils qw(first_index);
-use GD;
-use GD::Graph::bars;
-use GD::Graph::Data;
-use GD::Graph::lines;
+# use GD;
+# use GD::Graph::bars;
+# use GD::Graph::Data;
+# use GD::Graph::lines;
 use Cwd qw(getcwd);
 use Data::Dumper;
 use lib catfile("..","VD","bin");
@@ -281,15 +281,15 @@ if ($spike ne 'NA') {
 	graph_spiking_sum($dir,$spike);
 }
 
-# if ($control ne 'NA'){
+my $control_cutoff;
+# if ($controlfile ne 'NA'){
 	my $sum_file = catfile($dir ,'Summary.tsv');
-	# get_control_cutoff($sum_file);
-# }
-get_control_cutoff($sum_file,2);
+	$control_cutoff = get_control_cutoff($sum_file,2,$controlfile);
+#}
 
-# graph_size($dir);
+graph_size($dir);
 graph_cumulative_clean_sum($dir);
-create_html($dir,$spike,@files);
+create_html($dir,$spike,\@files,$control_cutoff);
 
 # # Delete partial results
 # foreach my $file ( glob catfile($dir,'*') ) {
@@ -300,9 +300,6 @@ create_html($dir,$spike,@files);
 # }
 
 closedir(DIR); 
-
-
-sub trim { my $s = shift; if($s){ $s =~ s/^\s+|\s+$//g; }; return $s };
 
 
 sub format_spike {
@@ -508,58 +505,10 @@ sub merge_spike_files{
 	#closedir(DIR);
 }
 
-sub graph_size{
-	my $dir = shift;
-	
-	if (-e -s catfile($dir ,'sRNA_length.txt')){
-		open FILE , catfile($dir ,'sRNA_length.txt') or die;
-		my $line = <FILE>;
-		my @field = split /\t/, $line;
-
-		my $datax =GD::Graph::Data-> new() or die;
-		$datax->read(file => catfile($dir ,'sRNA_length.txt'), delimiter => '\t');
-
-		foreach my $i (1..$datax->num_sets()){
-			my $data = $datax->copy();
-			$data -> wanted($i);
-			my $graph = GD::Graph::lines->new(800,640);
-
-			$graph->set(
-				x_label         => 'Read size',
-				y_label         => 'Frequency',
-				x_labels_vertical => 1,
-				title           => $field[$i],
-				transparent     => 0,
-				fgclr        => 'black',
-				boxclr       => 'white',
-				box_axis	=>0,
-				x_label_position=>.5,
-				b_margin=>10,
-				t_margin=>10,
-				l_margin=>10,
-				r_margin=>10,
-				accentclr    => 'white',
-			) or die $graph->error;
-		  
-			$graph->set_legend_font(gdMediumBoldFont, 20);
-			$graph->set_title_font(gdGiantFont);
-			$graph->set_y_label_font(gdMediumBoldFont);
-			$graph->set_x_label_font(gdMediumBoldFont);
-			$graph->set_values_font(gdMediumBoldFont);
-			$graph->plot($data) or die $graph->error;
-
-			my $file = catfile($dir ,trim($field[$i]).'_reads.png');
-			open(my $out, '>', $file) or die "Cannot open '$file' for write: $!";
-			binmode $out;
-			print $out $graph->gd->png;
-			close $out;
-		}
-	}
-}
-
 sub get_control_cutoff{
 	my $file = shift;
 	my $const = shift;
+	my $control_file = shift;
 	
 	my $control_col;
 	my $max=0;

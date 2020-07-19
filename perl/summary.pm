@@ -7,14 +7,14 @@ use Data::Dumper;
 sub create_html {
 	my $dir = shift;
 	my $spike = shift;
-	my @files = @_;
+	my $files = shift;
+	my $control_cutoff = shift;
+	my @files = @$files;
 
 	my $sum_file = catfile($dir,"Summary.tsv");	
 	my @spikes = split /,/, $spike;
 
-
-	print scalar @spikes;
-	open my $fh, '>', catfile($dir,"Summary.html") or warn "couldn't open: $!";
+	open my $fh, '>', catfile($dir,"Summary.html") or warn "could not open: $!";
 	
 	print $fh '<!DOCTYPE html>
 		<html>
@@ -72,7 +72,7 @@ sub create_html {
 	# foreach my $file (@files){
 	# 	_print_name($file,$fh);
 	# }
-	_print_table($fh,$sum_file);
+	_print_table($fh,$sum_file,$control_cutoff);
 	_print_cleaning_summaries($dir,$fh);
 	_print_spike_summaries($dir,$fh);
 	
@@ -115,12 +115,15 @@ sub _print_name {
 sub _print_table {
 	my $fh = shift;
 	my $sum_file = shift;
+	my $control_cutoff = shift;
 
 	my $table = '<div class="row" id="summary">
-		          <h2 class="featurette-heading">Summary report</h2>
-		          <p class="lead"></p>';
+		          <h2 class="featurette-heading">Summary report</h2><div class="container">';
+	if ($control_cutoff){
+		$table .= 'Control cutoff: '.$control_cutoff;
+	}
 	
-	$table .= '<div class="container"><table class="table table-striped table-bordered table-hover display nowrap" width="100%" id="sumTable" style="width:100%">';
+	$table .= '<table class="table table-striped table-bordered table-hover display nowrap" width="100%" id="sumTable" style="width:100%">';
 
 	open(FILE,$sum_file) || die "WRONG FILE";
 		my (@data,@data_n);
