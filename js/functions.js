@@ -93,7 +93,7 @@
 		  
 		var filem = path.join(folder,"control_"+files[i].name); 
         format_faidx(filem);
-        document.getElementById("subject").value = "Done !";
+        document.getElementById("subject").innerHTML = "Done !";
       }
     }
   }

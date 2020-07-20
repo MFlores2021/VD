@@ -59,7 +59,7 @@ sub rmadp
 
 	my $subUsage = qq'
 
-USAGE: $0 -s adapter_sequence -l minimum_length sRNA1 sRNA2 ... sRNAn
+USAGE: $0 -s adapter_sequence -l minimum_length -m maximum_length sRNA1 sRNA2 ... sRNAn
 
 
 
@@ -123,7 +123,10 @@ USAGE: $0 -s adapter_sequence -l minimum_length sRNA1 sRNA2 ... sRNAn
 
 	$cutoff_min_len =  $$options{'l'} if (defined $$options{'l'} );
 
-
+	my $cutoff_max_len = 30;
+	
+	$cutoff_max_len = $$options{'m'} if (defined $$options{'m'} );
+	
 
 	# set hash for sRNA size distribution
 
@@ -144,7 +147,7 @@ USAGE: $0 -s adapter_sequence -l minimum_length sRNA1 sRNA2 ... sRNAn
 
 	my $report_info = '';
 
-	$report_info.= "#sRNA\ttotal\t3Punmatch\t3Pnull\t3Pmatch\tbaseN\tshort\tcleaned\n";
+	$report_info.= "#sRNA\ttotal\t3Punmatch\t3Pnull\t3Pmatch\tbaseN\tshort\tlong\tcleaned\n";
 
 
 
@@ -194,9 +197,9 @@ USAGE: $0 -s adapter_sequence -l minimum_length sRNA1 sRNA2 ... sRNAn
 
 			$unmatch_3p_num,$null_3p_num,$match_3p_num,
 
-			$baseN_num,$short_num,
+			$baseN_num,$short_num,$long_num,
 
-			$clean_num,$adp_clean,$adp5p_clean,$adp3p_clean)=(0,0,0,0,0,0,0,0,0,0,0,0,0);
+			$clean_num,$adp_clean,$adp5p_clean,$adp3p_clean)=(0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 
 		my ($mode_5p_a, $mode_5p_b, $mode_5p_a_match) = (0, 0, 0);
 
@@ -500,6 +503,12 @@ USAGE: $0 -s adapter_sequence -l minimum_length sRNA1 sRNA2 ... sRNAn
 
 					$short_num++;
 
+				} elsif (length($trimmed_seq) > $cutoff_max_len ) {
+
+					$label.=",long";
+
+					$long_num++;
+
 				} else {
 
 					$clean_num++;
@@ -567,7 +576,7 @@ USAGE: $0 -s adapter_sequence -l minimum_length sRNA1 sRNA2 ... sRNAn
 
 			"$unmatch_3p_num\t$null_3p_num\t$match_3p_num\t".
 
-			"$baseN_num\t$short_num\t$clean_num\n";
+			"$baseN_num\t$short_num\t$long_num\t$clean_num\n";
 
 
 

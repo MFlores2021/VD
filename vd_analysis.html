@@ -106,6 +106,9 @@
               <br>
               <label>Minimum length of sequence after trimming <div class="tooltip">(?)<span class="tooltiptext">A minimum length for sequences after trimming can be provided, this is useful when you want to consider only true siRNA (21-24nts) or avoid extremely short sequences in your analysis, reducing read numbers and analysis time.</span></div></label><br>
               <input type="text" id="length" name="length" placeholder="" onkeypress="return onlyNos(event,this);">
+			  <br>
+			  <label>Maximum length of sequence after trimming <div class="tooltip">(?)<span class="tooltiptext">A maximum length for sequences after trimming can be provided, this is useful when you want to consider only true siRNA (21-24nts) or avoid extremely long sequences in your analysis, reducing read numbers and analysis time.</span></div></label><br>
+              <input type="text" id="maxlength" name="maxlength" placeholder="" onkeypress="return onlyNos(event,this);">
           </div>
           <button class="collapsible" onclick="collap(this);">Library quality control (optional)</button>
           <div class="content-collap">

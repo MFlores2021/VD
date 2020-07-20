@@ -7,10 +7,6 @@ use File::Spec::Functions 'catfile';
 use File::Path;
 use File::Basename;
 use List::MoreUtils qw(first_index);
-# use GD;
-# use GD::Graph::bars;
-# use GD::Graph::Data;
-# use GD::Graph::lines;
 use Cwd qw(getcwd);
 use Data::Dumper;
 use lib catfile("..","VD","bin");
@@ -26,12 +22,13 @@ my $dir = $ARGV[0];
 my $spike = $ARGV[1]; #'U95';
 my $adaptor = $ARGV[2]; #'v229';
 my $length  = $ARGV[3];
-my $database = $ARGV[4];
-my $host  = $ARGV[5];
-my $cores = $ARGV[6];
-my $controlseq = $ARGV[7];
-my $controlfile = $ARGV[8]; 
-my $add_parameters = $ARGV[9]; 
+my $max_length  = $ARGV[4];
+my $database = $ARGV[5];
+my $host  = $ARGV[6];
+my $cores = $ARGV[7];
+my $controlseq = $ARGV[8];
+my $controlfile = $ARGV[9]; 
+my $add_parameters = $ARGV[10]; 
 
 my $BIN_DIR  = catfile("VD","bin"); 
 my $align_program    = catfile("$BIN_DIR","bwa");
@@ -75,6 +72,7 @@ my $logoptions = "Options for runnign VDW:\n" .
 	"Spike in sequences: " . $spike  . "\n" .
 	"Adaptor for trimming: " . $adaptor . "\n" .
 	"Minimun length: " . $length . "\n" .
+	"Maximun length: " . $max_length . "\n" .
 	"Database: " . $database            . "\n" .
 	"Host reference: ".  $host    . "\n" .
 	"Control sequence file: " . $controlseq  . "\n" .
@@ -92,7 +90,11 @@ my $logoptions = "Options for runnign VDW:\n" .
 # ### Trimming
 # if($adaptor ne 'NA' && $length ne 'NA'){
 	# my $trimdir = 'perl ' . catfile($localdir,'VD','tools','sRNA_clean','sRNA_clean.pl ');
+	if($max_length ne 'NA'){
+	# my $commtrim = $trimdir .'-s '. $adaptor . ' -l ' . $length . ' -m ' . $max_length . ' '. $dir.'\\' . $stringFile ;
+	} else {
 	# my $commtrim = $trimdir .'-s '. $adaptor . ' -l ' . $length . ' '. $dir.'\\' . $stringFile ;
+	}
 	# system($commtrim) == 0
 		 # or die "Error: $commtrim . $?";
 # }

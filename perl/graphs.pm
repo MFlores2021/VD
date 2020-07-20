@@ -76,8 +76,8 @@ sub graph_cumulative_clean_sum{
 		my (@data,@data_n);
 		my $max = 0;
 		my $max_n = 0;
-		my @col = (0,7,5,6,3,2);
-		my @col_names = ("cleaned reads", "contains N", "short reads", "adapter only","no adapter");
+		my @col = (0,8,5,7,6,3,2);
+		my @col_names = ("cleaned reads", "contains N", "long reads", "short reads", "adapter only","no adapter");
 				
 		while(my $line = <FILE>){
 			chomp $line;
@@ -225,7 +225,7 @@ sub _draw_bars {
 			l_margin		=>10,
 			r_margin		=>10,
 			accentclr    	=> 'white',
-			dclrs			=> ['green','lblue','lyellow', 'orange','lred'],
+			dclrs			=> ['green','lblue','pink','lyellow', 'orange','lred'],
 
 	) or die $graph->error;
 	

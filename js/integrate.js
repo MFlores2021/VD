@@ -25,7 +25,8 @@
 				spike = spike.replace(/,,/g, ",");
 				spike = spike.replace(/,$/, ""); 
 			var adaptor = document.getElementById("adaptor").value;
-			var length = document.getElementById("length").value;
+			var minlength = document.getElementById("minlength").value;
+			var maxlength = document.getElementById("maxlength").value;
 			var db = document.getElementById("databases").value;
 			var ref = document.getElementById("references").value;
 			var cores = document.getElementById("cores").value;
@@ -36,7 +37,8 @@
 			var commrun = 'perl ' + cn + ' '+ folder + " ";
 			commrun = (spike.trim() != "") ? commrun + spike.toUpperCase() + " ": commrun + "NA ";
 			commrun = (adaptor.trim() != "") ? commrun + adaptor.toUpperCase() + " ": commrun + "NA ";
-			commrun = (length.trim() != "") ? commrun + length + " ": commrun + "NA ";
+			commrun = (minlength.trim() != "") ? commrun + minlength + " ": commrun + "NA ";
+			commrun = (maxlength.trim() != "") ? commrun + maxlength + " ": commrun + "NA ";
 			commrun = commrun + db + " ";
 			commrun = (ref.trim() != "") ? commrun + ref + " ": commrun + "NA ";
 			commrun = (cores.trim() != "") ? commrun + cores + " ": commrun + "NA ";
@@ -81,7 +83,7 @@
 		
 		var adaptor = document.getElementById("adaptor").value;
 		if(document.getElementById("fileDialog").value != ''){ 
-			if (adaptor != '' && document.getElementById("length").value != '' ){
+			if (adaptor != '' && document.getElementById("minlength").value != '' ){
 				if(!alphabets(adaptor)){
 					document.getElementById("running").innerHTML = "Insert only ATGC adaptor";
 					return false;
@@ -91,13 +93,19 @@
 						return false;
 					}
 				}
-			} else if (adaptor == '' && document.getElementById("length").value != ''){
+			} else if (adaptor == '' && document.getElementById("minlength").value != ''){
 				document.getElementById("running").innerHTML = 'Trimming: Provide both adaptor and length';
 				return false;
-			} else if(adaptor != '' && document.getElementById("length").value == ''){
+			} else if (adaptor != '' && document.getElementById("minlength").value == ''){
 				document.getElementById("running").innerHTML = 'Trimming: Provide both adaptor and length';
 				return false;
-			} 
+			} else if (adaptor == '' && document.getElementById("maxlength").value != ''){
+				document.getElementById("running").innerHTML = 'Trimming: Provide both adaptor and length';
+				return false;
+			} else if (document.getElementById("minlength").value == '' && document.getElementById("maxlength").value != ''){
+				document.getElementById("running").innerHTML = 'Trimming: Provide both min and max length';
+				return false;
+			}
 /* 			if (document.getElementById("spiketext").value != ''){ 
 				if(!alphabets(document.getElementById("spiketext").value)){
 					alert("Insert only ATGC sequences.");
