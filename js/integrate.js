@@ -33,6 +33,7 @@
 			var param = document.getElementById("param").value;
 			var control = document.getElementById("control").value;
 			var controlfile = document.getElementById("ccontrol").value;
+			var dedup = document.getElementById("dedup").value
 			
 			var commrun = 'perl ' + cn + ' '+ folder + " ";
 			commrun = (spike.trim() != "") ? commrun + spike.toUpperCase() + " ": commrun + "NA ";
@@ -44,6 +45,7 @@
 			commrun = (cores.trim() != "") ? commrun + cores + " ": commrun + "NA ";
 			commrun = (control.trim() != "") ? commrun + control + " ": commrun + "NA ";
 			commrun = (controlfile.trim() != "") ? commrun + controlfile + " ": commrun + "NA ";
+			commrun = (dedup.trim() != "") ? commrun + dedup + " ": commrun + "NA ";
 			commrun = (param.trim() != "") ? commrun + ' "'+ param + '" ' : commrun + "NA ";
 
 			//hacer q si se elige control te pregunte la secuencia

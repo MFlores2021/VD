@@ -101,6 +101,7 @@
           </div>
           <button class="collapsible" onclick="collap(this);">Sequence cleaning & trimming (optional in case of raw reads) <div class="tooltip">(?)<span class="tooltiptext">If raw reads are provided VDW can clean and trim sequence libraries, you will have to provide the sequencing adaptor and optionally minimum and maximimum sequence length after trimming.</span></div></button>
           <div class="content-collap" >
+			<input type="checkbox" id="dedup" name="dedup" value="TRUE"><label for="dedup">Remove duplicated reads</label><br>
             <label><br>Sequences of the adaptor <div class="tooltip">(?)<span class="tooltiptext1">Provide the sequence for the library adaptor sequence, commonly used adaptor sequences are provided in the VDW user manual. Ex. CAGATCGGAAGAGCACA</span></div></label><br>
               <input type="text" id="adaptor" name="adaptor" placeholder="" onkeypress="return onlyAlphabets(event,this);">
               <br>

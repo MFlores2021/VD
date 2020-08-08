@@ -123,7 +123,7 @@ USAGE: $0 -s adapter_sequence -l minimum_length -m maximum_length sRNA1 sRNA2 ..
 
 	$cutoff_min_len =  $$options{'l'} if (defined $$options{'l'} );
 
-	my $cutoff_max_len = 30;
+	my $cutoff_max_len = 100;
 	
 	$cutoff_max_len = $$options{'m'} if (defined $$options{'m'} );
 	
