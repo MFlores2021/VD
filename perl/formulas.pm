@@ -7,7 +7,8 @@ use Data::Dumper;
 sub average{
 	my $data = shift;
 	if (not @$data) {
-			warn("Empty arrayn");
+		warn("Empty array!");
+		return 0;
 	}
 	my $total = 0;
 	foreach (@$data) {

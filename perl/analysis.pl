@@ -9,7 +9,7 @@ use File::Basename;
 use List::MoreUtils qw(first_index);
 use Cwd qw(getcwd);
 use Data::Dumper;
-use lib catfile("..","VD","bin");
+use lib catfile("VD","bin");
 use Util;
 use align;
 use summary;
@@ -561,8 +561,12 @@ sub get_control_cutoff{
 		} 
 		push @control_percent, $line[$control_col];
 	}
-	my $av = average(\@control_percent)/$perc_control;
-	my $std = stdev(\@control_percent)/$perc_control;
+	my $av = 0;
+	my $std = 0;
+	if (@control_percent){
+		$av = average(\@control_percent)/$perc_control;
+		$std = stdev(\@control_percent)/$perc_control;
+	}
 	
 	my $cutoff = $av + ($std * $const);
 	return $cutoff;
