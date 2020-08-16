@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use Data::Dumper;
+use File::Basename;
 
 sub create_html {
 	my $dir = shift;
@@ -192,11 +193,12 @@ sub _print_spike_summaries {
 }
 
 sub _print_detail {
-	my $file = shift;
+	my $pathfile = shift;
 	my $fh = shift;
 	my $counter = shift;
 	my $dir = shift;
 	
+	my $file = basename($pathfile);
 	my $org_file = $file;
 	$file =~ s/.fastq//;
 	$file =~ s/.fq//;
@@ -213,10 +215,11 @@ sub _print_detail {
 	  <div class="panel-body">';
 	
 	#Print reads size
-	my $file_clean = catfile($dir,$file . '.clean_reads.png');
+	$file =~ s/.clean//;
+	my $file_clean = catfile($dir,$file . '_reads.png');
 	if (-e -s $file_clean){
 		$content .= '<h3>Clean reads</h3><br>
-			  <img width="100%" src="'. $file . '.clean_reads.png" /><br>';
+			  <img width="80%" src="'. $file . '_reads.png" /><br>';
 	}
 	
 	#Print blastn

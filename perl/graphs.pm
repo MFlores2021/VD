@@ -135,8 +135,8 @@ sub graph_size{
 				accentclr    => 'white',
 			) or die $graph->error;
 		  
-			$graph->set_legend_font(gdMediumBoldFont, 20);
-			$graph->set_title_font(gdGiantFont);
+			$graph->set_legend_font('gdMediumBoldFont', 20);
+			$graph->set_title_font('gdMediumBoldFont');
 			$graph->set_y_label_font(gdMediumBoldFont);
 			$graph->set_x_label_font(gdMediumBoldFont);
 			$graph->set_values_font(gdMediumBoldFont);

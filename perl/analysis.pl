@@ -304,14 +304,14 @@ if ($spike ne 'NA') {
 }
 
 my $control_cutoff;
-# if ($controlfile ne 'NA'){
-	my $sum_file = catfile($dir ,'Summary.tsv');$controlfile='control_190206_SNK268_A_L004_AMRW-32-48_R1.fastq';
+if ($controlfile ne 'NA'){
+	my $sum_file = catfile($dir ,'Summary.tsv');
 	$control_cutoff = get_control_cutoff($sum_file,2,$controlfile);
-#}
+}
 
 graph_size($dir);
 graph_cumulative_clean_sum($dir);
-create_html($dir,$spike,\@files,$control_cutoff);
+create_html($dir,$spike,\@array_files,$control_cutoff);
 
 # # Delete partial results
 # foreach my $file ( glob catfile($dir,'*') ) {
@@ -528,7 +528,7 @@ sub merge_spike_files{
 }
 
 sub get_control_cutoff{
-	my $file = shift;
+	my $sum_file = shift;
 	my $const = shift;
 	my $control_file = shift;
 	
@@ -563,7 +563,7 @@ sub get_control_cutoff{
 	}
 	my $av = 0;
 	my $std = 0;
-	if (@control_percent){
+	if (@control_percent && $perc_control >0 ){
 		$av = average(\@control_percent)/$perc_control;
 		$std = stdev(\@control_percent)/$perc_control;
 	}
