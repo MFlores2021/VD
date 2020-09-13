@@ -304,10 +304,12 @@ if ($spike ne 'NA') {
 	graph_spiking_sum($dir,$spike);
 }
 
-my $control_cutoff,$av,$sd;
+my $control_cutoff;
+my $av;
+my $sd;
 if ($controlfile ne 'NA'){
 	my $sum_file = catfile($dir ,'Summary.tsv');
-	($control_cutoff,$av,$sd = get_control_cutoff($sum_file,$controlconst,$controlfile);
+	($control_cutoff,$av,$sd) = get_control_cutoff($sum_file,$controlconst,$controlfile);
 }
 
 graph_size($dir);
