@@ -33,6 +33,7 @@
 			var param = document.getElementById("param").value;
 			var control = document.getElementById("control").value;
 			var controlfile = document.getElementById("ccontrol").value;
+			var controlconstant = document.getElementById("number_sd").value;
 			var dedup = document.getElementById("dedup").value
 			
 			var commrun = 'perl ' + cn + ' '+ folder + " ";
@@ -45,6 +46,7 @@
 			commrun = (cores.trim() != "") ? commrun + cores + " ": commrun + "NA ";
 			commrun = (control.trim() != "") ? commrun + control + " ": commrun + "NA ";
 			commrun = (controlfile.trim() != "") ? commrun + controlfile + " ": commrun + "NA ";
+			commrun = (controlconstant.trim() != "") ? commrun + controlconstant + " ": commrun + "NA ";
 			commrun = (dedup.trim() != "") ? commrun + dedup + " ": commrun + "NA ";
 			commrun = (param.trim() != "") ? commrun + ' "'+ param + '" ' : commrun + "NA ";
 

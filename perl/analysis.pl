@@ -28,8 +28,9 @@ my $host  = $ARGV[6];
 my $cores = $ARGV[7];
 my $controlseq = $ARGV[8];
 my $controlfile = $ARGV[9];
-my $rmdup = $ARGV[10];
-my $add_parameters = $ARGV[11]; 
+my $controlconst = $ARGV[10];
+my $rmdup = $ARGV[11];
+my $add_parameters = $ARGV[12]; 
 
 my $BIN_DIR  = catfile("VD","bin"); 
 my $align_program    = catfile("$BIN_DIR","bwa");
@@ -303,15 +304,15 @@ if ($spike ne 'NA') {
 	graph_spiking_sum($dir,$spike);
 }
 
-my $control_cutoff;
+my $control_cutoff,$av,$sd;
 if ($controlfile ne 'NA'){
 	my $sum_file = catfile($dir ,'Summary.tsv');
-	$control_cutoff = get_control_cutoff($sum_file,2,$controlfile);
+	($control_cutoff,$av,$sd = get_control_cutoff($sum_file,$controlconst,$controlfile);
 }
 
 graph_size($dir);
 graph_cumulative_clean_sum($dir);
-create_html($dir,$spike,\@array_files,$control_cutoff);
+create_html($dir,$spike,\@array_files,$control_cutoff,$av,$sd,$controlconst);
 
 # # Delete partial results
 # foreach my $file ( glob catfile($dir,'*') ) {
@@ -569,5 +570,5 @@ sub get_control_cutoff{
 	}
 	
 	my $cutoff = $av + ($std * $const);
-	return $cutoff;
+	return ($cutoff,$av,$const);
 }
