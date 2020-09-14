@@ -399,9 +399,9 @@ sub print_summary {
 			   	#Control sequence coverage
 				$dataFile1{trim($field[0])}{concov}   = trim($field[2]); 
 				#Norm deph
-				$dataFile1{trim($field[0])}{seq}   = sprintf("%.4f",trim($field[4])+0);  
+				$dataFile1{trim($field[0])}{seq}   = trim($field[4]);  
 				#Norm deph kb
-				$dataFile1{trim($field[0])}{kb}   = sprintf("%.4f",trim($field[5])+0);
+				$dataFile1{trim($field[0])}{kb}   = trim($field[5]);
 				##Mapped reads to control
 				$dataFile1{trim($field[0])}{map}   = trim($field[7]);
 				#%Mapped reads to control
@@ -506,7 +506,9 @@ sub print_summary {
 		#control
 		if($dataFile1{$file}{concov}){ 
 			#Control sequence coverage,Norm deph,Norm deph kb,#Mapped reads to control,%Mapped reads to control
-			$out = $out . $dataFile1{$file}{concov}."\t". ($dataFile1{$file}{seq}/$clean*1000000) ."\t".$dataFile1{$file}{kb}. "\t". $dataFile1{$file}{map}. "\t". $dataFile1{$file}{permap}."\t";
+			my $normDeph = sprintf("%.4f", ($dataFile1{$file}{seq}/$clean*1000000));
+			my $normDephKb = sprintf("%.4f", $dataFile1{$file}{kb});
+			$out = $out . $dataFile1{$file}{concov}."\t". $normDeph ."\t". $normDephKb . "\t". $dataFile1{$file}{map}. "\t". $dataFile1{$file}{permap}."\t";
 		} else {
 			$out = $out . "NA\tNA\tNA\tNA\tNA\t";
 		}

@@ -162,7 +162,7 @@ sub _print_table {
 sub _print_cleaning_summaries {
 	my $dir = shift;
 	my $fh = shift;
-	my $figures;
+	my $figures = "";
 	
 	if (-e -s catfile($dir,"Trimming_graph.png")) {
 		$figures = '<div class="row featurette">
@@ -184,7 +184,7 @@ sub _print_cleaning_summaries {
 sub _print_spike_summaries {
 	my $dir = shift;
 	my $fh = shift;
-	my $figures;
+	my $figures = "";
 	if (-e -s catfile($dir,"spike_sum.png") && -e -s catfile($dir,"norm_spike_sum.png") ){
 		$figures = '<div class="row featurette">
 					  <div class="col-md-12">
