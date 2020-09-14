@@ -140,7 +140,7 @@ foreach my $file1 (@files) {
 	    my $temp = $file;
 	    $temp =~ s/\.fq$/\.clean\.fq/;
 	    $temp =~ s/\.fastq$/\.clean\.fq/;
-	    if (!-s $temp){
+	    if (! -e -s $temp){
 	     	$trim = 0;
 	 	} else {
 			$trim = 1;
@@ -240,6 +240,19 @@ foreach my $file1 (@files) {
 			$controout = $controout . "\t". $depth;
 			#Norm deph kb
 			$controout = $controout . "\t". $depth/$size;
+		} else {
+			#File name
+			$controout = $controout . "$file1\t";
+			#Control sequence length
+			$controout = $controout .  'NA';
+			#Control sequence coverage
+			$controout = $controout . "\tNA";
+			#Depth
+			$controout = $controout . "\tNA";
+			#Norm deph
+			$controout = $controout . "\tNA";
+			#Norm deph kb
+			$controout = $controout . "\tNA";
 		}
 		
 		if (-s "$file.stats.txt"){
@@ -460,7 +473,7 @@ sub print_summary {
 	foreach my $spk (@spikes) {
 		$out = $out . "Norm. Spike: ". $spk. "\t"."# Spikes: ". $spk. "\t";
 	}
-	$out = $out ."Control coverage\tNormalized control deph\tNormalized depth/kb control coverage\t#Mapped to control\t%Mapped to control\n";
+	$out = $out ."Control coverage\tNormalized control depth\tNormalized depth/kb control coverage\t#Mapped to control\t%Mapped to control\n";
 	
 	## Body
 	foreach my $file (@array_files) { 
@@ -541,8 +554,8 @@ sub get_control_cutoff{
 	my $control_file = shift;
 	
 	my $control_col;
-	my $perc_control;
-	my @control_percent;
+	my $perc_control = 0;
+	my @control_percent = ();
 	
 	open(FILE,$sum_file) || die "WRONG FILE";
 	while(my $line = <FILE>){
