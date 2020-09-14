@@ -13,6 +13,7 @@ sub create_html {
 	my $average= shift;
 	my $sd = shift;
 	my $constant = shift;
+	
 	my @files = @$files;
 
 	my $sum_file = catfile($dir,"Summary.tsv");	
@@ -161,41 +162,45 @@ sub _print_table {
 sub _print_cleaning_summaries {
 	my $dir = shift;
 	my $fh = shift;
+	my $figures;
 	
-	my $figures = '<div class="row featurette">
-		          <div class="col-md-4">
-		            <h2 class="featurette-heading">Cleaning summary</h2>
-		            <p class="lead">.</p>
-		          </div>';
+	if (-e -s catfile($dir,"Trimming_graph.png")) {
+		$figures = '<div class="row featurette">
+					  <div class="col-md-4">
+						<h2 class="featurette-heading">Cleaning summary</h2>
+						<p class="lead">.</p>
+					  </div>';
 
-	$figures .= '<div class="col-md-8">
-				<img class="featurette-image img-fluid mx-auto" src="Trimming_graph.png" alt="Generic placeholder image">
-		       </div>
-		      </div>
-		      <hr class="featurette-divider">';
-
+		$figures .= '<div class="col-md-8">
+					<img class="featurette-image img-fluid mx-auto" src="Trimming_graph.png" alt="Generic placeholder image">
+				   </div>
+				  </div>
+				  <hr class="featurette-divider">';
+	}
+	
 	print $fh $figures;
 }
 
 sub _print_spike_summaries {
 	my $dir = shift;
 	my $fh = shift;
-	
-	my $figures = '<div class="row featurette">
-		          <div class="col-md-12">
-		            <h2 class="featurette-heading">Spikes summary</h2>
-		            <p class="lead">.</p>
-		          </div>';
+	my $figures;
+	if (-e -s catfile($dir,"spike_sum.png") && -e -s catfile($dir,"norm_spike_sum.png") ){
+		$figures = '<div class="row featurette">
+					  <div class="col-md-12">
+						<h2 class="featurette-heading">Spikes summary</h2>
+						<p class="lead">.</p>
+					  </div>';
 
-    $figures .= '<div class="col-md-6">
-    			<img class="featurette-image img-fluid mx-auto" src="spike_sum.png" alt="Generic placeholder image">
-		       </div>';
-	$figures .= '<div class="col-md-6">
-				<img class="featurette-image img-fluid mx-auto" src="norm_spike_sum.png" alt="Generic placeholder image">
-		       </div>
-		      </div>
-		      <hr class="featurette-divider">';
-
+		$figures .= '<div class="col-md-6">
+					<img class="featurette-image img-fluid mx-auto" src="spike_sum.png" alt="Generic placeholder image">
+				   </div>';
+		$figures .= '<div class="col-md-6">
+					<img class="featurette-image img-fluid mx-auto" src="norm_spike_sum.png" alt="Generic placeholder image">
+				   </div>
+				  </div>
+				  <hr class="featurette-divider">';
+	}
 	print $fh $figures;
 }
 

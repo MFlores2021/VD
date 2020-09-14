@@ -79,6 +79,8 @@ my $logoptions = "Options for runnign VDW:\n" .
 	"Host reference: ".  $host    . "\n" .
 	"Control sequence file: " . $controlseq  . "\n" .
 	"Control sample file name: " . $controlfile  . "\n" .
+	"Standard deviation times: " . $controlconst  . "\n" .
+	"Run de-duplication: " . $rmdup  . "\n" .
 	"Additional parameters: " . $add_parameters . "\n" .
 	"Number of cores: " . $cores  . "\n\n".
 	"Start: ". $datestring . "\n" ;
@@ -307,8 +309,9 @@ if ($spike ne 'NA') {
 my $control_cutoff;
 my $av;
 my $sd;
-if ($controlfile ne 'NA'){
+if ($controlfile ne 'NA' && $controlseq ne 'NA'){
 	my $sum_file = catfile($dir ,'Summary.tsv');
+	$controlconst = $controlconst ne 'NA' ? $controlconst : 2;
 	($control_cutoff,$av,$sd) = get_control_cutoff($sum_file,$controlconst,$controlfile);
 }
 
@@ -396,9 +399,9 @@ sub print_summary {
 			   	#Control sequence coverage
 				$dataFile1{trim($field[0])}{concov}   = trim($field[2]); 
 				#Norm deph
-				$dataFile1{trim($field[0])}{seq}   = trim($field[4]); 
+				$dataFile1{trim($field[0])}{seq}   = sprintf("%.4f",trim($field[4])+0);  
 				#Norm deph kb
-				$dataFile1{trim($field[0])}{kb}   = trim($field[5]); 
+				$dataFile1{trim($field[0])}{kb}   = sprintf("%.4f",trim($field[5])+0);
 				##Mapped reads to control
 				$dataFile1{trim($field[0])}{map}   = trim($field[7]);
 				#%Mapped reads to control
