@@ -30,7 +30,10 @@
 <span onclick="openNav()" style="color: chartreuse;background-color: black;"><B>&nbsp;&#9776;&nbsp;Menu&nbsp;&nbsp;</B> </span>
 
 <div id="main">
-    <div class="container" id="container">
+    <div class="container" id="container" style="background:white">
+		<div style="background:white center">
+			<img style="height:150px;display:block;margin-left:auto;margin-right:auto" src="./logo.png">
+		</div>
 		<h4>About VirusDetect Windows (VDW) version 0.9</h4>
 		<p>VirusDetect is a software package that can efficiently and exhaustively analyze large-scale small- or large- RNA datasets for virus identification. The program performs reference-guided assembly by aligning RNA reads to the known virus reference database (<a onclick="nw.Shell.openExternal('ftp://ftp.ncbi.nih.gov/genbank/');" href="">GenBank gbvrl</a>) as well as de novo assembly using <a onclick="nw.Shell.openExternal('https://www.ebi.ac.uk/~zerbino/velvet/');" href="">Velvet</a> with automated parameter optimization. The assembled contigs are compared to a reference virus sequence database for virus identification sequentially using BLASTN and BLASTX. The contigs are treated as undetermined contigs if no hit is found to any viruses in the database. When using small RNAs, the siRNA profile of these undetermined contigs are provided as guidance for discovery novel viruses which do not show sequence similarity with known viruses. VDW is an open source software and it is built on top of VirusDetect v1.7 for linux (<a onclick="nw.Shell.openExternal('http://virusdetect.feilab.net/cgi-bin/virusdetect/index.cgi');" href="">http://virusdetect.feilab.net/cgi-bin/virusdetect/index.cgi</a>) and includes options for automatic sequence cleaning & trimming, Fast quality check (FastQC) analysis, spike in and contamination control sequence analysis. <br><br>
 		<h4>If you use VirusDetect, please cite the following paper:</h4>
