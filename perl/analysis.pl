@@ -519,8 +519,8 @@ sub print_summary {
 		#control
 		if($dataFile1{$file}{concov}){ 
 			#Control sequence coverage,Norm deph,Norm deph kb,#Mapped reads to control,%Mapped reads to control
-			my $normDeph = sprintf("%.4f", ($dataFile1{$file}{seq}/$clean*1000000));
-			my $normDephKb = sprintf("%.4f", $dataFile1{$file}{kb});
+			my $normDeph = sprintf("%.2f", ($dataFile1{$file}{seq}/$clean*1000000));
+			my $normDephKb = sprintf("%.2f", $dataFile1{$file}{kb});
 			$out = $out . $dataFile1{$file}{concov}."\t". $normDeph ."\t". $normDephKb . "\t". $dataFile1{$file}{map}. "\t". $dataFile1{$file}{permap}."\t";
 		} else {
 			$out = $out . "NA\tNA\tNA\tNA\tNA\t";

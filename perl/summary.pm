@@ -128,8 +128,9 @@ sub _print_table {
 	my $table = '<div class="row" id="summary">
 		          <h2 class="featurette-heading">Summary report</h2><div class="container">';
 	if ($control_cutoff){
-		$table .= 'Average contamination from control virus: '. $average .'; SD: ' . $sd . '<br>';
+		$table .= 'Average contamination from control virus: '. sprintf("%.2f",$average) .'; SD: ' . $sd . '<br>';
 		$table .= 'Control cutoff (Average + '. $times_sd .' *SD): ' . $control_cutoff;
+		$table .= "<br>The control cutoff value can be used to determine an expected contamination rate of highly abundant reads of a virus identified from one sample to any other sample of a pooled library and is based on the detected contamination from the sample with your control virus (when included) throughout the pooled library. Use it by multiplying the control cutoff value with the \'Depth (Norm)\' value of any virus with high \'Depth (Norm\' values identified in any sample, which will provide you a ‘Depth (Norm)’ you could expect of that same virus in other samples based purely on contamination and could thus represent false positives.";
 	}
 	
 	$table .= '<table class="table table-striped table-bordered table-hover display nowrap" width="100%" id="sumTable" style="width:100%">';
