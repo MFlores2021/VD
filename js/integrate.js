@@ -47,7 +47,7 @@
 			commrun = (control.trim() != "") ? commrun + control + " ": commrun + "NA ";
 			commrun = (controlfile.trim() != "") ? commrun + controlfile + " ": commrun + "NA ";
 			commrun = (controlconstant.trim() != "") ? commrun + controlconstant + " ": commrun + "NA ";
-			commrun = (dedup.trim() == "true") ? commrun + dedup + " ": commrun + "NA ";
+			commrun = (dedup) ? commrun + dedup + " ": commrun + "NA ";
 			commrun = (param.trim() != "") ? commrun + ' "'+ param + '" ' : commrun + "NA ";
 
 			//hacer q si se elige control te pregunte la secuencia

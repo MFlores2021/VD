@@ -175,7 +175,7 @@ foreach my $file1 (@files) {
 	my $commvd = "perl " . catfile($localdir,'VD','virus_detect.pl ');
 	 $commvd = $database ne 'NA' ?  $commvd . " --reference " . $database . " " : $commvd;
 	 if ($database =~ /^l_/){
-		my $info = $database. "_genbank_info.gz";
+		my $info = $database. "_genbank.info.gz";
 		my $ids = $database . "_idmapping.gz";
 		$commvd = $commvd . " --seq_info " . $info . " --prot_tab " . $ids;
 	 }

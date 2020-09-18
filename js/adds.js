@@ -10,7 +10,7 @@ function update_db(orga,filt, vers){
     var execSync = require('child_process').execSync;
     var runperl = path.join("perlfiles","tmp_db.bat");
     var commrun = "perl " + path.join(process.cwd(),'VD','bin','download.pl '+ org1 + " " + filter+ " " + version);
-    var info = "vrl_genbank_info.gz";
+    var info = "vrl_genbank.info.gz";
     var ids = "vrl_idmapping.gz";
 	document.getElementById("running").innerHTML = "Downloading... Do not close the window until it is done.";
 	document.getElementById("Update").style.display='none';

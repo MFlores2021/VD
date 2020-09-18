@@ -120,7 +120,7 @@
 		      var db = path.join(folder,dbname);
           var commrun = "copy " + files[i].path + " "+ db +
              " & copy " + files_prot[i].path + " "+ db + "_prot" +
-             " & copy " + linfo[i].path + " "+ db + "_genbank_info" +
+             " & copy " + linfo[i].path + " "+ db + "_genbank.info" +
              " & copy " + lids[i].path + " "+ db + "_idmapping";
           
           exec(commrun, function(error,stdout,stderr){
@@ -132,7 +132,7 @@
 					format_db(db,"nucl");
 					format_db(db + "_prot","prot");
 					format_faidx(db);
-					zip_file(db + "_genbank_info",db + "_idmapping");
+					zip_file(db + "_genbank.info",db + "_idmapping");
 			  }
 			   document.getElementById("subject").innerHTML = "Done!\n";
 		   }); 

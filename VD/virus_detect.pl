@@ -131,7 +131,7 @@ my $diff_contig_cover = 0.5;
 my $diff_contig_length= 100; 
 my $debug; my $email; my $user;
 my $exp_valuexs;
-my $seq_info = "vrl_genbank_info.gz";
+my $seq_info = "vrl_genbank.info.gz";
 my $prot_tab = "vrl_idmapping.gz";
 
 my $siRNA_percent = 0.5;		# Proportion cutoff of 21-nt and 22-nt siRNAs for 
