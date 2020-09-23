@@ -35,11 +35,14 @@ foreach my $file (@remote_files2) {
 	}
 }
 my $info = "vrl_genbank.info.gz";
+my $info_old = "vrl_genbank_info.gz";
 my $ids = "vrl_idmapping.gz";
 my $url1 = "ftp://" .$ftp_site . "/" . $ftp_dir . "/" . $version  . "/" . $info ;
+my $url3 = "ftp://" .$ftp_site . "/" . $ftp_dir . "/" . $version  . "/" . $info_old ;
 my $url2 = "ftp://" .$ftp_site . "/" . $ftp_dir . "/" . $version  . "/" . $ids ;
 getstore($url1, $info);
 getstore($url2, $ids);
+getstore($url3, $info);
 
 $ftp->quit();
 
