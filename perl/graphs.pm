@@ -97,7 +97,7 @@ sub graph_cumulative_clean_sum{
 			}
 		}
 
-		my $result = _draw_bars(\@data_n,$dir,'Cleanning statistics','trimming_graph.png',\@col_names);
+		my $result = _draw_bars(\@data_n,$dir,'Cleaning statistics','trimming_graph.png',\@col_names);
 
 	}
 }
