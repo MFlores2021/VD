@@ -67,7 +67,7 @@ if ($controlfile ne 'NA'){
 ### Save options in a file.
 open my $writef, '>>', catfile($dir,"running_options.txt") or warn "couldn't open: $!";
 my $datestring = localtime();
-my $logoptions = "Options for runnign VDW:\n" .
+my $logoptions = "Options for running VDW (v0.93):\n" .
 	"========================\n" .
 	"Results are in folder: " . $dir  . "\n" .
 	"Files: ". join(",",@files) . "\n" .
@@ -202,6 +202,7 @@ foreach my $file1 (@files) {
 		my $samtools = catfile("$BIN_DIR","samtools"); 
 
 		if ($data_type eq 'mRNA'){
+			Util::process_cmd("$align_program index -p $control -a bwtsw $control 2>> $TEMP_DIR/bwa-mem.log", $debug) unless -s "$control.amb";
 			Util::process_cmd("$align_program mem $align_parameters $control $file 1> $file.sam 2>> $TEMP_DIR/bwa-mem.log", $debug);
 		} else {
 	  		align::align_to_reference($align_program, $file, $control, "$file.sam", $align_parameters, 10000, $TEMP_DIR, $debug);
