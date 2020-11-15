@@ -194,13 +194,18 @@ foreach my $file1 (@files) {
 	 }
 	 
 	### Control aligment to create statistic 
+	my $data_type = Util::detect_DataType($file);
 	if ( $controlseq ne 'NA'){ 
 		my $control = catfile($localdir,"VD","databases",$controlseq);
 
 		my $align_parameters = $cores ne 'NA' ?  " -t $cores  " : " -t 1 ";
 		my $samtools = catfile("$BIN_DIR","samtools"); 
 
-	  	align::align_to_reference($align_program, $file, $control, "$file.sam", $align_parameters, 10000, $TEMP_DIR, $debug);
+		if ($data_type eq 'mRNA'){
+			Util::process_cmd("$align_program mem $align_parameters $control $file 1> $file.sam 2>> $TEMP_DIR/bwa-mem.log", $debug);
+		} else {
+	  		align::align_to_reference($align_program, $file, $control, "$file.sam", $align_parameters, 10000, $TEMP_DIR, $debug);
+	  	}
 
 		if (-s "$file.sam")
 		{

@@ -58,7 +58,7 @@
       <p>This option enables you to download classified and non-redundant databases available on the  <a onclick="nw.Shell.openExternal('ftp://bioinfo.bti.cornell.edu/pub/program/VirusDetect/');" href="">VirusDetect ftp</a> site. This virus reference database is generated from the GenBank virus database (gbvrl) and updated on an occasional basis. The virus sequence databases have been classified into different kingdoms including plant, vertebrate, invertebrate, fungus, bacteria, algae, archaea and protozoa using a <a onclick="nw.Shell.openExternal('https://github.com/kentnf/virus-detect-new/tree/master/tools/genbank_vrl_classification');" href="">Virus Classification Pipeline</a>. Subdividing the different virus sequences by host reduces their size and increases the speed of analysis. Unique virus sequence databases were generated for each host kingdom by removing redundant sequences of 100%, 97% and 95% identity, respectively. Reducing the redundancy level reduces the database size, increasing the speed of analysis as well as reducing the complexity of results.
       </p><br>
 	  <label>Current local NCBI database version installed on this computer</label><br>
-    <textarea readonly type="text" id="currentv" name="currentv" placeholder=""></textarea>
+    <textarea readonly type="text" id="currentv" name="currentv" placeholder="No database available yet, please download the database"></textarea>
     <br><br>
     <label>Update to NCBI database version (latest available version is automatically displayed. If version is not listed, please close VDW and open again.)</label><br>
 	  <input type="text" id="version" name="version" placeholder="">
