@@ -339,13 +339,13 @@ graph_cumulative_clean_sum($dir);
 create_html($dir,$spike,\@array_files,$control_cutoff,$av,$sd,$controlconst);
 
 # # Delete partial results
-# foreach my $file ( glob catfile($dir,'*') ) {
+foreach my $file ( glob catfile($dir,'*') ) {
 	# if ($file =~ "spikeSum\.txt") {unlink $file;}
 	# if ($file =~ "\.spike\.txt") {unlink $file;}
 	# if ($file =~ "control\.tsv") {unlink $file;}
 	# if ($file =~ "spikeSummary\.txt") {unlink $file;}
-	 if (! -d $file  && ($file =~ "\.fastq$" || $file =~ "\.fq$" ) ) {unlink $file;}	
-# }
+	 if (! -d $file  && ($file =~ /\.fastq$/ || $file =~ /\.fq$/ ) ) {unlink $file;}	
+}
 
 closedir(DIR); 
 
@@ -526,8 +526,10 @@ sub print_summary {
 		#control
 		if($dataFile1{$file}{concov}){ 
 			#Control sequence coverage,Norm deph,Norm deph kb,#Mapped reads to control,%Mapped reads to control
-			my $normDeph = sprintf("%.2f", ($dataFile1{$file}{depth}/$clean*1000000));
-			my $normDephKb = sprintf("%.6f", $dataFile1{$file}{kb}*1000);
+			my $normDeph = 'NA';
+			if($dataFile1{$file}{depth} ne 'NA') { $normDeph = sprintf("%.2f", ($dataFile1{$file}{depth}/$clean*1000000)); }
+			my $normDephKb = 'NA';
+			if($dataFile1{$file}{kb} ne 'NA') { $normDeph = sprintf("%.6f", $dataFile1{$file}{kb}*1000); }
 
 			$out = $out . $dataFile1{$file}{concov}."\t". $normDeph ."\t". $normDephKb . "\t". $dataFile1{$file}{map}. "\t". $dataFile1{$file}{permap}."\t";
 		} else {
