@@ -344,6 +344,7 @@ create_html($dir,$spike,\@array_files,$control_cutoff,$av,$sd,$controlconst);
 	# if ($file =~ "\.spike\.txt") {unlink $file;}
 	# if ($file =~ "control\.tsv") {unlink $file;}
 	# if ($file =~ "spikeSummary\.txt") {unlink $file;}
+	 if (! -d $file  && ($file =~ "\.fastq$" || $file =~ "\.fq$" ) ) {unlink $file;}	
 # }
 
 closedir(DIR); 

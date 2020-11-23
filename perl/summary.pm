@@ -234,6 +234,12 @@ sub _print_detail {
 		$content .= '<h3>Clean reads</h3><br>
 			  <img width="80%" src="'. $file . '_reads.png" /><br>';
 	}
+
+	#Create link to fastqc
+	my $file_fastqc = catfile($dir,$file . '_fastqc.html');
+	if (-e -s $file_fastqc){
+		$content .= '<a href="'. $file_fastqc .'" target="_blank">FastQC report</a><br>';
+	}
 	
 	#Print blastn
 	my $file_blastn = catfile($dir,'result_' . $org_file ,'blastn.html');
