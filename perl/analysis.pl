@@ -217,7 +217,7 @@ foreach my $file1 (@files) {
 		
 		} 
 		my $controout = '';
-		$controout = $controout . "File\tControl sequence length\tControl sequence coverage\tDepth\tNorm deph\tNorm deph kb\t#Mapped reads to control\t%Mapped reads to control\n";
+		$controout = $controout . "File\tControl sequence length\tControl sequence coverage\tDepth\tDepth\tNorm deph kb\t#Reads\t#Mapped reads to control\t%Mapped reads to control\n";
 		
 		if (-s "$file.pileup" && -s "$control.fai"){	
 			my $num=0; my $den=0;
@@ -233,18 +233,18 @@ foreach my $file1 (@files) {
 				my @G = split;
 				$size=$G[1];
 			}
-			#File name
+			#0 File name
 			$controout = $controout . "$file1\t";
-			#Control sequence length
+			#1 Control sequence length
 			$controout = $controout .  $size;
-			#Control sequence coverage
+			#2 Control sequence coverage
 			$controout = $controout . "\t". sprintf("%.2f",($den/$size*100)) . "%";
 			my $depth=$num/$den;
-			#Depth
-			$controout = $controout . "\t". sprintf("%.2f",$depth);
-			#Norm deph
+			#3 Depth
 			$controout = $controout . "\t". $depth;
-			#Norm deph kb
+			#4 Depth
+			$controout = $controout . "\t". $depth;
+			#5 Norm deph kb
 			$controout = $controout . "\t". $depth/$size;
 		} else {
 			#File name
@@ -266,7 +266,7 @@ foreach my $file1 (@files) {
 			while (my $line = <$fh>){
 				if(index $line, 'total (QC', >=0){
 					$line =~ m/(\d+ )/;
-					##Mapped reads to control
+					##Reads
 					$controout = $controout . "\t" . $1;
 				}
 				if(index $line, 'mapped (', >=0){
@@ -418,7 +418,7 @@ sub print_summary {
 			   	#Control sequence coverage
 				$dataFile1{trim($field[0])}{concov}   = trim($field[2]); 
 				#Norm deph
-				$dataFile1{trim($field[0])}{seq}   = trim($field[4]);  
+				$dataFile1{trim($field[0])}{depth}   = trim($field[4]);  
 				#Norm deph kb
 				$dataFile1{trim($field[0])}{kb}   = trim($field[5]);
 				##Mapped reads to control
@@ -525,8 +525,9 @@ sub print_summary {
 		#control
 		if($dataFile1{$file}{concov}){ 
 			#Control sequence coverage,Norm deph,Norm deph kb,#Mapped reads to control,%Mapped reads to control
-			my $normDeph = sprintf("%.2f", ($dataFile1{$file}{seq}/$clean*1000000));
-			my $normDephKb = sprintf("%.6f", $dataFile1{$file}{kb});
+			my $normDeph = sprintf("%.2f", ($dataFile1{$file}{depth}/$clean*1000000));
+			my $normDephKb = sprintf("%.6f", $dataFile1{$file}{kb}*1000);
+
 			$out = $out . $dataFile1{$file}{concov}."\t". $normDeph ."\t". $normDephKb . "\t". $dataFile1{$file}{map}. "\t". $dataFile1{$file}{permap}."\t";
 		} else {
 			$out = $out . "NA\tNA\tNA\tNA\tNA\t";
