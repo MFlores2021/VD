@@ -86,7 +86,7 @@ sub create_html {
 		my $detail = '<div class="row featurette">
 			          <div class="col-md-12">
 			            <h2 class="featurette-heading">Samples detail</h2>
-			            <p class="lead"></p>
+			            <p class="lead">Identification of viral sequences is critically dependent upon the quality of the database(s) used. The default databases used by VDW contain all sequences annotated as viral from a certain host order that are available from Genbank. As a result some host derived proteins can be misidentified as viral because some viral proteins are related to host proteins. Typical examples in plants are heat shock (Hsp70) proteins found in closteroviruses, or reverse transcriptases of Caulimoviridae that are homologous to those of retrotransposons. Wrongly annotated sequences in the public databases can also lead to misinterpretation of findings, e.g. some sequences annotated as viral actually correspond to host proteins. When unexpected or uncertain results are obtained, a first check should be to click the link to the source sequence accession in Genbank and perform a BLAST with that sequence against the entire Genbank. This can quickly reveal if the sequence in question is misannotated Genbank or a sequence that may have homology to host DNA.</p>
 			          </div><div class="col-md-12">';
 		print $fh $detail;
 
