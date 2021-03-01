@@ -910,7 +910,7 @@ sub trim_XNseq
 	my $in = Bio::SeqIO->new(-format=>'fasta', -file=>"$input_contig.masked");
 	while(my $inseq = $in->next_seq)
 	{
-		$seq_length= $inseq->length;
+		$seq_length= $inseq->length || 0.000000000000001;
 		$seq_id    = $inseq->id;
 		$sequence  = $inseq->seq;
 		my $xn_num = $sequence =~ tr/XxNn/XxNn/;
@@ -1011,8 +1011,8 @@ sub remove_redundancy_main
 				# partily redundancy , combine then replace
 				# the format return_string is different
 				# 1. hit_name:query_name 
-				my @names = split(/\:/, $return_col[0]);#µÚÒ»ÁĞÊÇ(hit_name:query_name)		
-				$inset{$names[0]} = $return_col[1];; #Ô­À´hit_name¶ÔÓ¦µÄ¼ÇÂ¼±»ĞÂĞòÁĞ¸²¸Ç
+				my @names = split(/\:/, $return_col[0]);#ç¬¬ä¸€åˆ—æ˜¯(hit_name:query_name)		
+				$inset{$names[0]} = $return_col[1];; #åŸæ¥hit_nameå¯¹åº”çš„è®°å½•è¢«æ–°åºåˆ—è¦†ç›–
 				$restset .= $query;
 			}
 		}
@@ -1138,7 +1138,7 @@ sub findRedundancy
 					if ($query_start -1 <= $max_end_clip  && $query_to_end <= $max_end_clip)  
 					{
 						my $hit_seq = $inset->{$hit_name}; 
-					    	#print "type1\t".$hit_name."\t".$query_name."\t".$hit_seq."\n";#Êä³öºÏ²¢ĞÅÏ¢¹©ÈË¹¤Ğ£¶Ô£¬µ÷ÊÔÓÃ
+					    	#print "type1\t".$hit_name."\t".$query_name."\t".$hit_seq."\n";#è¾“å‡ºåˆå¹¶ä¿¡æ¯ä¾›äººå·¥æ ¡å¯¹ï¼Œè°ƒè¯•ç”¨
 						return $hit_name."\tr";
 					}
 
