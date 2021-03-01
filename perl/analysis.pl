@@ -397,11 +397,11 @@ sub print_summary {
 			my @field = split /\t/, $line1;  
 			   if (length(trim($field[0])) > 0){
 				$dataFile{trim($field[0])}{raw}   = trim($field[1]);  
-				$dataFile{trim($field[0])}{clean}   = trim($field[7]);
+				$dataFile{trim($field[0])}{clean}   = trim($field[8]);
 				$field[0] =~ s/.fastq//;
 				$field[0] =~ s/.fq//;
 				$dataFile{trim($field[0].".clean.fq")}{raw}   = trim($field[1]);  
-				$dataFile{trim($field[0].".clean.fq")}{clean}   = trim($field[7]);
+				$dataFile{trim($field[0].".clean.fq")}{clean}   = trim($field[8]);
 			}
 		}
 	}
