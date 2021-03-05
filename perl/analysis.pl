@@ -130,10 +130,10 @@ foreach my $file1 (@files) {
 
     ### FastQC
     my $fqcdir = catfile($localdir,'VD', 'bin','fastQC');
-    my $commfqc = "java -Xmx250m -classpath " . $fqcdir . ";" . catfile($fqcdir,"sam-1.103.jar") . ";" . catfile($fqcdir,"jbzip2-0.9.jar") . " uk.ac.babraham.FastQC.FastQCApplication " . $file . " 2>NULL";
+    # my $commfqc = "java -Xmx250m -classpath " . $fqcdir . ";" . catfile($fqcdir,"sam-1.103.jar") . ";" . catfile($fqcdir,"jbzip2-0.9.jar") . " uk.ac.babraham.FastQC.FastQCApplication " . $file . " 2>NULL";
 	
-    system($commfqc) == 0
-        or warn "Error: $commfqc . $?";
+    # system($commfqc) == 0
+    #     or warn "Error: $commfqc . $?";
 
     ### Trimming
     if($adaptor ne 'NA' && $length ne 'NA'){
