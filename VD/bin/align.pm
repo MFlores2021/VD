@@ -1011,8 +1011,8 @@ sub remove_redundancy_main
 				# partily redundancy , combine then replace
 				# the format return_string is different
 				# 1. hit_name:query_name 
-				my @names = split(/\:/, $return_col[0]);#第一列是(hit_name:query_name)		
-				$inset{$names[0]} = $return_col[1];; #原来hit_name对应的记录被新序列覆盖
+				my @names = split(/\:/, $return_col[0]);#The first column is (hit_name:query_name)		
+				$inset{$names[0]} = $return_col[1];; #The record corresponding to the original hit_name is overwritten by the new sequence
 				$restset .= $query;
 			}
 		}
@@ -1138,7 +1138,7 @@ sub findRedundancy
 					if ($query_start -1 <= $max_end_clip  && $query_to_end <= $max_end_clip)  
 					{
 						my $hit_seq = $inset->{$hit_name}; 
-					    	#print "type1\t".$hit_name."\t".$query_name."\t".$hit_seq."\n";#输出合并信息供人工校对，调试用
+					    	#print "type1\t".$hit_name."\t".$query_name."\t".$hit_seq."\n";#Output combined information for manual proofreading and debugging 
 						return $hit_name."\tr";
 					}
 
