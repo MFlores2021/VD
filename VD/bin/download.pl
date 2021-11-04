@@ -8,45 +8,23 @@ use Net::FTP;
 my $org =$ARGV[0]; # 'plant';
 my $filter = $ARGV[1]; #'U95';
 my $version = $ARGV[2]; #'v229';
-my $ftp_site     = 'bioinfo.bti.cornell.edu';
-my $ftp_dir     = 'pub/program/VirusDetect/virus_database';
-my $glob         = 'v*';
-my $glob2         = '*gz';
 
-my $ftp = Net::FTP->new($ftp_site) 
-    or die "Could not connect to $ftp_site: $!";
-
-$ftp->login() 
-    or die "Could not login to $ftp_site with user  $!";
-
-my $site=$ftp_dir . "/" . $version. "/" . $filter;
-$ftp->cwd($site) 
-    or die "Could not change remote working " . 
-             "directory to $site";
-
-my @remote_files2 = $ftp->ls($glob2);
-
-foreach my $file (@remote_files2) {
-	if ( $file =~ m/\Q$org/is ) {
-        my $url = "ftp://" .$ftp_site . "/" . $ftp_dir . "/" . $version  . "/" . $filter . "/" . $file ;
-
-		getstore($url, $file);
-		print "$file";
-	}
-}
+my $ftp_site = 'http://bioinfo.bti.cornell.edu';
+my $ftp_dir = 'ftp/program/VirusDetect/virus_database';
+my $site = $ftp_site . "/" . $ftp_dir . "/" . $version;
 my $info = "vrl_genbank.info.gz";
 my $info_old = "vrl_genbank_info.gz";
 my $ids = "vrl_idmapping.gz";
-my $url1 = "ftp://" .$ftp_site . "/" . $ftp_dir . "/" . $version  . "/" . $info ;
-my $url3 = "ftp://" .$ftp_site . "/" . $ftp_dir . "/" . $version  . "/" . $info_old ;
-my $url2 = "ftp://" .$ftp_site . "/" . $ftp_dir . "/" . $version  . "/" . $ids ;
+
+my $url1 = $site  . "/" . $info;
+my $url3 = $site  . "/" . $info_old;
+my $url2 = $site  . "/" . $ids;
+
+$version =~ s/v//;
+my $db_file = $org . "_" . $version  . "_" . $filter .".tar.gz";
+my $url4 = $site  . "/" . $filter ."/". $db_file;
+
 getstore($url1, $info);
 getstore($url2, $ids);
 getstore($url3, $info);
-
-$ftp->quit();
-
-    # print "plant_229_U95.tar.gz";
-
-
-
+getstore($url4, $db_file);
