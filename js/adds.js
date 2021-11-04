@@ -1,7 +1,7 @@
 function update_db(orga,filt, vers){
 	
     var org = document.getElementById(orga).value;
-    var org1 = capitalize(org);
+    org = decapitalize(org);
     var filter = document.getElementById(filt).value;
     var version = document.getElementById(vers).value;
     const path = require('path');
@@ -9,7 +9,7 @@ function update_db(orga,filt, vers){
     var exec = require('child_process').exec;
     var execSync = require('child_process').execSync;
     var runperl = path.join("perlfiles","tmp_db.bat");
-    var commrun = "perl " + path.join(process.cwd(),'VD','bin','download.pl '+ org1 + " " + filter+ " " + version);
+    var commrun = "perl " + path.join(process.cwd(),'VD','bin','download.pl '+ org + " " + filter+ " " + version);
     var info = "vrl_genbank.info.gz";
     var ids = "vrl_idmapping.gz";
 	document.getElementById("running").innerHTML = "Downloading... Do not close the window until it is done.";
@@ -171,9 +171,9 @@ function extension_gz(element) {
   return extName.test(element); 
 };
 
-const capitalize = (s) => {
+const decapitalize = (s) => {
   if (typeof s !== 'string') return ''
-  return s.charAt(0).toUpperCase() + s.slice(1)
+  return s.charAt(0).toLowerCase() + s.slice(1)
 }
 
 function unzip(dir){
