@@ -205,8 +205,8 @@ function unzip_file(file){
   console.log("unziping");
     const path = require('path');
     var execSync = require('child_process').execSync; 
-    var commrun = "tar -zxvf " + file + " --strip-components 1 -C " + path.join(process.cwd(),'VD','databases');
-
+    var sevenz = path.join(process.cwd(),'VD', 'bin','7za.exe ');
+    var commrun = sevenz + " x -so " + file + " | " + sevenz + " e -si -ttar -o" + path.join(process.cwd(),'VD','databases');
     var ff = execSync(commrun);
 }
 function zip_file(file,file2){
