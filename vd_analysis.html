@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Analysis</title>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <!-- <link rel="stylesheet" type="text/css" href="css/spinner.css"> -->
+    <link rel="stylesheet" type="text/css" href="css/w3.css">
+    <script type="text/javascript" src="js/menu.js"></script>
+    <script type="text/javascript" src="js/integrate.js"></script>
+    <script type="text/javascript" src="js/functions.js"></script>
+    <script type="text/javascript" src="js/adds.js"></script>
+    <script type="text/javascript" src="js/graph.js"></script>
+
+    <style type="text/css">
+      body, html {
+        height: 100%;
+      }
+      .line {
+          fill: none;
+          stroke: #ffab90;
+          stroke-width: 3;
+      }
+        
+      .overlay {
+        fill: none;
+        pointer-events: all;
+      }
+
+      /* Style the dots by assigning a fill and stroke */
+      .dot {
+          fill: #ffab00;
+          stroke: #fff;
+      }
+        
+        .focus circle {
+        fill: none;
+        stroke: steelblue;
+      }
+
+        .bar {
+        fill: steelblue;
+      }
+
+      .bar:hover {
+        fill: brown;
+      }
+
+      .axis--x path {
+        display: none;
+      }
+
+    </style>
+
+</head>
+<body>
+
+  <script>
+    $( document ).ready(function() {
+      $("#Menu").load("menu.html"); 
+      nw.Window.get().on('new-win-policy', function(frame, url, policy) { policy.ignore(); nw.Shell.openExternal(url); }); 
+      read_db();
+      read_reference();
+      read_control();
+	  check_java();
+	  check_perl();
+    });
+
+
+  function collap(elm) {
+    elm.classList.toggle("active");
+    var content = elm.nextElementSibling;
+    if (content.style.maxHeight){
+      content.style.maxHeight = null;
+    } else {
+      content.style.maxHeight = content.scrollHeight + "px";
+    } 
+  };
+  document.getElementById('outputtext').style.display = "none";
+  </script>
+
+  <div id="Menu"></div>
+
+
+<!-- Use any element to open the sidenav -->
+  <span onclick="openNav()" style="color: chartreuse;background-color: black;"><B>&nbsp;&#9776;&nbsp;Menu&nbsp;&nbsp;</B> </span>
+  <h3 align="center">Analysis</h4>
+  <div id="main">
+    <!-- <div class="container" id="container"> -->
+        <label id="ruta"></label>
+        <div class="w3-panel w3-light-grey w3-card-2 w3-round-large">
+          <label><br>Enter run folder name (no spaces; required) <div class="tooltip">(?)<span class="tooltiptext">Provide a name for the folder in which the result of this run will be saved.</span></div></label><br>
+          <input type="text" id="pname" name="projectname" placeholder=""><br>
+        </div>
+
+        <div class="w3-panel w3-light-grey w3-card-2 w3-round-large">
+          <div id=remove>
+              <label id="upload" for="upload"><br>Select file(s) to analyze (.fastq .fq .gz extension; required) <br><br></label>
+              <input id="fileDialog" type="file" multiple accept=".fastq, .fq, .tar.gz, .gz" nwworkingdir="C:\"  ><br><br></input>
+          </div>
+          <button class="collapsible" onclick="collap(this);">Sequence cleaning & trimming (optional in case of raw reads) <div class="tooltip">(?)<span class="tooltiptext">If raw reads are provided VDW can clean and trim sequence libraries, you will have to provide the sequencing adaptor and optionally minimum and maximimum sequence length after trimming.</span></div></button>
+          <div class="content-collap" >
+			<input type="checkbox" id="dedup" name="dedup" value="NA"><label for="dedup">Remove duplicated reads <div class="tooltip">(?)<span class="tooltiptext1">Reads that are identical are removed with this option, keeping only unique reads. This can reduce the computing time if many duplicated reads are present in the data.</span></div></label><br><b>Important note: when deduplicating reads, read counts for contamination control and spike in sequences for library quality control are no longer informative for their intended purpose.</b><br>
+            <label><br>Sequences of the adaptor <div class="tooltip">(?)<span class="tooltiptext1">Provide the sequence for the library adaptor sequence, commonly used adaptor sequences are provided in the VDW user manual. Ex. CAGATCGGAAGAGCACA</span></div></label><br>
+              <input type="text" id="adaptor" name="adaptor" placeholder="" onkeypress="return onlyAlphabets(event,this);">
+              <br>
+              <label>Minimum length of sequence after trimming <div class="tooltip">(?)<span class="tooltiptext">A minimum length for sequences after trimming can be provided, this is useful when you want to consider only true siRNA (21-24nts) or avoid extremely short sequences in your analysis, reducing read numbers and analysis time.</span></div></label><br>
+              <input type="text" id="minlength" name="minlength" placeholder="" onkeypress="return onlyNos(event,this);">
+			  <br>
+			  <label>Maximum length of sequence after trimming <div class="tooltip">(?)<span class="tooltiptext">A maximum length for sequences after trimming can be provided, this is useful when you want to consider only true siRNA (21-24nts) or avoid extremely long sequences in your analysis, reducing read numbers and analysis time.</span></div></label><br>
+              <input type="text" id="maxlength" name="maxlength" placeholder="" onkeypress="return onlyNos(event,this);">
+          </div>
+          <button class="collapsible" onclick="collap(this);">Library quality control (optional)</button>
+          <div class="content-collap">
+              <label><br><br>Enter spike sequences <div class="tooltip">(?)<span class="tooltiptext1">Synthetic RNA spike-in sequences can be added to samples before (recommended to control the complete library prep process), or after RNA extraction. Recovery of spike-in sequences among the reads of your sample library will provide an indication of the efficiency of library preparation and enable absolute quantification of (small) RNA amounts in the sample. Ex.<br>ATGGAGCCAGTTC<br>GGACTCATTACGG<br>GCTTGCCGATGAA<br>AGCACTCTGGGAT<br>ATGCTGGACCATG<br>AAGCCTGCGTATG<br>GAGCGTCCGATAT<br>CCGGGATCGTTAA<br>CGATATGCCTGGACG</span></div></label><br>
+              <textarea rows=6 id="spiketext" onkeypress="return onlyAlphabets(event,this);"></textarea><br>
+              <label>Select the control sequence <div class="tooltip">(?)<span class="tooltiptext">Cross sample contamination can be a problem when running several indexed samples in a same lane of a flowcell. To control for cross-sample contamination and adjust the default threshold of average read depth and coverage for virus detection by VDW, one can include a control sample containing a known virus at high concentration and unrelated to the sample under investigation. If included VWD will provide a separate output on genome coverage and sequencing depth of the control over all samples selected for the run.</span></div></label><br>
+              <select  class="form-control" id="control" name="control">
+                <option value=""></option>
+              </select>
+              <label>Add control sample <div class="tooltip">(?)<span class="tooltiptext">Here you can define which <br> of your samples is the control.</span></div></label><br>
+              <input type="text" id="ccontrol" name="ccontrol" placeholder="">
+			  <label>Control cutoff: Average + Number*SD (default: Number=2) <div class="tooltip">(?)<span class="tooltiptext">The control cutoff value can be used to determine an expected contamination rate of highly abundant reads of a virus identified from one sample to any other sample of a pooled library and is based on the detected contamination from the sample with your control virus (when included) throughout the pooled library. Use it by multiplying the control cutoff value with the Depth (Norm)' value of any virus with high 'Depth (Norm)' values identified in any sample, which will provide you a 'Depth (Norm)' you could expect of that same virus in other samples based purely on contamination and could thus represent false positives.</span></div></label>
+			  <input type="text" id="number_sd" name="number_sd" placeholder="">
+          </div>
+          <br>
+        </div>
+
+        <div class="w3-panel w3-light-grey w3-card-2 w3-round-large"><br>
+			     <label>Select host reference (optional) <div class="tooltip">(?)<span class="tooltiptext">A host reference sequence database, if available and loaded into VDW Menu, can be used to subtract RNA reads derived from the host, thus reducing the number of non-relevant reads for virus detection and consequently computing time. This can speed up the analysis, remove unspecific hits caused by genome integrated viral sequences and increase the chances of identifying foreign sequences among "undetermined contigs".</span></div></label><br>
+            <select  class="form-control" id="references" name="references">
+              <option value=""></option>
+            </select>
+            <label>Select virus sequence database (required) <div class="tooltip">(?)<span class="tooltiptext">Select one of the virus sequence databases you have previously loaded into VDW in the Menu.
+</span></div></label><br>
+            <select  class="form-control" id="databases" name="databases">
+              <option value=""></option>
+            </select><br>
+        </div>
+
+        <div class="w3-panel w3-light-grey w3-card-2 w3-round-large">
+          <label for="cores">Change default parameters (optional) <div class="tooltip">(?)<span class="tooltiptext">VirusDetect runs with default parameters which have been determined to be optimal over a large range of samples to ensure maximum accuracy and avoid false positive discovery due to cross sample contamination. However, variation may exist between samples from different host, library preparation approaches and sequencing platforms, or the level of sensitivity individual scientist require. Thus, VDW enables some of the key parameters to be adjusted according to the users needs. These parameters an their default value can be found <a onclick="nw.Shell.openExternal('https://research.cip.cgiar.org/virusdetect/VDW_Manual.pdf');" style="color:blue">here</a>, and can be adjusted by copying the parameter modifiers and providing the adjusted value. Each parameter needs to be provided on a seperate line.</span></div></label>
+          <textarea type="text" id="param" name="param" placeholder="" ></textarea>
+          <label for="cores"><br>Enter number of threads (Default 1)<div class="tooltip">(?)<span class="tooltiptext">Here the number of processor threads for running the software can be provided. The more threads provided, the more parallel processes the software can run, and the faster it will run, particularly if many samples have been provided as input simultaneously. The number of threads you can assign, will depend on the number of CPUs of your computer and the number of cores on each CPU.</span></div></label>
+          <input type="text" id="cores" name="cores" placeholder="1" onkeypress="return onlyNos(event,this);">
+        </div>
+<!-- </div> -->
+
+    <input type="submit" id="run" value="Run" onclick="run_VD('#fileDialog')"><br>
+		<label id="running"></label>
+		<textarea id="outputtext" style="height: 150px;overflow-y:scroll;display: none;" readonly></textarea>
+		
+    </div>
+
+	</div>
+	
+    <div id="graph"> </div>
+    <div id="graph1"></div>
+</body>
+</html>

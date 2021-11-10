@@ -1,0 +1,43 @@
+<div id="mySidenav" class="sidenav">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+  <a href="index.html">Home</a><hr style="border-width: .3px">
+  <button class="dropdown-btn">Virus reference database 
+    <i class="fa fa-caret-down"></i>
+  </button>
+  <div class="dropdown-container">
+    <a href="ncbi.html"> Download/Update NCBI database</a>
+    <a href="localdb.html"> Load custom database</a>
+  </div>
+    <a href="reference.html"> Host reference (optional)</a>
+  <a href="control.html"> Control virus (optional)</a>
+  <hr style="border-width: .5px;color: #262626">
+  <a href="vd_analysis.html"> Analysis</a><hr style="border-width: .5px">
+  <a onclick="gui.Shell.showItemInFolder(path.join(process.cwd(),'results'))">Results</a><hr style="border-width: .5px">
+  <button class="dropdown-btn">About VDW
+    <i class="fa fa-caret-down"></i>
+  </button>
+  <div class="dropdown-container">
+  <a href="about.html">About/citation</a>
+  <a onclick="nw.Shell.openExternal('https://research.cip.cgiar.org/virusdetect/VDW_Manual.pdf');">User manual</a>
+  <a onclick="nw.Shell.openExternal('https://research.cip.cgiar.org/virusdetect');" href="">Check for updates</a>
+  <a href="contact.html">Contact us</a>
+  </div>
+</div>
+<script type="text/javascript">
+  var dropdown = document.getElementsByClassName("dropdown-btn");
+  var i;
+
+  for (i = 0; i < dropdown.length; i++) {
+    dropdown[i].addEventListener("click", function() {
+      this.classList.toggle("active");
+      var dropdownContent = this.nextElementSibling;
+      if (dropdownContent.style.display === "block") {
+        dropdownContent.style.display = "none";
+      } else {
+        dropdownContent.style.display = "block";
+      }
+    });
+  }
+  var path = require("path");
+  var gui = require('nw.gui');
+</script>

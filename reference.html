@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Host reference (optional)</title>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+      <script src="https://d3js.org/d3.v5.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/menu.js"></script>
+    <script type="text/javascript" src="js/functions.js"></script>
+</head>
+<body>
+  <script>
+  	$( document ).ready(function() {
+        $("#Menu").load("menu.html");  
+	});
+  </script>
+  <div id="Menu"></div>
+
+	<span onclick="openNav()" style="color: chartreuse;background-color: black;"><B>&nbsp;&#9776;&nbsp;Menu&nbsp;&nbsp;</B> </span>
+	<h3 align="center">Host reference (optional)</h3>
+  <div id="main">
+  	<div class="container" id="container">
+      <p>VirusDetect can use a sequence of the virus host to subtract reads with homology to the host, thus removing host derived sequences and reducing the amount of sequences for assembly and virus identification. This can speed up the analysis, remove unspecific hits caused by genome integrated viral sequences and increase the chances of identifying foreign sequences among "undetermined contigs". The host reference should have a fasta or gz file extension.</p>
+   <!--   <form>-->
+	  	<label for="upload">Upload host reference (.fasta or .fa; optional)</label><br><br>
+	    <input id="fileDialog" type="file" accept=".fasta,.fa" nwworkingdir="C:\"  /><br><br>
+	    <input type="submit"  value="Submit" onclick="upload_reference('#fileDialog','databases')"><br><br><br>
+	    <label id="subject" name="subject"></label>
+	<!--  </form>-->
+	</div>
+  </div>
+
+</body>
+</html>

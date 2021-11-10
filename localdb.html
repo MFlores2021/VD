@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Load custom database</title>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+      <script src="https://d3js.org/d3.v5.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/menu.js"></script>
+   	<script type="text/javascript" src="js/functions.js"></script>
+	<script type="text/javascript" src="js/adds.js"></script>
+</head>
+<body>
+  <script>
+  	$( document ).ready(function() {
+        $("#Menu").load("menu.html");  
+	});
+  </script>
+  <div id="Menu"></div>
+
+	<span onclick="openNav()" style="color: chartreuse;background-color: black;"><B>&nbsp;&#9776;&nbsp;Menu&nbsp;&nbsp;</B> </span>
+	<h3 align="center">Load custom database</h3>
+  <div id="main">
+  	<div class="container" id="container">
+      <p>This option enables you to create your own custom virus sequence database and enables you to focus on viruses of your specific interest. To load a custom virus sequence database into VirusDetect-W, four files must first be created. Please see the user manual on how to create these.
+      </p> 
+      <label for="Nucl">1) Nucleotide FASTA file, with extension .fa or .fasta Example</label><br><br>
+	    <input id="fileDialog" type="file" nwworkingdir="C:\" accept=".fasta,.fa"/><br><br>
+      <label for="Nucl">2) Protein FASTA file containing translated protein sequences from the Nucleotide fasta file in the same order, with extension .fa or .fasta Example</label><br><br>
+      <input id="fileDialog2" type="file" nwworkingdir="C:\" accept=".fasta,.fa"/><br><br>
+      <label for="Nucl">4) a sequence information file with seven columns for each sequence containing sequence ID, sequence length, genus, virus name, number, host type, source of classification. Example </label><br><br>
+      <input id="info" type="file" nwworkingdir="C:\" accept=".txt,.gz"/><br><br>
+      <label for="Nucl">3) an ID file containing the ID of nucleotide fasta and translated ID protein sequence in two separate tabular columns on each line Example</label><br><br>
+      <input id="ids" type="file" nwworkingdir="C:\" accept=".txt,.gz"/><br><br>
+	    <input type="submit"  value="Submit" onclick="upload_localdb('#fileDialog','#fileDialog2','databases','#info','#ids');"><br><br><br>
+	    <div id="subject" name="subject"></div>
+	  <!-- </form> -->
+	</div>
+  </div>
+</body>
+</html>
