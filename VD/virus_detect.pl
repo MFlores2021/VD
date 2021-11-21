@@ -272,7 +272,7 @@ foreach my $sample (@ARGV)
 		#Util::process_cmd("mklink /d $TEMP_DIR\\$sample_base $sample_abs_source", $debug) unless -e "$TEMP_DIR/$sample_base";
 		Util::process_cmd("copy $sample $TEMP_DIR\\$sample_base", $debug) unless -e "$TEMP_DIR/$sample_base";
 	}
-	$sample = "$TEMP_DIR/$sample_base";             # change the sample name to the linke from this step
+	$sample = "$TEMP_DIR\\$sample_base";             # change the sample name to the linke from this step
 
 	# set parameters for remove reduncancy (rr)
 	my $rr_blast_word_size = int($min_overlap/3);
