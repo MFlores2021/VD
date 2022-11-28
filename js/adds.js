@@ -1,17 +1,20 @@
-function update_db(orga,filt, vers){
+function update_db(orga,filt, vers, ftp){
 	
     var org = document.getElementById(orga).value;
     org = decapitalize(org);
     var filter = document.getElementById(filt).value;
     var version = document.getElementById(vers).value;
+	  var ftp_site = document.getElementById(ftp).textContent;
+
     const path = require('path');
 
     var exec = require('child_process').exec;
     var execSync = require('child_process').execSync;
     var runperl = path.join("perlfiles","tmp_db.bat");
-    var commrun = "perl " + path.join(process.cwd(),'VD','bin','download.pl '+ org + " " + filter+ " " + version);
+    var commrun = "perl " + path.join(process.cwd(),'VD','bin','download.pl '+ org + " " + filter+ " " + version + " ") + ftp_site;
     var info = "vrl_genbank.info.gz";
     var ids = "vrl_idmapping.gz";
+
     let version1 = version.replace("v", "");
     var dbfile = path.join(process.cwd(), org + "_" + version1 + "_" + filter + ".tar.gz");
 	
@@ -209,7 +212,9 @@ function unzip_file(file){
   console.log("unziping");
     const path = require('path');
     var execSync = require('child_process').execSync; 
+
     var sevenz = path.join(process.cwd(),'VD', 'bin','7za.exe ');
+
     var commrun = sevenz + " x -so " + file + " | " + sevenz + " e -si -ttar -o" + path.join(process.cwd(),'VD','databases') + "";
     var ff = execSync(commrun);
 }
@@ -219,4 +224,6 @@ function zip_file(file,file2){
 	var tooldir = path.join(process.cwd(),'VD', 'bin','gzip.exe ');
     var commrun = tooldir + file + " " + file2;
     var ff = execSync(commrun);
+
 }
+

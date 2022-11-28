@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Manage external database repository</title>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/spinner.css">
+    <script type="text/javascript" src="js/menu.js"></script>
+    <script type="text/javascript" src="js/functions.js"></script>
+    <script type="text/javascript" src="js/adds.js"></script>
+</head>
+<body>
+  <script>
+  	$( document ).ready(function() {
+      $("#Menu").load("menu.html");  
+	  });
+
+	function update_db_url(){
+		var fs = require('fs');
+		const path = require('path');
+		var file = path.join("perlfiles","databases.lists");
+		var databaseurl = document.getElementById("ftp").value;
+		var ftp = databaseurl.trim();
+		databaseurl = ftp.replace(/\/+$/, '');
+		
+		if( !databaseurl.startsWith('http')){
+			alert("Insert a valid url ");
+			return;
+		}
+
+		fs.writeFile(file, databaseurl, function(err) {
+			if(err) {
+				document.getElementById("running").innerHTML = 'Something went wrong trying to store the database. ' + error;
+				return console.log(err);
+			}
+			document.getElementById("running").innerHTML = 'Database saved.';
+			console.log("The file was saved!");
+		}); 
+	}
+
+
+  </script>
+
+
+  <div id="Menu"></div>
+<!-- Use any element to open the sidenav -->
+  <span onclick="openNav()" style="color: chartreuse;background-color: black;"><B>&nbsp;&#9776;&nbsp;Menu&nbsp;&nbsp;</B> </span>
+  <h3 align="center">Manage external database repository</h3>
+  <div id="main">     
+    <div class="container" id="container">
+      <p>This option enables you to manage external databases repositories. The default database is  <a onclick="nw.Shell.openExternal('ftp://bioinfo.bti.cornell.edu/pub/program/VirusDetect/');" href="">VirusDetect ftp</a> site. This virus reference database is generated from the GenBank virus database (gbvrl) and updated on an occasional basis. Update the default url database repository to other resources as needed. If you have downloaded databases before and databases have the same name it will be overwritten.
+      </p><br>
+	  <label>Insert a database repository if you want to change the default. Please start with https://</label><br>
+		<textarea type="text" id="ftp" name="ftp" placeholder=""></textarea>
+    <br><br>
+	  
+	  <input type="submit" id="Update" value="Update" onclick="update_db_url()">
+	  <br><label id="running"></label>
+	</div>
+  </div>
+
+</body>
+</html>
