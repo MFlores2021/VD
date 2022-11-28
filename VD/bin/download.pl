@@ -8,10 +8,11 @@ use Net::FTP;
 my $org =$ARGV[0]; # 'plant';
 my $filter = $ARGV[1]; #'U95';
 my $version = $ARGV[2]; #'v229';
+my $ftp_site = $ARGV[3]; #'http://bioinfo.bti.cornell.edu/ftp/program/VirusDetect/virus_database'
 
-my $ftp_site = 'http://bioinfo.bti.cornell.edu';
-my $ftp_dir = 'ftp/program/VirusDetect/virus_database';
-my $site = $ftp_site . "/" . $ftp_dir . "/" . $version;
+$ftp_site =~ s/\/$//;
+
+my $site = $ftp_site . "/" . $version;
 my $info = "vrl_genbank.info.gz";
 my $info_old = "vrl_genbank_info.gz";
 my $ids = "vrl_idmapping.gz";
@@ -28,3 +29,5 @@ getstore($url1, $info);
 getstore($url2, $ids);
 getstore($url3, $info);
 getstore($url4, $db_file);
+
+1;

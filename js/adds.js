@@ -1,17 +1,21 @@
-function update_db(orga,filt, vers){
+function update_db(orga,filt, vers, ftp){
 	
     var org = document.getElementById(orga).value;
     org = decapitalize(org);
     var filter = document.getElementById(filt).value;
     var version = document.getElementById(vers).value;
+	var ftp_site = document.getElementById(ftp).textContent;
+
     const path = require('path');
 
     var exec = require('child_process').exec;
     var execSync = require('child_process').execSync;
     var runperl = path.join("perlfiles","tmp_db.bat");
-    var commrun = "perl " + path.join(process.cwd(),'VD','bin','download.pl '+ org + " " + filter+ " " + version);
+    var commrun = "perl " + path.join(process.cwd(),'VD','bin','download.pl '+ org + " " + filter+ " " + version + " ") + ftp_site;
     var info = "vrl_genbank.info.gz";
     var ids = "vrl_idmapping.gz";
+	let version1 = version.replace("v", "");
+	var dbfile = path.join(process.cwd(), org + "_" + version1 + "_" + filter + ".tar.gz");
 	document.getElementById("running").innerHTML = "Downloading... Do not close the window until it is done.";
 	document.getElementById("Update").style.display='none';
 
@@ -26,17 +30,18 @@ function update_db(orga,filt, vers){
           var database = path.join("VD","databases",stdout);
           try{
             var delPrev ="IF EXIST "+ path.join("VD","databases","vrl_*"+ org + "*" + filter + "*") + " DEL /F/Q/S " + path.join("VD","databases","vrl_*"+ org + "*" + filter + "*") + " >NUL";
-            execSync(delPrev,  { stdio:  'inherit' } ); 
+            execSync(delPrev,  { stdio:  'inherit' } );
             var eje=execSync("IF EXIST "+ stdout + " move " + stdout + " "+ database,  { stdio:  'inherit' } ); 
             execSync("IF EXIST "+ info + " move " + info + " "+ path.join("VD","databases"),  { stdio:  'inherit' } ); 
-            execSync("IF EXIST "+ ids + " move " + ids + " "+ path.join("VD","databases"),  { stdio:  'inherit' } ); 
-            unzip_file(database);
-            execSync("IF EXIST "+ database +" DEL /F/Q/S " + database + " >NUL",  { stdio:  'inherit' } );  
+            execSync("IF EXIST "+ ids + " move " + ids + " "+ path.join("VD","databases"),  { stdio:  'inherit' } );
+								 
+																											
             execSync("IF EXIST "+ path.join("VD","databases","vrl_*amb") +" DEL /F/Q/S " + path.join("VD","databases","vrl_*amb") + " >NUL",  { stdio:  'inherit' } );  
             execSync("IF EXIST "+ path.join("VD","databases","vrl_*ann") +" DEL /F/Q/S " + path.join("VD","databases","vrl_*ann") + " >NUL",  { stdio:  'inherit' } );  
-            execSync("IF EXIST "+ path.join("VD","databases","vrl_*pac") +" DEL /F/Q/S " + path.join("VD","databases","vrl_*pac") + " >NUL",  { stdio:  'inherit' } );         
+            execSync("IF EXIST "+ path.join("VD","databases","vrl_*pac") +" DEL /F/Q/S " + path.join("VD","databases","vrl_*pac") + " >NUL",  { stdio:  'inherit' } );
+			unzip_file(dbfile);
           } catch (ex){
-            console.log(ex);
+            alert(ex);
           }
         }
        document.getElementById("running").innerHTML = "Done!";
@@ -205,8 +210,8 @@ function unzip_file(file){
   console.log("unziping");
     const path = require('path');
     var execSync = require('child_process').execSync; 
-    var sevenz = path.join(process.cwd(),'VD', 'bin','7za.exe ');
-    var commrun = sevenz + " x -so " + file + " | " + sevenz + " e -si -ttar -o" + path.join(process.cwd(),'VD','databases');
+	var sevenz = path.join(process.cwd(),'VD', 'bin','7za.exe ');
+    var commrun = sevenz + " x -so " + file + " | " + sevenz + " e -si -ttar -o" + path.join(process.cwd(),'VD','databases') + "";
     var ff = execSync(commrun);
 }
 function zip_file(file,file2){
@@ -216,4 +221,3 @@ function zip_file(file,file2){
     var commrun = tooldir + file + " " + file2;
     var ff = execSync(commrun);
 }
-
