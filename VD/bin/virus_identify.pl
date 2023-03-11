@@ -510,7 +510,7 @@ main: {
 		}
 	}
 
-	if ($select_ctg_num > 0 && $mode == 2 && -e $sample.pileup) {
+	if ($select_ctg_num > 0 && $mode == 2 ) {
 		# plot the select ctg
 		Util::plot_select(\%select_ctg_for_sRNA_len_check, \%select_label, \%ctg_norm_depth, \%contig_best_blast, \%best_virus_info, $map_sRNA_len_stat, $sample_dir, 'undetermined');
 		# report to screen

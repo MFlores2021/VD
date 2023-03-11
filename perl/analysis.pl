@@ -67,7 +67,7 @@ if ($controlfile ne 'NA'){
 ### Save options in a file.
 open my $writef, '>>', catfile($dir,"running_options.txt") or warn "couldn't open: $!";
 my $datestring = localtime();
-my $logoptions = "Options for running VDW (v0.93):\n" .
+my $logoptions = "Options for running VDW (v0.95):\n" .
 	"========================\n" .
 	"Results are in folder: " . $dir  . "\n" .
 	"Files: ". join(",",@files) . "\n" .
