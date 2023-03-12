@@ -309,7 +309,9 @@ foreach my $file1 (@files) {
 	push @array_files , $file;
 }
 
-# Write file
+## Following the pipeline after finishing the samples loop.
+
+# Write log file
 my $datestringend = localtime();
 print $writef "End: $datestringend \n" ;
 
@@ -325,6 +327,7 @@ if ($spike ne 'NA') {
 	graph_spiking_sum($dir,$spike);
 }
 
+#Get control_cutoff
 my $control_cutoff;
 my $av;
 my $sd;
@@ -349,6 +352,7 @@ foreach my $file ( glob catfile($dir,'*') ) {
 
 closedir(DIR); 
 
+### End of analysis
 
 sub format_spike {
 	my %count;
@@ -476,7 +480,7 @@ sub print_summary {
 	### Run summary
 	## Header
 	open my $fh1, '>', catfile($dir,"Summary.tsv") or warn "couldn't open: $!";
-	my $out = "File\t#Raw reads\t#clean reads\t21\t22\t23\t24\t";
+	my $out = "File\t#Raw reads\t#clean reads\t21\t22\t23\t24\tSum(21-24)\tSum(21-24)/clean\t";
 	foreach my $spk (@spikes) {
 		$out = $out . "Norm. Spike: ". $spk. "\t"."# Spikes: ". $spk. "\t";
 	}
@@ -505,19 +509,26 @@ sub print_summary {
 			$out = $out . "NA\tNA\t";
 		}
 
-		#21-24
+		#21-24 and sum + sum/clean
+		my $sumReads = 0;
 		foreach (21..24){
 			if($dataFile3{$file}{$_}){ 
 				$out = $out . $dataFile3{$file}{$_}."\t";
+				$sumReads += $dataFile3{$file}{$_};
 			} else{
 				$out = $out . "NA\t";
 			}
 		}
+		$out = $out . $sumReads . "\t";
+		if ($clean && $clean > 0) { $out = $out . $sumReads/$clean . "\t"; }
+		else { $out = $out . "NA\t"; }
 
 		#spikes
 		foreach my $spk (@spikes) {
-			if($dataFile2{$file}{$spk}){
+			if($dataFile2{$file}{$spk} && $clean && $clean != 0){
 				$out = $out . ($dataFile2{$file}{$spk}/$clean*1000000) . "\t" . ($dataFile2{$file}{$spk}) ."\t";
+			} elsif ($dataFile2{$file}{$spk}){
+				$out = $out . "NA\t" . ($dataFile2{$file}{$spk}) ."\t";
 			} else {
 				$out = $out . "NA\tNA\t";
 			}
