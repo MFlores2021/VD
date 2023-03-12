@@ -283,7 +283,8 @@ main: {
 		my $known_num = 0; ($known_num, $known_identified) = arrange_col2($known_identified);
 
 		if ( length($known_identified) > 1 ) { 
-			Util::plot_result($known_identified, $known_contig_blast_table, $sample_dir, 'blastn', $mode); 
+			Util::plot_result($known_identified, $known_contig_blast_table, $sample_dir, 'blastn', $mode);
+			Util::plot_result_tab($known_identified, $known_contig_blast_table, $sample_dir, 'blastn', $mode, $sample); 
 		} else {
 			unlink "$sample_dir/$sample_base.blastn.xls" if -e "$sample_dir/$sample_base.blastn.xls";
 		}
@@ -401,7 +402,8 @@ main: {
 		my $novel_num = 0; ($novel_num, $novel_identified) = arrange_col2($novel_identified);
 
 		if ( length($novel_identified) > 1 ) { 
-			Util::plot_result($novel_identified, $novel_contig_blast_table, $sample_dir, 'blastx', $mode); 
+			Util::plot_result($novel_identified, $novel_contig_blast_table, $sample_dir, 'blastx', $mode);
+			Util::plot_result_tab($novel_identified, $novel_contig_blast_table, $sample_dir, 'blastx', $mode); 
 		} else {
 			unlink "$sample_dir/$sample_base.blastx.xls" if -e "$sample_dir/$sample_base.blastx.xls";
 		}

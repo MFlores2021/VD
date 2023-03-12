@@ -1931,6 +1931,106 @@ $align
 	return $out_table;
 }
 
+=head2
+ plot_result_tab -- plot the result in tab format
+=cut
+sub plot_result_tab
+{
+	my ($known_identified, $known_contig_blast_table, $output, $type, $mode, $sample) = @_;
+
+	# parse blast result to get contig_length and match length
+	# push contig and match info to hash
+	# key 1: contig # reference virus ID
+	# 	key 2: length
+	# 		   match
+	# 		   iden
+	my %contig_match;
+	chomp($known_contig_blast_table);
+	my @bs = split(/\n/, $known_contig_blast_table);
+	foreach my $bs (@bs) {
+		my @line = split(/\t/, $bs);
+		if ($line[13] =~ m/(\d+)\/(\d+)\(\d+%\)/) {
+			$contig_match{$line[0]."#".$line[2]}{'match'}  = $1;
+			$contig_match{$line[0]."#".$line[2]}{'length'} = $2;
+			$contig_match{$line[0]."#".$line[2]}{'iden'}   = $1/$2;
+		}
+		else {
+			die "[ERR]CONTIG $bs\n";
+		}
+	}
+
+	my $OUTPUT_DIR  = "$output/$type"."_references";
+	mkdir $OUTPUT_DIR unless -e $OUTPUT_DIR;
+	my $output_file = "$output/$type.tab"; 	
+
+	my %all_hits;
+	my %out;
+	my %index;
+
+	my $out_table = '';
+	my $line_number=0;
+
+	# save contig and virus to hash
+	# key: contig ID
+	# value: virus accession ID
+	my %contig_virus;
+	chomp($known_identified);
+	my @a = split(/\n/, $known_identified);
+	foreach my $line (@a)
+	{
+		next if $line =~ m/^#/;
+		$line_number++;
+
+		my @ta = split(/\t/, $line);
+		# 0 [col1] - virus seq ID
+		# 1 [col2] - virus seq length
+		# 2 [col3] - virus seq cover length
+		# 3 [col4] - coverage (cover_length/seq_length: col3/col2)
+		# 4 [col5] - contigs
+		# 5 [col6] - contig number
+		# 6 [col7] - raw depth (read depth, from pileup file)
+		# 7 [col8] - normalized depth
+		# 8 [col9] - genus
+		# 9 [col10]- desc
+
+		die "[ERR]Num of cols: $line\n" unless scalar @ta == 10;
+		my ($ref, $len, $cov_base, $coverage, $contig, $contig_num, $raw_depth, $norm_depth, $genus, $desc) = @ta;
+
+		my ($match, $len_c, $max_iden, $min_iden) = (0, 0, 0, 100);
+		my @c = split(/,/, $ta[4]);
+		foreach my $cid (@c) {
+			my $key = $cid."#".$ref;
+			$match += $contig_match{$key}{'match'};
+			$len_c += $contig_match{$key}{'length'};
+			my $iden_c = $contig_match{$key}{'iden'};
+			$max_iden = $iden_c if $iden_c > $max_iden;
+			$min_iden = $iden_c if $iden_c < $min_iden;
+		}
+		my $iden = sprintf("%.2f", $match/$len_c*100);
+		$max_iden = sprintf("%.2f", $max_iden*100);
+		$min_iden = sprintf("%.2f", $min_iden*100);
+		$iden = 100 if $iden == 100;
+		$max_iden = 100 if $max_iden == 100;
+		$min_iden = 100 if $min_iden == 100;
+
+		$all_hits{$ref} = 1; 
+		$index{$ref} = $line_number;
+
+		my $link = $type."_references/".$ref.".html";
+		$coverage = sprintf("%.3f", $coverage) * 100;
+		$raw_depth = 'NA' if $mode == 1;
+		$norm_depth = 'NA' if $mode == 1;
+		$raw_depth = sprintf("%.1f", $raw_depth) if $mode == 2;
+		$norm_depth = sprintf("%.1f", $norm_depth) if $mode == 2;
+
+		$out_table .= $sample . "\t". $type . "\t" . $ref ."\t" . $len ."\t" . $cov_base . "\t" . $coverage ."\t" . $contig_num ."\t" . $raw_depth ."\t" . $norm_depth ."\t" . $iden ."\t" . $max_iden ."\t" . $min_iden ."\t" . $genus ."\t" . $desc ."\n";	
+	}
+
+	$out_table = "Sample\tBlast\tReference\t Length \t Coverage \t Coverage(%) \t contig \t Depth \t Depth (Norm) \t Identity \t Iden Max \t Iden Min \t Genus \t Description \n" . $out_table;
+
+	# output table to file
+	save_file($out_table, $output_file);
+}
 
 =head2
  srna_range -- only get selected size of sRNA reads for next analysis

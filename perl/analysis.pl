@@ -319,6 +319,11 @@ print $writef "End: $datestringend \n" ;
 if($spike ne 'NA'){
 	merge_spike_files($dir);
 }
+# Get blast
+my $fileBlast;
+if($fileBlast ne 'NA'){
+	# merge_blast($dir);
+}
 
 # Print
 print_summary($dir,"report_sRNA_trim.txt","control.tsv","spikeSummary.txt", "sRNA_length.txt",$spike,$controlfile, @array_files);
@@ -477,6 +482,32 @@ sub print_summary {
 		}
 	}
 
+	#Get blast results
+	my %dataFileBlast;
+	my $fileBlast;
+
+	if (-e -s $fileBlast){
+		
+		open FILE5, "$fileBlast" or warn;
+		
+		while (my $line1=<FILE5>) {   
+			# chomp;
+			my @field = split /\t/, $line1;
+			my $sample = trim($field[0]);
+			$dataFileBlast{$sample}{'reference'} = trim($field[3]);
+			$dataFileBlast{$sample}{'description'} = trim($field[13]);
+			$dataFileBlast{$sample}{'genus'} = trim($field[12]);
+			$dataFileBlast{$sample}{'type'} = trim($field[2]);
+			$dataFileBlast{$sample}{'lenCoverage'} = trim($field[5]);
+			$dataFileBlast{$sample}{'perCoverage'} = trim($field[6]);
+			$dataFileBlast{$sample}{'depth'} = trim($field[8]);
+			$dataFileBlast{$sample}{'depthNor'} = trim($field[9]);
+			$dataFileBlast{$sample}{'iden'} = trim($field[10]);
+			$dataFileBlast{$sample}{'idenMax'} = trim($field[11]);
+			$dataFileBlast{$sample}{'idenMin'} = trim($field[12]);
+		}
+	}
+
 	### Run summary
 	## Header
 	open my $fh1, '>', catfile($dir,"Summary.tsv") or warn "couldn't open: $!";
@@ -612,4 +643,8 @@ sub get_control_cutoff{
 	
 	my $cutoff = $av + ($std * $const);
 	return ($cutoff,$av,$std);
+}
+
+sub merge_blast {
+
 }
