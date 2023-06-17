@@ -67,7 +67,7 @@ if ($controlfile ne 'NA'){
 ### Save options in a file.
 open my $writef, '>>', catfile($dir,"running_options.txt") or warn "couldn't open: $!";
 my $datestring = localtime();
-my $logoptions = "Options for running VDW (v0.93):\n" .
+my $logoptions = "Options for running VDW (v0.95):\n" .
 	"========================\n" .
 	"Results are in folder: " . $dir  . "\n" .
 	"Files: ". join(",",@files) . "\n" .
@@ -309,13 +309,20 @@ foreach my $file1 (@files) {
 	push @array_files , $file;
 }
 
-# Write file
+## Following the pipeline after finishing the samples loop.
+
+# Write log file
 my $datestringend = localtime();
 print $writef "End: $datestringend \n" ;
 
 # Get spiking
 if($spike ne 'NA'){
 	merge_spike_files($dir);
+}
+# Get blast
+my $fileBlast;
+if($fileBlast ne 'NA'){
+	# merge_blast($dir);
 }
 
 # Print
@@ -325,6 +332,7 @@ if ($spike ne 'NA') {
 	graph_spiking_sum($dir,$spike);
 }
 
+#Get control_cutoff
 my $control_cutoff;
 my $av;
 my $sd;
@@ -349,6 +357,7 @@ foreach my $file ( glob catfile($dir,'*') ) {
 
 closedir(DIR); 
 
+### End of analysis
 
 sub format_spike {
 	my %count;
@@ -473,10 +482,36 @@ sub print_summary {
 		}
 	}
 
+	#Get blast results
+	my %dataFileBlast;
+	my $fileBlast;
+
+	if (-e -s $fileBlast){
+		
+		open FILE5, "$fileBlast" or warn;
+		
+		while (my $line1=<FILE5>) {   
+			# chomp;
+			my @field = split /\t/, $line1;
+			my $sample = trim($field[0]);
+			$dataFileBlast{$sample}{'reference'} = trim($field[3]);
+			$dataFileBlast{$sample}{'description'} = trim($field[13]);
+			$dataFileBlast{$sample}{'genus'} = trim($field[12]);
+			$dataFileBlast{$sample}{'type'} = trim($field[2]);
+			$dataFileBlast{$sample}{'lenCoverage'} = trim($field[5]);
+			$dataFileBlast{$sample}{'perCoverage'} = trim($field[6]);
+			$dataFileBlast{$sample}{'depth'} = trim($field[8]);
+			$dataFileBlast{$sample}{'depthNor'} = trim($field[9]);
+			$dataFileBlast{$sample}{'iden'} = trim($field[10]);
+			$dataFileBlast{$sample}{'idenMax'} = trim($field[11]);
+			$dataFileBlast{$sample}{'idenMin'} = trim($field[12]);
+		}
+	}
+
 	### Run summary
 	## Header
 	open my $fh1, '>', catfile($dir,"Summary.tsv") or warn "couldn't open: $!";
-	my $out = "File\t#Raw reads\t#clean reads\t21\t22\t23\t24\t";
+	my $out = "File\t#Raw reads\t#clean reads\t21\t22\t23\t24\tSum(21-24)\tSum(21-24)/clean\t";
 	foreach my $spk (@spikes) {
 		$out = $out . "Norm. Spike: ". $spk. "\t"."# Spikes: ". $spk. "\t";
 	}
@@ -505,19 +540,26 @@ sub print_summary {
 			$out = $out . "NA\tNA\t";
 		}
 
-		#21-24
+		#21-24 and sum + sum/clean
+		my $sumReads = 0;
 		foreach (21..24){
 			if($dataFile3{$file}{$_}){ 
 				$out = $out . $dataFile3{$file}{$_}."\t";
+				$sumReads += $dataFile3{$file}{$_};
 			} else{
 				$out = $out . "NA\t";
 			}
 		}
+		$out = $out . $sumReads . "\t";
+		if ($clean && $clean > 0) { $out = $out . $sumReads/$clean . "\t"; }
+		else { $out = $out . "NA\t"; }
 
 		#spikes
 		foreach my $spk (@spikes) {
-			if($dataFile2{$file}{$spk}){
+			if($dataFile2{$file}{$spk} && $clean && $clean != 0){
 				$out = $out . ($dataFile2{$file}{$spk}/$clean*1000000) . "\t" . ($dataFile2{$file}{$spk}) ."\t";
+			} elsif ($dataFile2{$file}{$spk}){
+				$out = $out . "NA\t" . ($dataFile2{$file}{$spk}) ."\t";
 			} else {
 				$out = $out . "NA\tNA\t";
 			}
@@ -601,4 +643,8 @@ sub get_control_cutoff{
 	
 	my $cutoff = $av + ($std * $const);
 	return ($cutoff,$av,$std);
+}
+
+sub merge_blast {
+
 }
