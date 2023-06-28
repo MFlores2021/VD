@@ -158,18 +158,24 @@ sub print_user_message {
 	my @message = @_;
 	#print "\n";
 	#my $time = get_time();
+	open(FH, ">> vdw.log" ) || warn $!;
 	foreach my $line (@message) { 
 		#print $time." ".$line."\n";
 		print "#####   " . $line."\n";
+		print FH "#####   " . $line."\n";
 	}
+	close(FH);
 	#print "\n";
 }
 
 sub print_user_submessage{
 	my @message = @_;
+	open(FH, ">> vdw.log" ) || warn $!;
 	foreach my $line (@message) { 
 		print "   ".$line."\n";
-	}
+		print FH "   ".$line."\n";
+	}	
+	close(FH);
 }
 
 sub get_time {
