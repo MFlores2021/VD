@@ -60,7 +60,7 @@ if (scalar @files < 1) { print "Couldn't find valid FastQ files.\n"; die $!; };
 # Check 
 if ($controlfile ne 'NA'){
 	if ( !grep( /^$controlfile$/, @files ) ) {
-		print "Control file name not provided or incorrect.\n";
+		Util::print_user_submessage("Control file name not provided or incorrect.\n");
 	} 
 }
 
@@ -110,6 +110,7 @@ if($rmdup ne 'NA'){
 }
 	
 ### Trimming
+my @clean_files;
 if($adaptor ne 'NA' && $length ne 'NA'){
 	my $commtrim;
 	my $trimdir = 'perl ' . catfile($localdir,'VD','tools','sRNA_clean','sRNA_clean.pl ');
@@ -120,7 +121,20 @@ if($adaptor ne 'NA' && $length ne 'NA'){
 	}
 	system($commtrim) == 0
 		 or die "Error: $commtrim . $?";
+		 
+	foreach my $file (@files) {
+		my $clean =$file;		
+		$clean =~ s/\.fq$/\.clean\.fq/;
+	    $clean =~ s/\.fastq$/\.clean\.fq/;
+		
+		my $cleanfile = catfile($dir,$clean);
+		if(-e -s $cleanfile && ($file ne $clean)){
+			
+			push @clean_files,  catfile($dir,$clean);
+		}
+	}
 }
+
 
 my @array_files;
 #Loop through the array printing out the filenames
@@ -319,6 +333,7 @@ print $writef "End: $datestringend \n" ;
 if($spike ne 'NA'){
 	merge_spike_files($dir);
 }
+
 # Get blast
 my $fileBlast;
 if($fileBlast ne 'NA'){
@@ -353,11 +368,28 @@ foreach my $file ( glob catfile($dir,'*') ) {
 	# if ($file =~ "control\.tsv") {unlink $file;}
 	# if ($file =~ "spikeSummary\.txt") {unlink $file;}
 	 if (! -d $file  && ($file =~ /\.fastq$/ || $file =~ /\.fq$/ ) ) {unlink $file;}	
+
+	foreach my $cleanfile (@clean_files){
+		if( -e -s $cleanfile) {
+			compress_file($cleanfile, $localdir);
+		}
+	}
 }
 
 closedir(DIR); 
 
 ### End of analysis
+sub compress_file {
+	my $file = shift;
+	my $localdir = shift;
+	
+	my $tooldir = catfile($localdir,'VD', 'bin','gzip.exe ');
+    my $commrun = $tooldir . " -k " . $file;
+
+	system($commrun) == 0
+		or warn "Error: $commrun . $?";
+}
+	
 
 sub format_spike {
 	my %count;
@@ -481,7 +513,7 @@ sub print_summary {
 			}
 		}
 	}
-
+	
 	#Get blast results
 	my %dataFileBlast;
 	my $fileBlast;
