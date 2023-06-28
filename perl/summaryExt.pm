@@ -5,10 +5,6 @@ use File::Basename;
 use File::Spec::Functions 'catfile';
 use List::Util qw(reduce);
 
-# concat_blast("test1","adapt_180905_SNK268_A_L002_AMRW-22-10_R1.clean.fq","spike_190517_SNK268_B_L003_AMRW-37-7_R1.clean.fq","control_190206_SNK268_A_L004_AMRW-32-48_R1.clean.fq"); 	
-
-# print_summary("test1","report_sRNA_trim.txt","NA","spikeSummary.txt", "sRNA_length.txt","AATGC,ATGAA,TGCCC,pattern","NA", undef, "adapt_180905_SNK268_A_L002_AMRW-22-10_R1.clean.fq","spike_190517_SNK268_B_L003_AMRW-37-7_R1.clean.fq","control_190206_SNK268_A_L004_AMRW-32-48_R1.clean.fq"); 	
-
 sub concat_blast {
 	my $dir = shift;
 	my @array_files = @_;
@@ -35,15 +31,14 @@ sub concat_blast {
 		}
 }
 
-sub print_summary {
+sub print_summary0 {
 	my $dir = shift;
 	my $trim = catfile($dir,shift);
 	my $control = catfile($dir,shift);
 	my $spikeFile = catfile($dir,shift);
 	my $sRNA = catfile($dir,shift);
 	my $spike = shift;
-	my $controlfile = shift;
-	my $fileBlast = shift;
+	my $controlSample = shift;
 	my @array_files = @_;
 	my @spikes = split /,/, $spike;
 	my $extended_table = 0;
@@ -128,9 +123,7 @@ sub print_summary {
 
 	#Get control results
 	my %dataFile1;
-	my $controlSample = "control_190206_SNK268_A_L004_AMRW-32-48_R1.clean.fq";
 	my $contaminRateControl = 'NA';
-	$control = "test1/control.tsv";
 
 	if (-e -s $control){
 	
@@ -204,10 +197,9 @@ sub print_summary {
 			}
 		}
 	}
-# print Dumper \%results;
+
 	#Get spike in results
 	my %dataFile2;
-	# my @spikeListRaw;
 
 	if (-e -s $spikeFile){
 		open FILE3, "$spikeFile" or warn;
@@ -230,7 +222,6 @@ sub print_summary {
 			}
 		}
 	}
-	# my @spikeList = uniq(@spikeListRaw);
 
 
 	#Get blast results
@@ -238,8 +229,8 @@ sub print_summary {
 
 	foreach my $file (@array_files) {
 		
-		$fileBlast = catfile($dir ,"result_$file" , "blastxn.tab");
-		print STDERR $fileBlast ."\n";
+		my $fileBlast = catfile($dir ,"result_$file" , "blastxn.tab");
+		# print STDERR $fileBlast ."\n";
 		if (-e -s $fileBlast){
 			
 			open FILE5, "$fileBlast" or warn;
@@ -283,9 +274,9 @@ sub print_summary {
     }
 
     #add coverageCutoff according to virus. This is done in a second round since it uses previous results
-	my ($cutoff) = get_samples_stats(%results);
+	my ($cutoff) = get_samples_stats($controlSample,%results);
 	if($cutoff){
-		my %virusCutoff = get_virus_summary("control",$cutoff,%dataFileBlastFiltered);
+		my %virusCutoff = get_virus_summary($cutoff,%dataFileBlastFiltered);
 
 		while (my ($sample, $resultType) = each %results) {
 
@@ -304,134 +295,9 @@ sub print_summary {
 	    	}
 	    }
 	}
-# print "\n\n\n\n\n\n" .Dumper \%results;
 
-	print_summaryR("varibalesfile", \@spikes,\@array_files, %results);
+	print_summaryR(catfile($dir,"Summary_analisis_table.tsv"), \@spikes,\@array_files, %results);
 
-	### Run summary
-	## Header
-	open my $fh1, '>', catfile($dir,"SummaryT.tsv") or warn "couldn't open: $!";
-	my $out = "";
-	my $header = "File\t#Raw reads\t#clean reads\t21\t22\t23\t24\tSum(21-24)\tSum(21-24)/clean\t";
-	foreach my $spk (@spikes) {
-		$header = $header . "Norm. Spike: ". $spk. "\t"."# Spikes: ". $spk. "\t";
-	}
-	$header = $header ."Control coverage\tNormalized control depth\tNormalized depth/kb control coverage\t#Mapped to control\t%Mapped to control";
-	#extended table
-	# if($extended_table == 1){
-		$header = $header . "\tReference\t" .
-					"sRSA Results(Virus)\t".
-					"Viral genus detect\t".
-					"BLAST\t".
-					"Length sequence covered\t".
-					"% sequence covered\t".
-					"Depth\t".
-					"Depth Normalized\t".
-					"%identity\t".
-					"%identity Max\t".
-					"%identity min\t".
-					"# reads mapped\t".
-					"% reads mapped\t".
-					"Contamination rate\t".
-					"Virus specific cutoff\t".
-					"Depth (Nor) *(%Coverage/100)*length\t".
-					"Depth (Nor) *(%Coverage/100)";
-	# }
-		
-	## Body
-	my $outT = "";
-	foreach my $file (@array_files) {
-		my $clean =1;
-		if($dataFile1{$file}{controlRaw}){
-			$clean = $dataFile1{$file}{controlRaw};
-		}
-
-		$file = basename($file);
-		if ($controlfile ne 'NA' && $controlfile eq $file){
-			$out = "Control: ". $file."\t";
-		} else{
-			$out = $file."\t";
-		}
-		
-		# raw and clean
-		if($dataFile{$file}{raw}){ 
-			$out = $out . $dataFile{$file}{raw}."\t".$dataFile{$file}{clean}."\t";
-			$clean = $dataFile{$file}{clean};
-			if ($clean == 0) { $clean = $dataFile1{$file}{controlRaw} };
-		} else{
-			$out = $out . "NA\tNA\t";
-		}
-
-		#21-24 and sum + sum/clean
-		my $sumReads = 0;
-		foreach (21..24){
-			if($dataFile3{$file}{$_}){ 
-				$out = $out . $dataFile3{$file}{$_}."\t";
-				$sumReads += $dataFile3{$file}{$_};
-			} else{
-				$out = $out . "NA\t";
-			}
-		}
-		$out = $out . $sumReads . "\t";
-		if ($clean && $clean > 0) { $out = $out . $sumReads/$clean . "\t"; }
-		else { $out = $out . "NA\t"; }
-
-		#spikes
-		foreach my $spk (@spikes) {
-			if($dataFile2{$file}{$spk} && $clean && $clean != 0){
-				$out = $out . ($dataFile2{$file}{$spk}/$clean*1000000) . "\t" . ($dataFile2{$file}{$spk}) ."\t";
-			} elsif ($dataFile2{$file}{$spk}){
-				$out = $out . "NA\t" . ($dataFile2{$file}{$spk}) ."\t";
-			} else {
-				$out = $out . "NA\tNA\t";
-			}
-		}
-
-		#control
-		if($dataFile1{$file}{concov}){ 
-			#Control sequence coverage,Norm deph,Norm deph kb,#Mapped reads to control,%Mapped reads to control
-			my $normDeph = 'NA';
-			if($dataFile1{$file}{depth} ne 'NA') { $normDeph = sprintf("%.2f", ($dataFile1{$file}{depth}/$clean*1000000)); }
-			my $normDephKb = 'NA';
-			if($dataFile1{$file}{kb} ne 'NA') { $normDeph = sprintf("%.6f", $dataFile1{$file}{kb}*1000); }
-
-			$out = $out . $dataFile1{$file}{concov}."\t". $normDeph ."\t". $normDephKb . "\t". $dataFile1{$file}{numMapControl}. "\t". $dataFile1{$file}{permap}."\t";
-		} else {
-			$out = $out . "NA\tNA\tNA\tNA\tNA\t";
-		}
-		
-		#extended table
-		# if($extended_table == 1){
-		my $sample = $file;
-		if($dataFileBlast{$sample}){
-			my $out0 = "\n" . $out;print STDERR Dumper \$out;
-			my $outB;
-			for  my $reference (keys $dataFileBlast{$sample}){
-				# $outB = $out0 . $reference ."\t".
-					# $dataFileBlast{$sample}{$reference}{'description'}."\t".
-					# $dataFileBlast{$sample}{$reference}{'genus'}."\t".
-					# $dataFileBlast{$sample}{$reference}{'type'}."\t".
-					# $dataFileBlast{$sample}{$reference}{'lenCoverage'}."\t".
-					# $dataFileBlast{$sample}{$reference}{'perCoverage'}."\t".
-					# $dataFileBlast{$sample}{$reference}{'depth'}."\t".
-					# $dataFileBlast{$sample}{$reference}{'depthNor'}."\t".
-					# $dataFileBlast{$sample}{$reference}{'iden'}."\t".
-					# $dataFileBlast{$sample}{$reference}{'idenMax'}."\t".
-					# $dataFileBlast{$sample}{$reference}{'idenMin'}."\n";
-					# $dataFileBlast{$sample}{$reference}{'nroMapped'}."\t".
-					# $dataFileBlast{$sample}{$reference}{'perMapped'}."\t".
-					# $dataFileBlast{$sample}{$reference}{'contaminRate'}."\t".
-					# $dataFileBlast{$sample}{$reference}{'virusCutoff'}."\t".
-					# $dataFileBlast{$sample}{$reference}{'depthFormLen'}."\t".
-					# $dataFileBlast{$sample}{$reference}{'depthForm'}."\n";
-			}
-			$out = $out . $outB;
-		}
-
-		$outT = $outT . $out ."\n";
-	}
-
-	print $fh1 $header."\n".$outT . "\n";
 }
 
 sub trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
@@ -449,34 +315,33 @@ sub get_max_by_genus {
 
 			foreach my $row (@$rows) {
 
-				# print "\nNOENTRA " . $max{$sample}{$genus}{$variable} ."\t". $row->{$variable};
 				if (not defined $max{$sample}{$genus} ) {
 		            $max{$sample}{$genus} = $row;
-		            # print "\nnodef\n"; 
 		        }
 		        if ($max{$sample}{$genus}{$variable} < $row->{$variable}) {
 		        	
 		            $max{$sample}{$genus} = $row;
-		            # print "\nentra" . $max{$sample}{$genus}{$variable} ."\t". $row->{$variable} . "\n";
 		        }
     		}
-    		 # print "\n > = == Max: " . Dumper \$max{$sample}{$genus} ; print "\n";
     	}
-    	# print "Max: " . Dumper \%max;
     }
-    # print "Max: " . Dumper \%max ;
     return %max;
 }
 
 #get stats
 sub get_samples_stats {
 	#calculate SD, Average, cut off
-
+	my $control = shift;
     my (%data) = @_;
     my %table;
 	my ($sd,$average,$cutoff);
 	my $array;
-	my $control = 'control_190206_SNK268_A_L004_AMRW-32-48_R1';
+
+	$control =~ s/\.clean\.fastq$//g;
+	$control =~ s/\.clean\.fq$//g;
+	$control =~ s/\.clean$//g;
+	$control =~ s/\.fastq$//g;
+	$control =~ s/\.fq$//g;
    
    if(%data) {
 	    while (my ($sample, $control1) = each %data) {
@@ -498,14 +363,13 @@ sub get_samples_stats {
 
 #get virus summary table
 sub get_virus_summary {
-	my $control = shift;
 	my $cutoff = shift;
     my (%data) = @_;
     my %table;
 
     while (my ($sample, $genuses) = each %data) {
     	while (my ($genus, $rows) = each %$genuses) {
-    		# print "contaminRate" . Dumper \$rows->{'contaminRate'};
+
     		my $virus = lc $rows->{'description'};
     		$virus =~ s/\.$//g;
 
@@ -531,10 +395,9 @@ sub print_summaryR {
 
 	my (%data) = @_; #same as results
 
-	$filename = "test1/Summary_analisis_table.tsv";
-	
+
 	#read columns to print 
-	open(FILE, '<', "test1/variables.tsv") or die $!;
+	open(FILE, '<', "variables.tsv") or die $!;
 	my @columns;
 	while (my $line=<FILE>) {
 		my @field = split /\t/, $line;

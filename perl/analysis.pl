@@ -13,6 +13,7 @@ use lib catfile("VD","bin");
 use Util;
 use align;
 use summary;
+use summaryExt;
 use graphs;
 use formulas;
 
@@ -48,6 +49,7 @@ if ( -e catfile($localdir,"VD","databases","vrl_*pac")){ unlink catfile($localdi
 
 # Getting fastq files
 opendir(DIR, $dir) or die $!;
+Util::print_user_message("Copying FastQ and other files\n",$dir);
 
 my @files 
     = grep { 
@@ -55,7 +57,7 @@ my @files
     && -f "$dir/$_"   # and is a file
 } readdir(DIR);
 
-if (scalar @files < 1) { print "Couldn't find valid FastQ files.\n"; die $!; };
+if (scalar @files < 1) { Util::print_user_submessage("Couldn't find valid FastQ files.\n",$dir); die $!; };
 
 # Check 
 if ($controlfile ne 'NA'){
@@ -93,6 +95,7 @@ my $stringFile = join " $dir\\", @files;
 
 ### De-duplicate
 if($rmdup ne 'NA'){
+	Util::print_user_message("Running De-duplication\n",$dir);
 	foreach my $file1 (@files) {
 		my $file = catfile($dir,$file1);
 		my $file_tmp = catfile($dir,$file1."tmp.fastq");
@@ -112,6 +115,7 @@ if($rmdup ne 'NA'){
 ### Trimming
 my @clean_files;
 if($adaptor ne 'NA' && $length ne 'NA'){
+	Util::print_user_message("Trimming sequences\n",$dir);
 	my $commtrim;
 	my $trimdir = 'perl ' . catfile($localdir,'VD','tools','sRNA_clean','sRNA_clean.pl ');
 	if($max_length ne 'NA'){
@@ -121,7 +125,7 @@ if($adaptor ne 'NA' && $length ne 'NA'){
 	}
 	system($commtrim) == 0
 		 or die "Error: $commtrim . $?";
-		 
+	Util::print_user_submessage("Sequences trimmed\n",$dir);
 	foreach my $file (@files) {
 		my $clean =$file;		
 		$clean =~ s/\.fq$/\.clean\.fq/;
@@ -138,7 +142,10 @@ if($adaptor ne 'NA' && $length ne 'NA'){
 
 my @array_files;
 #Loop through the array printing out the filenames
+
+Util::print_user_message("Analysis of samples...\n",$dir);
 foreach my $file1 (@files) {
+	Util::print_user_message("Working with sample" . $file1 . "\n",$dir);
 	my $file = catfile($dir,$file1);
     $trim = 0;
 
@@ -166,15 +173,18 @@ foreach my $file1 (@files) {
 	     $file =~ s/\.fastq$/\.clean\.fq/;
 	     $file1 =~ s/\.fq$/\.clean\.fq/;
 	     $file1 =~ s/\.fastq$/\.clean\.fq/;	 
-	        
+	     
+	     Util::print_user_message("Running FastQC\n",$dir);
 	     my $commfqc1 = "java -Xmx250m -classpath " . $fqcdir . ";" . catfile($fqcdir,"sam-1.103.jar") . ";" . catfile($fqcdir,"jbzip2-0.9.jar") . " uk.ac.babraham.FastQC.FastQCApplication " . $file  . " 2>NULL";
 		
 	     system($commfqc1) == 0
 	        or warn "Error: $commfqc1 . $?";
+	     Util::print_user_submessage("Trimming ends\n",$dir);
     }
 
     ### run spiking
 	if($spike ne 'NA'){
+		Util::print_user_message("Counting spikes\n",$dir);
 		my $spkdir = catfile($localdir,'VD','bin','seqkit.exe ');
 		my $commspk = $spkdir .'locate -p '. $spike . " " . $file .' -o ' . $file .".spike.txt";
 		system($commspk) == 0
@@ -183,9 +193,12 @@ foreach my $file1 (@files) {
 		if (-s "$file.spike.txt"){
 			format_spike("$file.spike.txt");
 		}
+		Util::print_user_submessage("Done\n",$dir);
 	}
 
 	### Run virus detect 
+	Util::print_user_message("Analyzing virus\n",$dir);
+
 	my $commvd = "perl " . catfile($localdir,'VD','virus_detect.pl ');
 	 $commvd = $database ne 'NA' ?  $commvd . " --reference " . $database . " " : $commvd;
 	 if ($database =~ /^l_/){
@@ -201,6 +214,7 @@ foreach my $file1 (@files) {
 	  or warn "Error in analysis";
 	  
 	# move final folder to results
+	 Util::print_user_submessage("Moving files\n",$dir);
 	 my $folderm = catfile($localdir,"results","result_". $file1);
 	 if ( -e $folderm ){
 		system("move ". $folderm ." ". $dir) == 0
@@ -208,6 +222,8 @@ foreach my $file1 (@files) {
 	 }
 	 
 	### Control aligment to create statistic 
+	Util::print_user_message("Running control analysis\n",$dir);
+
 	my $data_type = Util::detect_DataType($file);
 	if ( $controlseq ne 'NA'){ 
 		my $control = catfile($localdir,"VD","databases",$controlseq);
@@ -221,7 +237,8 @@ foreach my $file1 (@files) {
 		} else {
 	  		align::align_to_reference($align_program, $file, $control, "$file.sam", $align_parameters, 10000, $TEMP_DIR, $debug);
 	  	}
-
+	  	Util::print_user_submessage("Aligment ends\n",$dir);
+	  	Util::print_user_submessage("Getting alignment stats\n",$dir);
 		if (-s "$file.sam")
 		{
 			 Util::process_cmd("$samtools view -@ 5 -bt $control.fai $file.sam > $file.bam 2> $TEMP_DIR/samtools.log", $debug);
@@ -233,6 +250,7 @@ foreach my $file1 (@files) {
 		my $controout = '';
 		$controout = $controout . "File\tControl sequence length\tControl sequence coverage\tDepth\tDepth\tNorm deph kb\t#Reads\t#Mapped reads to control\t%Mapped reads to control\n";
 		
+		Util::print_user_submessage("Printing control stats\n",$dir);
 		if (-s "$file.pileup" && -s "$control.fai"){	
 			my $num=0; my $den=0;
 			open my $fh, '<', "$file.pileup" or warn "couldn't open: $!";
@@ -305,6 +323,8 @@ foreach my $file1 (@files) {
 		}
 		
 		#check if files exists and delete it
+		Util::print_user_submessage("Deleting SAM and BAM files\n",$dir);
+
 		if ( -e "$file.sam"){ unlink "$file.sam"};
 		if ( -e "$file.bam"){ unlink "$file.bam"};
 		if ( -e "$file.sorted.bam"){ unlink "$file.sorted.bam"};
@@ -317,6 +337,7 @@ foreach my $file1 (@files) {
 	}
 	
 	# Delete temp folders
+	Util::print_user_submessage("Deleting temp files\n",$dir);
 	if (-e catfile($localdir,$file1."_temp")){
 		rmtree(catfile($localdir,$file1."_temp")) or warn "couldn't: $!";
 	}
@@ -341,9 +362,14 @@ if($fileBlast ne 'NA'){
 }
 
 # Print
+Util::print_user_submessage("Creating short summary\n",$dir);
 print_summary($dir,"report_sRNA_trim.txt","control.tsv","spikeSummary.txt", "sRNA_length.txt",$spike,$controlfile, @array_files);
 
+concat_blast($dir,@array_files); 	
+print_summary0($dir,"report_sRNA_trim.txt","control.tsv","spikeSummary.txt", "sRNA_length.txt",$spike,$controlfile, @array_files);
+
 if ($spike ne 'NA') {
+	Util::print_user_submessage("Creating spikes graph\n",$dir);
 	graph_spiking_sum($dir,$spike);
 }
 
@@ -357,12 +383,17 @@ if ($controlfile ne 'NA' && $controlseq ne 'NA'){
 	($control_cutoff,$av,$sd) = get_control_cutoff($sum_file,$controlconst,$controlfile);
 }
 
+Util::print_user_submessage("Creating summary graphs\n",$dir);
 graph_size($dir);
 graph_cumulative_clean_sum($dir);
+
+Util::print_user_submessage("Creating html\n",$dir);
 create_html($dir,$spike,\@array_files,$control_cutoff,$av,$sd,$controlconst);
 
 # # Delete partial results
 foreach my $file ( glob catfile($dir,'*') ) {
+
+	Util::print_user_submessage("Deleting intermediate files and compressing files\n",$dir);
 	# if ($file =~ "spikeSum\.txt") {unlink $file;}
 	# if ($file =~ "\.spike\.txt") {unlink $file;}
 	# if ($file =~ "control\.tsv") {unlink $file;}
