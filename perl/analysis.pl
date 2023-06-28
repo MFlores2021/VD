@@ -60,7 +60,7 @@ if (scalar @files < 1) { print "Couldn't find valid FastQ files.\n"; die $!; };
 # Check 
 if ($controlfile ne 'NA'){
 	if ( !grep( /^$controlfile$/, @files ) ) {
-		Util::print_user_submessage("Control file name not provided or incorrect.\n");
+		Util::print_user_submessage("Control file name not provided or incorrect.\n",$dir);
 	} 
 }
 
