@@ -5,6 +5,7 @@ use warnings;
 use Bio::SeqIO; 
 use Bio::Graphics;
 use Bio::SeqFeature::Generic;
+use File::Spec::Functions 'catfile';
 
 sub generate_reads {
 	my $input = shift;
@@ -156,9 +157,14 @@ sub detect_seqNum {
 
 sub print_user_message {
 	my @message = @_;
+	my $msg  = shift;
+	my $folder  = shift;
+	
+	my $logfile = catfile($folder,"vdw.log");
+	
 	#print "\n";
 	#my $time = get_time();
-	open(FH, ">> vdw.log" ) || warn $!;
+	open(FH, ">>$logfile" ) || warn $!;
 	foreach my $line (@message) { 
 		#print $time." ".$line."\n";
 		print "#####   " . $line."\n";
@@ -170,7 +176,12 @@ sub print_user_message {
 
 sub print_user_submessage{
 	my @message = @_;
-	open(FH, ">> vdw.log" ) || warn $!;
+	my $msg  = shift;
+	my $folder  = shift;
+	
+	my $logfile = catfile($folder,"vdw.log");
+
+	open(FH, ">>$logfile" ) || warn $!;
 	foreach my $line (@message) { 
 		print "   ".$line."\n";
 		print FH "   ".$line."\n";
