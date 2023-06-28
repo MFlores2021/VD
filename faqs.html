@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>VDW</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script type="text/javascript" src="js/menu.js"></script>
+    <script type="text/javascript" src="js/functions.js"></script>
+    <style type="text/css">
+      body, html {
+        height: 100%;
+      }
+    </style>
+</head>
+
+<body>
+<script>
+    // get the system platform using node.js
+    var os = require('os');
+    //require('nw.gui').Window.get().showDevTools();
+    // document.write('You are running on ', os.platform());
+    $(function(){
+      $("#Menu").load("menu.html"); 
+    });
+</script>
+<div id="Menu"></div>
+
+<!-- Use any element to open the sidenav -->
+<span onclick="openNav()" style="color: chartreuse;background-color: black;"><B>&nbsp;&#9776;&nbsp;Menu&nbsp;&nbsp;</B> </span>
+
+  <div id="main">
+    <div class="container" id="container"><br>
+<h4>FAQs:</h4><br>
+<p>What to do if VDW doesn't open? Make sure VDW is not being stopped by the Antivirus. Make sure files were not maipulated/deleted by users outside of the VDW interface.</p><br>
+<p>I can't see any database version to download. What to do? Please close VDW and open again. Now you will be able to see the database version to download.</p><br>
+<p>VDW says invalid sequence, is something wrong with my FastQ files? Please alphanumeric and dash in your sample name and avoid strange characters.</p><br>
+<p>Use this contact to report bugs or receive more information</p><br>
+<a href="mailto:VirusDetect.Windows@cgiar.org">VirusDetect.Windows@cgiar.org</a>
+<br>
+</div>
+</div>
+
+</body>
+</html>
