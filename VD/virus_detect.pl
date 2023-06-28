@@ -391,6 +391,11 @@ foreach my $sample (@ARGV)
 			} else {
 				Util::print_user_submessage("No host-derived contig was removed");
 			}
+			my $host_results = "$sample.host_removed.txt";
+			open(FH, ">" . $host_results) || warn $!;
+			print FH "denovo_ctg\t$denovo_ctg";
+			print FH "host_removed\t$sub_num";
+			close(FH); 
 		}
 		align::remove_redundancy("$sample.assembled", $sample, $rr_blast_parameters, $max_end_clip, $min_overlap, $min_identity, 'ASSEMBLED',$BIN_DIR, $TEMP_DIR, $data_type, $debug) if -s "$sample.assembled";
 	} else {
@@ -433,6 +438,11 @@ foreach my $sample (@ARGV)
 			} else {
 				Util::print_user_submessage("No host-derived contig was removed");
 			}
+			my $host_results = "$sample.host_removed.txt";
+			open(FH, ">" . $host_results) || warn $!;
+			print FH "denovo_ctg\t$denovo_ctg";
+			print FH "host_removed\t$sub_num";
+			close(FH);
 		}
 		align::remove_redundancy("$sample.combined", $sample, $rr_blast_parameters, $max_end_clip, $min_overlap, $min_identity, 'CONTIG', $BIN_DIR, $TEMP_DIR, $data_type, $debug);
 	} else {
