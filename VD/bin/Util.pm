@@ -163,28 +163,28 @@ sub print_user_message {
 	my $dir = $folder ? $folder : ".";	
 	my $logfile = catfile($dir,"vdw.log");
 	
-	#print "\n";
 	#my $time = get_time();
 	open(FH, ">>$logfile" ) || warn $!;
 	foreach my $line (@message) { 
-		#print $time." ".$line."\n";
+		next if $line eq $folder;
 		print "#####   " . $line."\n";
 		print FH "#####   " . $line."\n";
 	}
 	close(FH);
-	#print "\n";
+
 }
 
 sub print_user_submessage{
 	my @message = @_;
 	my $msg  = shift;
 	my $folder  = shift;
+	
 	my $dir = $folder ? $folder : ".";
-
 	my $logfile = catfile($dir,"vdw.log");
 
 	open(FH, ">>$logfile" ) || warn $!;
 	foreach my $line (@message) { 
+		next if $line eq $folder;
 		print "   ".$line."\n";
 		print FH "   ".$line."\n";
 	}	
