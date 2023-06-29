@@ -39,6 +39,7 @@ sub print_summary0 {
 	my $sRNA = catfile($dir,shift);
 	my $spike = shift;
 	my $controlSample = shift;
+	my $localdir = shift;
 	my @array_files = @_;
 	my @spikes = split /,/, $spike;
 	my $extended_table = 0;
@@ -296,7 +297,7 @@ sub print_summary0 {
 	    }
 	}
 
-	print_summaryR(catfile($dir,"Summary_analisis_table.tsv"), \@spikes,\@array_files, %results);
+	print_summaryR(catfile($dir,"Summary_analisis_table.tsv"), \@spikes,\@array_files, $localdir, %results);
 
 }
 
@@ -390,14 +391,14 @@ sub get_virus_summary {
 
 sub print_summaryR {
 	my $filename =shift;
-	my $spikeList = shift;
-	my $samples = shift;
-
+	my $spikeList = shift;	
+	my $samples = shift;	
+	my $localdir = shift;
 	my (%data) = @_; #same as results
 
 
 	#read columns to print 
-	open(FILE, '<', "variables.tsv") or die $!;
+	open(FILE, '<', catfile($localdir,"perl","variables.tsv")) or warn $!;
 	my @columns;
 	while (my $line=<FILE>) {
 		my @field = split /\t/, $line;
@@ -409,8 +410,8 @@ sub print_summaryR {
 
 	#create a plain hash from results. easy to print 
 	my %resultsformatted;
-
-	for my $sample (@{$samples}){ print Dumper $sample;
+	for my $sample (@{$samples}){
+		
 		$sample =~ s/\.clean\.fastq$//g;
 		$sample =~ s/\.clean\.fq$//g;
 		$sample =~ s/\.clean$//g;
@@ -436,11 +437,11 @@ sub print_summaryR {
 	}
 
 	#print headers and then values according to file
-	open(FH, '>', $filename) or die $!;
+	open(FH, '>', $filename) or warn $!;
 	print FH "Sample\t";
 
 	foreach my $column(@columns){
-		my @header = values $column;
+		my @header = values %{$column};
 		
 		if ($header[0] eq 'spike'){
 			foreach my $spike (@$spikeList){
@@ -462,7 +463,7 @@ sub print_summaryR {
 		for my $rows (@{$resultsformatted{$sample}}) {
 			print FH $sample . "\t";
 			foreach (@columns){
-				my @variable = keys $_;
+				my @variable = keys %{$_};
 
 				#print normal columns 
 				if ($variable[0] ne 'spike'){
@@ -531,3 +532,5 @@ sub stdev{
 	my $std = ($sqtotal / (@$data-1)) ** 0.5;
 	return $std;
 }
+
+1;
