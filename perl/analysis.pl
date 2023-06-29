@@ -361,12 +361,13 @@ if($fileBlast ne 'NA'){
 	# merge_blast($dir);
 }
 
+
 # Print
 Util::print_user_submessage("Creating short summary\n",$dir);
 print_summary($dir,"report_sRNA_trim.txt","control.tsv","spikeSummary.txt", "sRNA_length.txt",$spike,$controlfile, @array_files);
 
-concat_blast($dir,@array_files); 	
-print_summary0($dir,"report_sRNA_trim.txt","control.tsv","spikeSummary.txt", "sRNA_length.txt",$spike,$controlfile, @array_files);
+concat_blast($dir,@array_files);
+print_summary0($dir,"report_sRNA_trim.txt","control.tsv","spikeSummary.txt", "sRNA_length.txt",$spike,$controlfile, $localdir, @array_files);
 
 if ($spike ne 'NA') {
 	Util::print_user_submessage("Creating spikes graph\n",$dir);
