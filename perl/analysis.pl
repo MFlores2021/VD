@@ -209,7 +209,7 @@ foreach my $file1 (@files) {
 	 $commvd = $host ne 'NA' ? $commvd . " --host_reference " . $host . " ": $commvd;
 	 $commvd = $cores ne 'NA' ? $commvd . " --thread_num " . $cores . " ": $commvd;
 	 $commvd = $add_parameters ne 'NA' ? $commvd . " " . $add_parameters . " ": $commvd;
-	 $commvd = $commvd . " " . $file; 
+	 $commvd = $commvd . " " . $file;
 	 system($commvd) == 0
 	  or warn "Error in analysis";
 	  
@@ -354,13 +354,6 @@ print $writef "End: $datestringend \n" ;
 if($spike ne 'NA'){
 	merge_spike_files($dir);
 }
-
-# Get blast
-my $fileBlast;
-if($fileBlast ne 'NA'){
-	# merge_blast($dir);
-}
-
 
 # Print
 Util::print_user_submessage("Creating short summary\n",$dir);
