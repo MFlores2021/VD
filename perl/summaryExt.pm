@@ -10,6 +10,7 @@ sub concat_blast {
 	my @array_files = @_;
 
 	foreach my $sample (@array_files) {
+		$sample = basename($sample);
 
 		my @sources;
 		push @sources, catfile($dir ,"result_$sample" , "blastn.tab");
@@ -229,7 +230,8 @@ sub print_summary0 {
 	my %dataFileBlast;
 
 	foreach my $file (@array_files) {
-		
+		$file = basename($file);
+
 		my $fileBlast = catfile($dir ,"result_$file" , "blastxn.tab");
 		# print STDERR $fileBlast ."\n";
 		if (-e -s $fileBlast){
