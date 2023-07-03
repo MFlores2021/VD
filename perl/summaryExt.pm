@@ -73,8 +73,8 @@ sub print_summary0 {
 				$field[0] =~ s/.fq//;
 				$dataFile{trim($field[0].".clean.fq")}{raw}   = trim($field[1]);  
 				$dataFile{trim($field[0].".clean.fq")}{clean}   = trim($field[8]);
-				$results{$sample}{"trimming"}{raw}   = trim($field[1]);  
-				$results{$sample}{"trimming"}{clean}   = trim($field[8]);
+				$results{$sample.".clean.fq"}{"trimming"}{raw}   = trim($field[1]);  
+				$results{$sample.".clean.fq"}{"trimming"}{clean}   = trim($field[8]);
 			}
 		}
 	}
@@ -455,7 +455,7 @@ sub print_summaryR {
 	}
 
 	print FH "\n";
-	for my $sample (@{$samples}){ print Dumper \$sample;
+	for my $sample (@{$samples}){
 		$sample =~ s/\.clean\.fastq$//g;
 		$sample =~ s/\.clean\.fq$//g;
 		$sample =~ s/\.clean$//g;

@@ -236,6 +236,7 @@ die "[ERR]kmer range: $kmer_range\n" if $kmer_min > $kmer_max;
 # main
 foreach my $sample (@ARGV) 
 {
+	my $dir = dirname($sample);
 	# parse zip file
 	if ($sample =~ m/\.gz$/) {
 		Util::process_cmd("$BIN_DIR/gzip $sample", $debug);
@@ -288,7 +289,7 @@ foreach my $sample (@ARGV)
 	print "Align Program: $align_program\nAlign Parameters: $align_parameters\nAlign Input File: $sample\nAlign Output File: $sample.sam\n" if $debug;
 
 	print ("####################################################################\nprocess sample $sample_base (total read: $seq_num)\n");
-	Util::print_user_message("Align reads to reference virus sequence database");
+	Util::print_user_message("Align reads to reference virus sequence database",$dir);
 	align::align_to_reference($align_program, $sample, $reference, "$sample.sam", $align_parameters, 10000, $TEMP_DIR, $debug);
 	my $mapped_num = align::filter_SAM($sample.".sam");	# filter out unmapped, 2nd hits, only keep the best hit
 
@@ -307,21 +308,21 @@ foreach my $sample (@ARGV)
 			align::remove_redundancy("$sample.aligned", $sample, $rr_blast_parameters, $max_end_clip, $min_overlap, $min_identity, 'ALIGNED', $BIN_DIR, $TEMP_DIR, $data_type, $debug);
 			my $align_num = align::count_seq("$sample.aligned");
 			if ($align_num == 0) {
-				Util::print_user_submessage("No unique contig was generated");
+				Util::print_user_submessage("No unique contig was generated",$dir);
 			}
 		} else {
 			system("type nul >$sample.aligned");
-			Util::print_user_submessage("No unique contig was generated");
+			Util::print_user_submessage("No unique contig was generated",$dir);
 		}
 	} else {
-		Util::print_user_submessage("No unique contig was generated");
+		Util::print_user_submessage("No unique contig was generated",$dir);
 	}
 	
 	# part B: 1. remove host related reads  2. de novo assembly 3. remove redundancy contigs
 	# parameter for velvet: $sample, $output_contig, $kmer_start, $kmer_end, $coverage_start, $coverage_end, $objective_type, $bin_dir, $temp_dir, $rm_dup, $debug
 	if( $host_reference ){
 		my $host_reference_base = $host_reference; $host_reference_base =~ s/.*\///;
-		Util::print_user_message("Align reads to host ($host_reference_base) reference sequences");
+		Util::print_user_message("Align reads to host ($host_reference_base) reference sequences",$dir);
 
 		if ($data_type eq 'mRNA') {
 			my $hisat_file_type = ''; # fasta or fastq
@@ -334,14 +335,14 @@ foreach my $sample (@ARGV)
 			if ($hisat_rpt =~ m/(\d+) reads; of these:/) { $total_num = $1; }
 			if ($hisat_rpt =~ m/\s+(\d+) .*aligned 0 times/) { $unmap_num = $1; }
 			my $mapped_num = $total_num - $unmap_num;
-			Util::print_user_submessage("Reads aligned");
+			Util::print_user_submessage("Reads aligned",$dir);
 			#Util::print_user_submessage("$mapped_num reads aligned");
 		} else {
 			align::align_to_reference($align_program, $sample, $host_reference, "$sample.sam", $align_parameters, 1, $TEMP_DIR, $debug);
 			align::generate_unmapped_reads("$sample.sam", "$sample.unmapped");
 		}
 
-		Util::print_user_message("De novo assembly");
+		Util::print_user_message("De novo assembly",$dir);
 
 
 		if ($data_type eq 'mRNA') {
@@ -353,7 +354,7 @@ foreach my $sample (@ARGV)
 	}	
 	else
 	{
-		Util::print_user_message("De novo assembly");
+		Util::print_user_message("De novo assembly",$dir);
 
 		if ($data_type eq 'mRNA') {
 			align::velvet_optimiser_combine($sample, "$sample.assembled", 31, 31, 10, 10, $objective_type, $BIN_DIR, $TEMP_DIR, $rm_dup, $debug) if -s $sample;
@@ -370,9 +371,9 @@ foreach my $sample (@ARGV)
 			my %denovo_ctg = Util::load_seq("$sample.assembled");		
 			my $denovo_ctg = scalar(keys(%denovo_ctg));
 			if ($denovo_ctg > 1) {
-				Util::print_user_submessage("$denovo_ctg contigs were assembled");
+				Util::print_user_submessage("$denovo_ctg contigs were assembled",$dir);
 			} else {
-				Util::print_user_submessage("$denovo_ctg contig was assembled");
+				Util::print_user_submessage("$denovo_ctg contig was assembled",$dir);
 			}
 
 		    my $blast_program = $BIN_DIR."/blastn";
@@ -385,13 +386,13 @@ foreach my $sample (@ARGV)
 			my %subtract = Util::host_subtraction("$sample.assembled", $blast_table, 90, 70);
 			my $sub_num = scalar(keys(%subtract));
 			if ($sub_num > 1) {
-				Util::print_user_submessage("$sub_num host-derived contigs were removed");
+				Util::print_user_submessage(" $sub_num host-derived contigs were removed",$dir);
 			} elsif ($sub_num == 1) {
-				Util::print_user_submessage("$sub_num host-derived contig was removed");
+				Util::print_user_submessage(" $sub_num host-derived contig was removed",$dir);
 			} else {
-				Util::print_user_submessage("No host-derived contig was removed");
+				Util::print_user_submessage(" No host-derived contig was removed",$dir);
 			}
-			my $host_results = "$sample.host_removed.txt";
+			my $host_results = catfile($dir,"$sample.host_removed.txt");
 			open(FH, ">" . $host_results) || warn $!;
 			print FH "denovo_ctg\t$denovo_ctg";
 			print FH "host_removed\t$sub_num";
@@ -399,11 +400,11 @@ foreach my $sample (@ARGV)
 		}
 		align::remove_redundancy("$sample.assembled", $sample, $rr_blast_parameters, $max_end_clip, $min_overlap, $min_identity, 'ASSEMBLED',$BIN_DIR, $TEMP_DIR, $data_type, $debug) if -s "$sample.assembled";
 	} else {
-		Util::print_user_submessage("No unique contig was generated");
+		Util::print_user_submessage("No unique contig was generated",$dir);
 	}
 
 	# combine the known and unknown virus, remove redundancy of combined results, it must be using strand_specific parameter
-	Util::print_user_message("Remove redundancies in virus contigs");
+	Util::print_user_message("Remove redundancies in virus contigs",$dir);
 
 	if (-s "$sample.aligned" && -s "$sample.assembled") {
 		$sample =~ s/\//\\/g; 
@@ -420,9 +421,9 @@ foreach my $sample (@ARGV)
 			my %denovo_ctg = Util::load_seq("$sample.combined");
 			my $denovo_ctg = scalar(keys(%denovo_ctg));
 			if ($denovo_ctg > 1) {
-				Util::print_user_submessage("$denovo_ctg contigs were assembled");
+				Util::print_user_submessage("$denovo_ctg contigs were assembled",$dir);
 			} else {
-				Util::print_user_submessage("$denovo_ctg contig was assembled");
+				Util::print_user_submessage("$denovo_ctg contig was assembled",$dir);
 			}
 			my $blast_program = $BIN_DIR."/blastn";
 			my $blast_output  = "$sample.combined.blast";
@@ -432,13 +433,13 @@ foreach my $sample (@ARGV)
 			my %subtract = Util::host_subtraction("$sample.combined", $blast_table, 90, 70);
 			my $sub_num = scalar(keys(%subtract));
 			if ($sub_num > 1) {
-				Util::print_user_submessage("$sub_num host-derived contigs were removed");
+				Util::print_user_submessage("$sub_num host-derived contigs were removed",$dir);
 			} elsif ($sub_num == 1) {
-				Util::print_user_submessage("$sub_num host-derived contig was removed");
+				Util::print_user_submessage("$sub_num host-derived contig was removed",$dir);
 			} else {
-				Util::print_user_submessage("No host-derived contig was removed");
+				Util::print_user_submessage("No host-derived contig was removed",$dir);
 			}
-			my $host_results = "$sample.host_removed.txt";
+			my $host_results = catfile($dir,"$sample.host_removed.txt");
 			open(FH, ">" . $host_results) || warn $!;
 			print FH "denovo_ctg\t$denovo_ctg";
 			print FH "host_removed\t$sub_num";
@@ -446,12 +447,12 @@ foreach my $sample (@ARGV)
 		}
 		align::remove_redundancy("$sample.combined", $sample, $rr_blast_parameters, $max_end_clip, $min_overlap, $min_identity, 'CONTIG', $BIN_DIR, $TEMP_DIR, $data_type, $debug);
 	} else {
-		Util::print_user_submessage("No unique contig was generated");
+		Util::print_user_submessage("No unique contig was generated",$dir);
 	}
 
 	# identify the virus
 
-	Util::print_user_message("Virus identification");
+	Util::print_user_message("Virus identification",$dir);
 	my $cmd_identify = "perl $BIN_DIR/virus_identify.pl --reference $reference ";
 	$cmd_identify .= "--word-size $word_size --exp-value $exp_value --exp-valuex $exp_valuex --percent-identity $percent_identity ";
 	$cmd_identify .= "--cpu-num $thread_num --mis-penalty $mis_penalty_b --gap-cost $gap_cost_b --gap-extension $gap_extension_b ";
@@ -465,7 +466,7 @@ foreach my $sample (@ARGV)
 		#print $cmd_identify;
 		Util::process_cmd($cmd_identify, $debug);
 	} else {
-		Util::print_user_submessage("No virus was identified");
+		Util::print_user_submessage("No virus was identified",$dir);
 	}
 
 	# delete temp files and log files 
@@ -473,8 +474,8 @@ foreach my $sample (@ARGV)
 	unless ($debug) {
 		system("rd /s /q $TEMP_DIR") if -s $TEMP_DIR;
 	}
-	Util::print_user_message("Finished");
-	print ("####################################################################\n\n");
+	Util::print_user_message("Finished",$dir);
+	Util::print_user_message("####################################################################\n\n",$dir);
 
 }
 
@@ -483,7 +484,7 @@ foreach my $sample (@ARGV)
 if (defined $email && $email && defined $user && $user) {
 	my $file = basename($ARGV[0]);
 	my %mail = ( To => $email,
-		From => 'bioinfo@cornell.edu',
+		From => 'j.kreuze@cip.org',
 		Subject => "VirusDetect analysis for $file is finished",
 		Message => "Dear $user,\nThe analysis for $file is finished. Please login VirusDetect to view and download your results.\nThank you for using VirusDetect.\n\nBest Regards,\nVirusDetect");
 	#sendmail(%mail) or die $Mail::Sendmail::error;

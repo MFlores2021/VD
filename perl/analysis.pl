@@ -145,7 +145,7 @@ my @array_files;
 
 Util::print_user_message("Analysis of samples...\n",$dir);
 foreach my $file1 (@files) {
-	Util::print_user_message("Working with sample" . $file1 . "\n",$dir);
+	Util::print_user_message("Working with sample: " . $file1 . "\n",$dir);
 	my $file = catfile($dir,$file1);
     $trim = 0;
 
@@ -392,9 +392,10 @@ Util::print_user_submessage("Creating html\n",$dir);
 create_html($dir,$spike,\@array_files,$control_cutoff,$av,$sd,$controlconst);
 
 # # Delete partial results
+Util::print_user_submessage("Deleting intermediate files and compressing files\n",$dir);
 foreach my $file ( glob catfile($dir,'*') ) {
 
-	Util::print_user_submessage("Deleting intermediate files and compressing files\n",$dir);
+	
 	# if ($file =~ "spikeSum\.txt") {unlink $file;}
 	# if ($file =~ "\.spike\.txt") {unlink $file;}
 	# if ($file =~ "control\.tsv") {unlink $file;}
@@ -546,32 +547,6 @@ sub print_summary {
 		}
 	}
 	
-	#Get blast results
-	my %dataFileBlast;
-	my $fileBlast;
-
-	if (-e -s $fileBlast){
-		
-		open FILE5, "$fileBlast" or warn;
-		
-		while (my $line1=<FILE5>) {   
-			# chomp;
-			my @field = split /\t/, $line1;
-			my $sample = trim($field[0]);
-			$dataFileBlast{$sample}{'reference'} = trim($field[3]);
-			$dataFileBlast{$sample}{'description'} = trim($field[13]);
-			$dataFileBlast{$sample}{'genus'} = trim($field[12]);
-			$dataFileBlast{$sample}{'type'} = trim($field[2]);
-			$dataFileBlast{$sample}{'lenCoverage'} = trim($field[5]);
-			$dataFileBlast{$sample}{'perCoverage'} = trim($field[6]);
-			$dataFileBlast{$sample}{'depth'} = trim($field[8]);
-			$dataFileBlast{$sample}{'depthNor'} = trim($field[9]);
-			$dataFileBlast{$sample}{'iden'} = trim($field[10]);
-			$dataFileBlast{$sample}{'idenMax'} = trim($field[11]);
-			$dataFileBlast{$sample}{'idenMin'} = trim($field[12]);
-		}
-	}
-
 	### Run summary
 	## Header
 	open my $fh1, '>', catfile($dir,"Summary.tsv") or warn "couldn't open: $!";
@@ -580,7 +555,7 @@ sub print_summary {
 		$out = $out . "Norm. Spike: ". $spk. "\t"."# Spikes: ". $spk. "\t";
 	}
 	$out = $out ."Control coverage\tNormalized control depth\tNormalized depth/kb control coverage\t#Mapped to control\t%Mapped to control\n";
-	
+
 	## Body
 	foreach my $file (@array_files) { 
 		my $clean =1;
@@ -709,6 +684,3 @@ sub get_control_cutoff{
 	return ($cutoff,$av,$std);
 }
 
-sub merge_blast {
-
-}

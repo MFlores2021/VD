@@ -156,8 +156,7 @@ sub detect_seqNum {
 }
 
 sub print_user_message {
-	my @message = @_;
-	my $msg  = shift;
+	my @message = shift;
 	my $folder  = shift;
 
 	my $dir = $folder ? $folder : ".";	
@@ -166,17 +165,15 @@ sub print_user_message {
 	#my $time = get_time();
 	open(FH, ">>$logfile" ) || warn $!;
 	foreach my $line (@message) { 
-		next if $line eq $folder;
 		print "#####   " . $line."\n";
-		print FH "#####   " . $line."\n";
+		print FH "#####   " . $line;
 	}
 	close(FH);
 
 }
 
 sub print_user_submessage{
-	my @message = @_;
-	my $msg  = shift;
+	my @message = shift;
 	my $folder  = shift;
 	
 	my $dir = $folder ? $folder : ".";
@@ -184,9 +181,8 @@ sub print_user_submessage{
 
 	open(FH, ">>$logfile" ) || warn $!;
 	foreach my $line (@message) { 
-		next if $line eq $folder;
 		print "   ".$line."\n";
-		print FH "   ".$line."\n";
+		print FH "   ".$line;
 	}	
 	close(FH);
 }
