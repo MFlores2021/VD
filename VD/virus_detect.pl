@@ -6,6 +6,7 @@ use Getopt::Long;
 use Cwd;
 use IO::File;
 use File::Basename;
+use File::Spec::Functions 'catfile';
 use FindBin;
 #use Mail::Sendmail;
 use lib "$FindBin::RealBin/bin";
@@ -392,11 +393,11 @@ foreach my $sample (@ARGV)
 			} else {
 				Util::print_user_submessage(" No host-derived contig was removed",$dir);
 			}
-			my $host_results = catfile($dir,"$sample.host_removed.txt");
-			open(FH, ">" . $host_results) || warn $!;
-			print FH "denovo_ctg\t$denovo_ctg";
-			print FH "host_removed\t$sub_num";
-			close(FH); 
+			my $host_results = catfile($dir,basename($sample).".host_removed.txt");
+			open my $fh, '>>', $host_results or warn "couldn't open: $!";
+			print $fh "denovo_ctg\t$denovo_ctg\n";
+			print $fh "host_removed\t$sub_num\n";
+			close($fh); 
 		}
 		align::remove_redundancy("$sample.assembled", $sample, $rr_blast_parameters, $max_end_clip, $min_overlap, $min_identity, 'ASSEMBLED',$BIN_DIR, $TEMP_DIR, $data_type, $debug) if -s "$sample.assembled";
 	} else {
@@ -439,11 +440,11 @@ foreach my $sample (@ARGV)
 			} else {
 				Util::print_user_submessage("No host-derived contig was removed",$dir);
 			}
-			my $host_results = catfile($dir,"$sample.host_removed.txt");
-			open(FH, ">" . $host_results) || warn $!;
-			print FH "denovo_ctg\t$denovo_ctg";
-			print FH "host_removed\t$sub_num";
-			close(FH);
+			my $host_results = catfile($dir,basename($sample).".host_removed.txt");
+			open my $fh, '>>', $host_results or warn "couldn't open: $!";
+			print $fh "denovo_ctg\t$denovo_ctg\n";
+			print $fh "host_removed\t$sub_num\n";
+			close($fh);
 		}
 		align::remove_redundancy("$sample.combined", $sample, $rr_blast_parameters, $max_end_clip, $min_overlap, $min_identity, 'CONTIG', $BIN_DIR, $TEMP_DIR, $data_type, $debug);
 	} else {
