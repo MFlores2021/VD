@@ -58,7 +58,7 @@ sub print_summary0 {
 			# chomp;
 			next if($line1 =~ /^#sRNA/);
 			my @field = split /\t/, $line1;
-		
+
 			if (length(trim($field[0])) > 0){
 				my $sample = trim($field[0]);
 				$sample =~ s/\.clean\.fastq$//g;
@@ -185,7 +185,7 @@ sub print_summary0 {
 				##Raw reads
 				$results{$sample}{"control"}{raw}   = trim($field[6]);
 				#%Mapped reads (21-24nts) to control
-				my $sum = $results{$sample}{"sRNA"}{'sum21-24'};
+				my $sum = $results{$sample}{"sRNA"}{'sum21-24'} ? $results{$sample}{"sRNA"}{'sum21-24'} : 0;
 				my $per2124MapControl = 'NA';
 				if ($sum > 0 ) {
 					$per2124MapControl   = trim($field[7])/$results{$sample}{"sRNA"}{'sum21-24'} ;
@@ -221,6 +221,26 @@ sub print_summary0 {
 				$dataFile2{trim($field[0])}{$field[1]} = trim($field[2]);
 				$results{$sample}{"spike"}{$field[1]} = trim($field[2]);
 				# push @spikeListRaw, $field[1];
+			}
+		}
+	}
+	
+	#get host counts	
+	foreach my $file (@array_files) {
+		my $sample = basename($file);
+		$sample =~ s/\.clean\.fastq$//g;
+		$sample =~ s/\.clean\.fq$//g;
+		$sample =~ s/\.clean$//g;
+		$sample =~ s/\.fastq$//g;
+		$sample =~ s/\.fq$//g;
+		my $hostSample = $file . ".host_removed.txt";
+		if (-e -s $hostSample){
+			open FILE, "$hostSample" or warn;
+			while (my $line1=<FILE>) {
+				my @field = split /\t/, $line1;
+				if (length(trim($field[0])) > 0){
+					$results{$sample}{"control"}{$field[0]} += trim($field[1]);
+				}
 			}
 		}
 	}
