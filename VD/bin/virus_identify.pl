@@ -99,7 +99,7 @@ my $hits_return = 500;			# megablast: hit number
 my $input_suffix = '';
 my $siRNA_percent = 0.5;		#
 
-my ($debug, $debug_force, $email, $user);
+my ($debug, $debug_force, $email, $user, $dir);
 
 ########################
 # get input parameters #
@@ -130,6 +130,7 @@ GetOptions(
 
 	'email=s'	=> \$email,
 	'user=s'	=> \$user,
+	'D|directory'			=> \$dir,
 
 );
 
@@ -290,11 +291,11 @@ main: {
 		}
 
 		if ($known_num > 1) {
-			Util::print_user_submessage("$known_num viruses were identified by nucleotide similarity (BLASTN)");
+			Util::print_user_submessage("$known_num viruses were identified by nucleotide similarity (BLASTN)",$dir);
 		} elsif ($known_num == 1) {
-			Util::print_user_submessage("$known_num virus was identified by nucleotide similarity (BLASTN) ");
+			Util::print_user_submessage("$known_num virus was identified by nucleotide similarity (BLASTN) ",$dir);
 		} else {
-			Util::print_user_submessage("No virus was identified by nucleotide similarity (BLASTN)");
+			Util::print_user_submessage("No virus was identified by nucleotide similarity (BLASTN)",$dir);
 		}
 
 		# assign known type to contigs 
@@ -327,7 +328,7 @@ main: {
 	{ 
 		# create file 'no_known_virus_detected' if there is no contig meet cutoff of known virus
 		Util::process_cmd("echo.> $sample_dir/no_virus_detected_by_blastn", $debug);
-		Util::print_user_submessage("No virus was identified by nucleotide similarity (BLASTN)");	
+		Util::print_user_submessage("No virus was identified by nucleotide similarity (BLASTN)",$dir);	
 	}
 	############################################
 	# ===== end of known virus detection ===== #
@@ -409,11 +410,11 @@ main: {
 		}
 
 		if ($novel_num > 1) {
-			Util::print_user_submessage("$novel_num viruses were identified by translated protein similarity (BLASTX)");
+			Util::print_user_submessage("$novel_num viruses were identified by translated protein similarity (BLASTX)",$dir);
 		} elsif ($novel_num == 1) {
-			Util::print_user_submessage("$novel_num virus was identified by translated protein similarity (BLASTX)");
+			Util::print_user_submessage("$novel_num virus was identified by translated protein similarity (BLASTX)",$dir);
 		} else {
-			Util::print_user_submessage("No virus was identified by translated protein similarity (BLASTX)");
+			Util::print_user_submessage("No virus was identified by translated protein similarity (BLASTX)",$dir);
 		}
 
         # assign novel type to contigs 
@@ -517,7 +518,7 @@ main: {
 		Util::plot_select(\%select_ctg_for_sRNA_len_check, \%select_label, \%ctg_norm_depth, \%contig_best_blast, \%best_virus_info, $map_sRNA_len_stat, $sample_dir, 'undetermined');
 		# report to screen
 		my $select_message = 'Contigs having enrichment of 21-22nt sRNAs were identified as potential virus sequences. Please check undetermined.html';
-		Util::print_user_submessage($select_message);
+		Util::print_user_submessage($select_message,$dir);
 	}
 
 	Util::save_file($known_contig_content, "$sample_dir/contig_sequences.blastn.fa") if length($known_contig_content) > 1;

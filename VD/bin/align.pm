@@ -50,7 +50,7 @@ sub align_to_reference
 =cut
 sub generate_unmapped_reads
 {
-	my ($input_SAM, $output_reads) = @_;
+	my ($input_SAM, $output_reads,$dir) = @_;
 
 	my %mapped_reads;
 	my ($num_unmapped_reads, $ratio) = (0, 0);
@@ -78,7 +78,7 @@ sub generate_unmapped_reads
 	$ratio = $ratio."%";
 
 	my $mapped_num = scalar(keys %mapped_reads);
-	Util::print_user_submessage("$mapped_num reads aligned");
+	Util::print_user_submessage("$mapped_num reads aligned",$dir);
 
 	return ($num_unmapped_reads, $ratio);
 }
@@ -91,6 +91,7 @@ sub generate_unmapped_reads
 sub filter_SAM
 {
         my $input_SAM = shift;
+        my $dir = shift;
         $input_SAM =~ s/\//\\/g; 
 
         my $temp_SAM = $input_SAM.".temp";
@@ -189,7 +190,7 @@ sub filter_SAM
 	$fh->close;
 	my $mapped_num = scalar(keys(%mapped_reads));
 
-	Util::print_user_submessage("$mapped_num reads aligned");
+	Util::print_user_submessage("$mapped_num reads aligned",$dir);
         #print STDERR "This program filtered $filtered_count out of $total_count reads (" . sprintf("%.2f", $filtered_count / $total_count * 100) . ") as 2ndhits reads, only for BWA\n";
 
 	return $mapped_num;
@@ -738,7 +739,7 @@ sub contigStats
 =cut
 sub remove_redundancy
 {
-	my ($contig_file, $read_file, $parameters, $max_end_clip, $min_overlap, $min_identity, $perfix, $bin_dir, $temp_dir, $data_type, $debug) = @_;
+	my ($contig_file, $read_file, $parameters, $max_end_clip, $min_overlap, $min_identity, $perfix, $bin_dir, $temp_dir, $data_type, $debug, $dir) = @_;
 	$contig_file =~ s/\//\\/g; 
 	# guess thread number used for blast, or using default 20
 	my $cpu_num = 8;
@@ -753,7 +754,7 @@ sub remove_redundancy
 	$after_contig_num  = $before_contig_num - 1;	# this is seq number after remove redundancy	
 
 	if ($before_contig_num == 0) {
-		Util::print_user_submessage("No unique contig was generated");
+		Util::print_user_submessage("No unique contig was generated",$dir);
 		return 1;
 	}
 
@@ -768,11 +769,11 @@ sub remove_redundancy
 		my $uniq_ctg_num = scalar(keys(%uniq_ctg_hash));
 		
 		if ($uniq_ctg_num > 1) {
-			Util::print_user_submessage("$uniq_ctg_num unique contigs were generated");
+			Util::print_user_submessage("$uniq_ctg_num unique contigs were generated",$dir);
 		} elsif ($uniq_ctg_num == 1) {
-			Util::print_user_submessage("$uniq_ctg_num unique contig was generated");
+			Util::print_user_submessage("$uniq_ctg_num unique contig was generated",$dir);
 		} else {
-			Util::print_user_submessage("No unique contig was generated");
+			Util::print_user_submessage("No unique contig was generated",$dir);
 		}
 
 		base_correction($read_file, $contig_file, $cpu_num, $perfix, $bin_dir, $temp_dir, $debug);	
@@ -803,11 +804,11 @@ sub remove_redundancy
 	}
 
 	if ($after_contig_num > 1) {
-		Util::print_user_submessage("$after_contig_num unique contigs were generated");
+		Util::print_user_submessage("$after_contig_num unique contigs were generated",$dir);
 	} elsif ($after_contig_num == 1) {
-		Util::print_user_submessage("$after_contig_num unique contig was generated");
+		Util::print_user_submessage("$after_contig_num unique contig was generated",$dir);
 	} else {
-		Util::print_user_submessage("No unique contig was generated");
+		Util::print_user_submessage("No unique contig was generated",$dir);
 	}
 
 	# finish remove redundancy, next for base correction

@@ -292,7 +292,7 @@ foreach my $sample (@ARGV)
 	print ("####################################################################\nprocess sample $sample_base (total read: $seq_num)\n");
 	Util::print_user_message("Align reads to reference virus sequence database",$dir);
 	align::align_to_reference($align_program, $sample, $reference, "$sample.sam", $align_parameters, 10000, $TEMP_DIR, $debug);
-	my $mapped_num = align::filter_SAM($sample.".sam");	# filter out unmapped, 2nd hits, only keep the best hit
+	my $mapped_num = align::filter_SAM($sample.".sam",$dir);	# filter out unmapped, 2nd hits, only keep the best hit
 
 	if ($mapped_num > 0)
 	{
@@ -306,7 +306,7 @@ foreach my $sample (@ARGV)
 
 		# system("cp $sample.aligned $sample.aligned.raw.ctg");	# for debug
 		if (-s "$sample.aligned") {
-			align::remove_redundancy("$sample.aligned", $sample, $rr_blast_parameters, $max_end_clip, $min_overlap, $min_identity, 'ALIGNED', $BIN_DIR, $TEMP_DIR, $data_type, $debug);
+			align::remove_redundancy("$sample.aligned", $sample, $rr_blast_parameters, $max_end_clip, $min_overlap, $min_identity, 'ALIGNED', $BIN_DIR, $TEMP_DIR, $data_type, $debug,$dir);
 			my $align_num = align::count_seq("$sample.aligned");
 			if ($align_num == 0) {
 				Util::print_user_submessage("No unique contig was generated",$dir);
@@ -340,7 +340,7 @@ foreach my $sample (@ARGV)
 			#Util::print_user_submessage("$mapped_num reads aligned");
 		} else {
 			align::align_to_reference($align_program, $sample, $host_reference, "$sample.sam", $align_parameters, 1, $TEMP_DIR, $debug);
-			align::generate_unmapped_reads("$sample.sam", "$sample.unmapped");
+			align::generate_unmapped_reads("$sample.sam", "$sample.unmapped",$dir);
 		}
 
 		Util::print_user_message("De novo assembly",$dir);
@@ -399,7 +399,7 @@ foreach my $sample (@ARGV)
 			print $fh "host_removed\t$sub_num\n";
 			close($fh); 
 		}
-		align::remove_redundancy("$sample.assembled", $sample, $rr_blast_parameters, $max_end_clip, $min_overlap, $min_identity, 'ASSEMBLED',$BIN_DIR, $TEMP_DIR, $data_type, $debug) if -s "$sample.assembled";
+		align::remove_redundancy("$sample.assembled", $sample, $rr_blast_parameters, $max_end_clip, $min_overlap, $min_identity, 'ASSEMBLED',$BIN_DIR, $TEMP_DIR, $data_type, $debug, $dir) if -s "$sample.assembled";
 	} else {
 		Util::print_user_submessage("No unique contig was generated",$dir);
 	}
@@ -446,7 +446,7 @@ foreach my $sample (@ARGV)
 			print $fh "host_removed\t$sub_num\n";
 			close($fh);
 		}
-		align::remove_redundancy("$sample.combined", $sample, $rr_blast_parameters, $max_end_clip, $min_overlap, $min_identity, 'CONTIG', $BIN_DIR, $TEMP_DIR, $data_type, $debug);
+		align::remove_redundancy("$sample.combined", $sample, $rr_blast_parameters, $max_end_clip, $min_overlap, $min_identity, 'CONTIG', $BIN_DIR, $TEMP_DIR, $data_type, $debug, $dir);
 	} else {
 		Util::print_user_submessage("No unique contig was generated",$dir);
 	}
@@ -462,6 +462,7 @@ foreach my $sample (@ARGV)
 	$cmd_identify .= "--novel-len-cutoff $novel_len_cutoff ";
 	$cmd_identify .= "--seq-info $seq_info --prot-tab $prot_tab ";
 	$cmd_identify .= "-d " if $debug;
+	$cmd_identify .= "-D " if $dir;
 	$cmd_identify .= "$sample $sample.combined ";
 	if (-s "$sample.combined") {
 		#print $cmd_identify;
