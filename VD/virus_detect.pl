@@ -462,7 +462,7 @@ foreach my $sample (@ARGV)
 	$cmd_identify .= "--novel-len-cutoff $novel_len_cutoff ";
 	$cmd_identify .= "--seq-info $seq_info --prot-tab $prot_tab ";
 	$cmd_identify .= "-d " if $debug;
-	$cmd_identify .= "-D " if $dir;
+	$cmd_identify .= "--directory $dir ";
 	$cmd_identify .= "$sample $sample.combined ";
 	if (-s "$sample.combined") {
 		#print $cmd_identify;
