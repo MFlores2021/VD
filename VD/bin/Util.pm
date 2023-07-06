@@ -166,7 +166,7 @@ sub print_user_message {
 	open(FH, ">>$logfile" ) || warn $!;
 	foreach my $line (@message) { 
 		print "#####   " . $line."\n";
-		print FH "#####   " . $line;
+		print FH "#####   " . $line."\n";
 	}
 	close(FH);
 
@@ -182,7 +182,7 @@ sub print_user_submessage{
 	open(FH, ">>$logfile" ) || warn $!;
 	foreach my $line (@message) { 
 		print "   ".$line."\n";
-		print FH "   ".$line;
+		print FH "   ".$line."\n";
 	}	
 	close(FH);
 }

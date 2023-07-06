@@ -18,6 +18,7 @@ Usage: virus_identify.pl [options] --reference reference input_read contig
  Options(3):
   --reference           Name of the reference virus sequences database [vrl_plant]
   --diff-ratio          The hits with distance less than 0.25 will be combined into one  [0.25] 
+  --directory			Working directory
  
  blast-related options(7):
   --word-size           Minimum word size - length of best perfect match [11]
@@ -130,7 +131,7 @@ GetOptions(
 
 	'email=s'	=> \$email,
 	'user=s'	=> \$user,
-	'D|directory'			=> \$dir,
+	'directory=s'			=> \$dir,
 
 );
 
