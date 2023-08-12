@@ -8,7 +8,7 @@ use List::Util qw(reduce);
 sub concat_blast {
 	my $dir = shift;
 	my @array_files = @_;
-	my $sumBlastxn = "Sample\tBlast\tReference\tLength\tCoverage\tCoverage(%) contig\tDepth\tDepth (Norm)\tIdentity\tIden Max\tIden Min\tGenus\tDescription\n" ;
+	my $sumBlastxn = "Sample\tBlast\tReference\tLength\tCoverage\tCoverage(%) contig\tDepth\tDepth (Norm)\tIdentity\tIden Max\tIden Min\tGenus\tDescription" ;
 
 	foreach my $sample (@array_files) {
 		$sample = basename($sample);
