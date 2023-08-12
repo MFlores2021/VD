@@ -470,12 +470,12 @@ USAGE: $0 -s adapter_sequence -l minimum_length -m maximum_length sRNA1 sRNA2 ..
 			}
 
 
+			#Added in order to do not delete long reads that doesn't get trimmed 
+			if ($label =~ m/3p_unmatch/ && $read_len > 30) {
 
-			#if ($label =~ m/3p_unmatch/) {
+				print $out1 "@".$id1."\n".$seq."\n".$id2."\n".$qul."\n";
 
-			#	print $out1 "@".$id1."\n".$seq."\n".$id2."\n".$qul."\n";
-
-			#}
+			}
 
 
 
