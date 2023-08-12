@@ -1,5 +1,0 @@
-Sat Aug 12 16:46:32 2023
- C:/Users/lib-pac-olin-ppc/Documents/GitHub/VD/VD/bin/velveth C:\Users\lib-pac-olin-ppc\Documents\GitHub\VD\spike_190517_SNK268_B_L003_AMRW-37-7_R1.clean.fq_temp\spike_190517_SNK268_B_L003_AMRW-37-7_R1.clean.fq_13_5 13 -fastq C:\Users\lib-pac-olin-ppc\Documents\GitHub\VD\spike_190517_SNK268_B_L003_AMRW-37-7_R1.clean.fq_temp\spike_190517_SNK268_B_L003_AMRW-37-7_R1.clean.fq
-Sat Aug 12 16:46:32 2023
- C:/Users/lib-pac-olin-ppc/Documents/GitHub/VD/VD/bin/velvetg C:\Users\lib-pac-olin-ppc\Documents\GitHub\VD\spike_190517_SNK268_B_L003_AMRW-37-7_R1.clean.fq_temp\spike_190517_SNK268_B_L003_AMRW-37-7_R1.clean.fq_13_5 -cov_cutoff 5 -min_contig_lgth 30
-Final graph has 111 nodes and n50 of 67, max 222, total 6615, using 0/28551 reads

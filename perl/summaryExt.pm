@@ -8,7 +8,6 @@ use List::Util qw(reduce);
 sub concat_blast {
 	my $dir = shift;
 	my @array_files = @_;
-	my $sumBlastxn = "Sample\tBlast\tReference\tLength\tCoverage\tCoverage(%) contig\tDepth\tDepth (Norm)\tIdentity\tIden Max\tIden Min\tGenus\tDescription" ;
 
 	foreach my $sample (@array_files) {
 		$sample = basename($sample);
@@ -25,16 +24,12 @@ sub concat_blast {
 		    if (open my $in, '<', $file) {
 		        while (my $line = <$in>) {
 		            print $out $line;
-					$sumBlastxn .= $line if ($line !~ /^Sample/);
 		        }
 		        close $in;
 		    }
 		}
 		close $out;
-	}
-	open my $outS, '>', catfile($dir , "Summary_blast.tab") or warn "Could not open blastxn summary for appending\n";
-	print $outS $sumBlastxn;
-	close $outS
+		}
 }
 
 sub print_summary0 {
