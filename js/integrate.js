@@ -31,7 +31,10 @@
 			var ref = document.getElementById("references").value;
 			var cores = document.getElementById("cores").value;
 			var param = document.getElementById("param").value;
-			var control = document.getElementById("control").value;
+			
+			var options = document.getElementById('control').selectedOptions;
+			var listcontrol = Array.from(options).map(({ value }) => value);
+			var control = listcontrol.toString();
 			var controlfile = document.getElementById("ccontrol").value;
 			var controlconstant = document.getElementById("number_sd").value;
 			var dedup = document.getElementById("dedup").checked;
@@ -51,7 +54,6 @@
 			commrun = (param.trim() != "") ? commrun + ' "'+ param + '" ' : commrun + "NA ";
 
 			//hacer q si se elige control te pregunte la secuencia
-	  
 			create_analysisbat(runperl, commrun);
 
 			console.log(runperl);
