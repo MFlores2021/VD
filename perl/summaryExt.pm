@@ -159,17 +159,17 @@ sub print_summary0 {
 			my @field = split /\t/, $line1;
 			if (length(trim($field[0])) > 0){
 			   	#Control sequence coverage
-				$dataFile1{trim($field[0])}{concov}   = trim($field[2]); 
+				$dataFile1{trim($field[0])}{concov}   = trim($field[3]); 
 				#Norm deph
-				$dataFile1{trim($field[0])}{depth}   = trim($field[4]);  
+				$dataFile1{trim($field[0])}{depth}   = trim($field[5]);  
 				#Norm deph kb
-				$dataFile1{trim($field[0])}{kb}   = trim($field[5]);
+				$dataFile1{trim($field[0])}{kb}   = trim($field[6]);
 				##Mapped reads to control
-				$dataFile1{trim($field[0])}{numMapControl}   = trim($field[7]);
+				$dataFile1{trim($field[0])}{numMapControl}   = trim($field[8]);
 				#%Mapped reads to control
-				$dataFile1{trim($field[0])}{permap}   = trim($field[8]);
+				$dataFile1{trim($field[0])}{permap}   = trim($field[9]);
 				##Raw reads
-				$dataFile1{trim($field[0])}{controlRaw}   = trim($field[6]);
+				$dataFile1{trim($field[0])}{controlRaw}   = trim($field[7]);
 
 				my $sample = trim($field[0]);
 				$sample =~ s/\.clean\.fastq$//g;
@@ -177,18 +177,20 @@ sub print_summary0 {
 				$sample =~ s/\.clean$//g;
 				$sample =~ s/\.fastq$//g;
 				$sample =~ s/\.fq$//g;
+				#Control sequence name
+				$results{$sample}{"control"}{name}   = trim($field[1]); 
 				#Control sequence coverage
-				$results{$sample}{"control"}{concov}   = trim($field[2]); 
+				$results{$sample}{"control"}{concov}   = trim($field[3]); 
 				#Norm deph
-				$results{$sample}{"control"}{depth}   = trim($field[4]);  
+				$results{$sample}{"control"}{depth}   = trim($field[5]);  
 				#Norm deph kb
-				$results{$sample}{"control"}{kb}   = trim($field[5]);
+				$results{$sample}{"control"}{kb}   = trim($field[6]);
 				##Mapped reads to control
-				$results{$sample}{"control"}{numMapControl}   = trim($field[7]); 
+				$results{$sample}{"control"}{numMapControl}   = trim($field[8]); 
 				#%Mapped reads to control
-				$results{$sample}{"control"}{permap}   = trim($field[8]);
+				$results{$sample}{"control"}{permap}   = trim($field[9]);
 				##Raw reads
-				$results{$sample}{"control"}{raw}   = trim($field[6]);
+				$results{$sample}{"control"}{raw}   = trim($field[7]);
 				#%Mapped reads (21-24nts) to control
 				my $sum = $results{$sample}{"sRNA"}{'sum21-24'} ? $results{$sample}{"sRNA"}{'sum21-24'} : 0;
 				my $per2124MapControl = 'NA';

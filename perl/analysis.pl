@@ -221,12 +221,16 @@ foreach my $file1 (@files) {
 			or warn "Error moving folder";
 	 }
 	 
-	### Control aligment to create statistic 
+	### Control aligment to create statistics
 	Util::print_user_message("Running control analysis\n",$dir);
 
 	my $data_type = Util::detect_DataType($file);
-	if ( $controlseq ne 'NA'){ 
-		my $control = catfile($localdir,"VD","databases",$controlseq);
+	if ( $controlseq ne 'NA'){
+		my @controls = split /,/, $controlseq;
+		my $i = 0;
+		foreach(@controls) {
+		my $controlSeqName = $_;
+		my $control = catfile($localdir,"VD","databases",$controlSeqName);
 
 		my $align_parameters = $cores ne 'NA' ?  " -t $cores  " : " -t 1 ";
 		my $samtools = catfile("$BIN_DIR","samtools"); 
@@ -235,20 +239,20 @@ foreach my $file1 (@files) {
 			Util::process_cmd("$align_program index -p $control -a bwtsw $control 2>> $TEMP_DIR/bwa-mem.log", $debug) unless -s "$control.amb";
 			Util::process_cmd("$align_program mem $align_parameters $control $file 1> $file.sam 2>> $TEMP_DIR/bwa-mem.log", $debug);
 		} else {
-	  		align::align_to_reference($align_program, $file, $control, "$file.sam", $align_parameters, 10000, $TEMP_DIR, $debug);
-	  	}
-	  	Util::print_user_submessage("Aligment ends\n",$dir);
-	  	Util::print_user_submessage("Getting alignment stats\n",$dir);
+			align::align_to_reference($align_program, $file, $control, "$file.sam", $align_parameters, 10000, $TEMP_DIR, $debug);
+		}
+		Util::print_user_submessage("Aligment ends\n",$dir);
+		Util::print_user_submessage("Getting alignment stats\n",$dir);
 		if (-s "$file.sam")
 		{
 			 Util::process_cmd("$samtools view -@ 5 -bt $control.fai $file.sam > $file.bam 2> $TEMP_DIR/samtools.log", $debug);
 			 Util::process_cmd("$samtools sort $file.bam -o $file.sorted.bam 2> $TEMP_DIR/samtools.log", $debug);
 			 Util::process_cmd("$samtools mpileup $file.sorted.bam > $file.pileup 2> $TEMP_DIR/samtools.log", $debug);
-			 Util::process_cmd("$samtools flagstat $file.sam >$file.stats.txt", $debug);
+			 Util::process_cmd("$samtools flagstat $file.sam >$file.stats.$i.txt", $debug);
 		
 		} 
 		my $controout = '';
-		$controout = $controout . "File\tControl sequence length\tControl sequence coverage\tDepth\tDepth\tNorm deph kb\t#Reads\t#Mapped reads to control\t%Mapped reads to control\n";
+		$controout = $controout . "File\tControl sequence name\tControl sequence length\tControl sequence coverage\tDepth\tDepth\tNorm deph kb\t#Reads\t#Mapped reads to control\t%Mapped reads to control\n";
 		
 		Util::print_user_submessage("Printing control stats\n",$dir);
 		if (-s "$file.pileup" && -s "$control.fai"){	
@@ -267,20 +271,24 @@ foreach my $file1 (@files) {
 			}
 			#0 File name
 			$controout = $controout . "$file1\t";
-			#1 Control sequence length
+			#1 Control sequence name
+			$controout = $controout . "$controlSeqName\t";
+			#2 Control sequence length
 			$controout = $controout .  $size;
-			#2 Control sequence coverage
+			#3 Control sequence coverage
 			$controout = $controout . "\t". sprintf("%.2f",($den/$size*100)) . "%";
 			my $depth=$num/$den;
-			#3 Depth
-			$controout = $controout . "\t". $depth;
 			#4 Depth
 			$controout = $controout . "\t". $depth;
-			#5 Norm deph kb
+			#5 Depth
+			$controout = $controout . "\t". $depth;
+			#6 Norm deph kb
 			$controout = $controout . "\t". $depth/$size;
 		} else {
 			#File name
 			$controout = $controout . "$file1\t";
+			#0 Control sequence name
+			$controout = $controout . "$controlSeqName\t";
 			#Control sequence length
 			$controout = $controout .  'NA';
 			#Control sequence coverage
@@ -293,22 +301,22 @@ foreach my $file1 (@files) {
 			$controout = $controout . "\tNA";
 		}
 		
-		if (-s "$file.stats.txt"){
-			open my $fh, '<', "$file.stats.txt" or warn "couldn't open: $!";
+		if (-s "$file.stats.$i.txt"){
+			open my $fh, '<', "$file.stats.$i.txt" or warn "couldn't open: $!";
 			while (my $line = <$fh>){
 				if(index $line, 'total (QC', >=0){
 					$line =~ m/(\d+ )/;
-					##Reads
+					#7 #Reads
 					$controout = $controout . "\t" . $1;
 				}
 				if(index $line, 'mapped (', >=0){
 					$line =~ m/(\d+ )/;
-					##Mapped reads to control
+					#8 #Mapped reads to control
 					$controout = $controout . "\t".$1;
 				}
 				if(index $line, 'mapped (', >=0){
 					$line =~ m/(\d+.\d+\%)/;
-					#%Mapped reads to control
+					#9 %Mapped reads to control
 					$controout = $controout . "\t".$1. "\n";
 				}
 				
@@ -333,9 +341,9 @@ foreach my $file1 (@files) {
 		if ( -e catfile("$TEMP_DIR","bwa.log")){ unlink catfile("$TEMP_DIR","bwa.log")};
 		if ( -e catfile("$TEMP_DIR","samtools.log")){ unlink catfile("$TEMP_DIR","samtools.log")};
 		if ( -e catfile("$TEMP_DIR","bwa.sai")){ unlink catfile("$TEMP_DIR","bwa.sai")};
-
+		$i++;
+		}
 	}
-	
 	# Delete temp folders
 	Util::print_user_submessage("Deleting temp files\n",$dir);
 	if (-e catfile($localdir,$file1."_temp")){
@@ -484,17 +492,17 @@ sub print_summary {
 			my @field = split /\t/, $line1;
 			   if (length(trim($field[0])) > 0){
 			   	#Control sequence coverage
-				$dataFile1{trim($field[0])}{concov}   = trim($field[2]); 
+				$dataFile1{trim($field[0])}{concov}   = trim($field[3]); 
 				#Norm deph
-				$dataFile1{trim($field[0])}{depth}   = trim($field[4]);  
+				$dataFile1{trim($field[0])}{depth}   = trim($field[5]);  
 				#Norm deph kb
-				$dataFile1{trim($field[0])}{kb}   = trim($field[5]);
+				$dataFile1{trim($field[0])}{kb}   = trim($field[6]);
 				##Mapped reads to control
-				$dataFile1{trim($field[0])}{map}   = trim($field[7]);
+				$dataFile1{trim($field[0])}{map}   = trim($field[8]);
 				#%Mapped reads to control
-				$dataFile1{trim($field[0])}{permap}   = trim($field[8]);
+				$dataFile1{trim($field[0])}{permap}   = trim($field[9]);
 				##Raw reads
-				$dataFile1{trim($field[0])}{raw}   = trim($field[6]);
+				$dataFile1{trim($field[0])}{raw}   = trim($field[7]);
 			}
 		}
 	}
