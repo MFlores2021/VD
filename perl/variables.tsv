@@ -20,9 +20,13 @@ depthNor	Depth Normalized
 iden	%identity 
 idenMax	%identity Max 
 idenMin	%identity Min 
-numMapControl	# reads mapped to control 
-per2124MapControl	%Mapped reads (21-24nts) to control 
-contaminRate	Contamination rate 
-coverageCutoff	Virus specific contamination cutoff 
 depthFormLen	Depth (Nor) *(%Coverage/100)*length 
-depthFormLen	Depth (Nor) *(%Coverage/100)
+depthForm	Depth (Nor) *(%Coverage/100)
+0:numMapControl	# reads mapped to control 
+0:per2124MapControl	%Mapped reads (21-24nts) to control 
+0:contaminRate	Contamination rate 
+0:coverageCutoff	Virus specific contamination cutoff 
+1:numMapControl	# reads mapped to control 
+1:per2124MapControl	%Mapped reads (21-24nts) to control 
+1:contaminRate	Contamination rate 
+1:coverageCutoff	Virus specific contamination cutoff

@@ -368,7 +368,7 @@ Util::print_user_submessage("Creating short summary\n",$dir);
 print_summary($dir,"report_sRNA_trim.txt","control.tsv","spikeSummary.txt", "sRNA_length.txt",$spike,$controlfile, @array_files);
 
 concat_blast($dir,@array_files);
-print_summary0($dir,"report_sRNA_trim.txt","control.tsv","spikeSummary.txt", "sRNA_length.txt",$spike,$controlfile, $localdir, @array_files);
+print_summary0($dir,"report_sRNA_trim.txt","control.tsv","spikeSummary.txt", "sRNA_length.txt",$spike,$controlfile, $localdir, $controlseq, @array_files);
 
 if ($spike ne 'NA') {
 	Util::print_user_submessage("Creating spikes graph\n",$dir);
@@ -472,11 +472,11 @@ sub print_summary {
 			my @field = split /\t/, $line1;  
 			   if (length(trim($field[0])) > 0){
 				$dataFile{trim($field[0])}{raw}   = trim($field[1]);  
-				$dataFile{trim($field[0])}{clean}   = trim($field[8]);
+				$dataFile{trim($field[0])}{clean}   = trim($field[8]) > 0  ? trim($field[8]) : trim($field[1]);
 				$field[0] =~ s/.fastq//;
 				$field[0] =~ s/.fq//;
 				$dataFile{trim($field[0].".clean.fq")}{raw}   = trim($field[1]);  
-				$dataFile{trim($field[0].".clean.fq")}{clean}   = trim($field[8]);
+				$dataFile{trim($field[0].".clean.fq")}{clean}   = trim($field[8]) > 0  ? trim($field[8]) : trim($field[1]);
 			}
 		}
 	}

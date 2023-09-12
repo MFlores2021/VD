@@ -46,8 +46,11 @@ sub print_summary0 {
 	my $spike = shift;
 	my $controlSample = shift;
 	my $localdir = shift;
+	my $controlseq = shift;
 	my @array_files = @_;
+	
 	my @spikes = split /,/, $spike;
+	my @controls = split /,/, $controlseq;
 	my $extended_table = 0;
 
 	# opendir(DIR, $dir) or die $!;
@@ -74,17 +77,19 @@ sub print_summary0 {
 
 				$dataFile{trim($field[0])}{raw}   = trim($field[1]);  
 				$dataFile{trim($field[0])}{clean}   = trim($field[8]);
-				$field[0] =~ s/.fastq//;
+				$field[0] =~ s/.fastq//;	
 				$field[0] =~ s/.fq//;
 				$dataFile{trim($field[0].".clean.fq")}{raw}   = trim($field[1]);  
 				$dataFile{trim($field[0].".clean.fq")}{clean}   = trim($field[8]);
 				$results{$sample.".clean.fq"}{"trimming"}{raw}   = trim($field[1]);  
-				$results{$sample.".clean.fq"}{"trimming"}{clean}   = trim($field[8]);
+				$results{$sample.".clean.fq"}{"trimming"}{clean}   = trim($field[8]) > 0  ? trim($field[8]) : trim($field[1]);
+				$results{$sample}{"trimming"}{raw}   = trim($field[1]);  
+				$results{$sample}{"trimming"}{clean}   = trim($field[8]) > 0  ? trim($field[8]) : trim($field[1]);
 			}
 		}
 	}
 
-	#Get sRNA results to get size 21-24
+	#Get sRNA results to get size 21-24	
 	my %dataFile3;
 	
 	if (-e -s $sRNA){
@@ -130,7 +135,7 @@ sub print_summary0 {
 
 	#Get control results
 	my %dataFile1;
-	my $contaminRateControl = 'NA';
+	my %contaminRateControl;
 
 	if (-e -s $control){
 	
@@ -139,6 +144,8 @@ sub print_summary0 {
 			# chomp;
 			next if($line =~ /^File/); 
 			my @field = split /\t/, $line;
+			my ($controlIndex) = grep { $controls[$_] eq $field[1] } (0 .. @controls-1);
+
 			if (length(trim($field[0])) > 0 && trim($field[0]) eq $controlSample){
 				my $sample = trim($field[0]);
 				$sample =~ s/\.clean\.fastq$//g;
@@ -148,7 +155,9 @@ sub print_summary0 {
 				$sample =~ s/\.fq$//g;
 				my $sum = $results{$sample}{"sRNA"}{'sum21-24'};
 				if ($sum > 0 ) {
-					$contaminRateControl   = trim($field[7])/$results{$sample}{"sRNA"}{'sum21-24'} ;
+					my $perMapControl = trim($field[9]);
+					if (index($perMapControl, '%') != -1) { $perMapControl =~ s/%$//g; $perMapControl =$perMapControl/100}
+					$contaminRateControl{$controlIndex}   = $perMapControl/$results{$sample}{"sRNA"}{'sum21-24'} ;
 				}
 			}
 		}
@@ -157,6 +166,8 @@ sub print_summary0 {
 		while (my $line1=<FILE>) {
 			next if($line1 =~ /^File/);
 			my @field = split /\t/, $line1;
+			my ($controlIndex) = grep { $controls[$_] eq $field[1] } (0 .. @controls-1);
+			
 			if (length(trim($field[0])) > 0){
 			   	#Control sequence coverage
 				$dataFile1{trim($field[0])}{concov}   = trim($field[3]); 
@@ -178,30 +189,32 @@ sub print_summary0 {
 				$sample =~ s/\.fastq$//g;
 				$sample =~ s/\.fq$//g;
 				#Control sequence name
-				$results{$sample}{"control"}{name}   = trim($field[1]); 
+				$results{$sample}{"control"}{$controlIndex. ":name"}   = trim($field[1]); 
 				#Control sequence coverage
-				$results{$sample}{"control"}{concov}   = trim($field[3]); 
+				$results{$sample}{"control"}{$controlIndex. ":concov"}   = trim($field[3]); 
 				#Norm deph
-				$results{$sample}{"control"}{depth}   = trim($field[5]);  
+				$results{$sample}{"control"}{$controlIndex. ":depth"}   = trim($field[5]);  
 				#Norm deph kb
-				$results{$sample}{"control"}{kb}   = trim($field[6]);
+				$results{$sample}{"control"}{$controlIndex. ":kb"}   = trim($field[6]);
 				##Mapped reads to control
-				$results{$sample}{"control"}{numMapControl}   = trim($field[8]); 
+				$results{$sample}{"control"}{$controlIndex. ":numMapControl"}   = trim($field[8]); 
 				#%Mapped reads to control
-				$results{$sample}{"control"}{permap}   = trim($field[9]);
+				$results{$sample}{"control"}{$controlIndex. ":permap"}   = trim($field[9]);
 				##Raw reads
-				$results{$sample}{"control"}{raw}   = trim($field[7]);
+				$results{$sample}{"control"}{$controlIndex. ":raw"}   = trim($field[7]);
 				#%Mapped reads (21-24nts) to control
 				my $sum = $results{$sample}{"sRNA"}{'sum21-24'} ? $results{$sample}{"sRNA"}{'sum21-24'} : 0;
-				my $per2124MapControl = 'NA';
+				my $per2124MapControl = '0';
 				if ($sum > 0 ) {
-					$per2124MapControl   = trim($field[7])/$results{$sample}{"sRNA"}{'sum21-24'} ;
+					my $perMapControl = trim($field[9]);
+					if (index($perMapControl, '%') != -1) { $perMapControl =~ s/%$//g; $perMapControl =$perMapControl/100}
+					$per2124MapControl   = $perMapControl/$results{$sample}{"sRNA"}{'sum21-24'} ;
 				}
-				$results{$sample}{"control"}{per2124MapControl} = $per2124MapControl;
-				if ($contaminRateControl ne 'NA' && $per2124MapControl ne 'NA') {
-					$results{$sample}{"control"}{contaminRate}   = $per2124MapControl/$contaminRateControl;
+				$results{$sample}{"control"}{$controlIndex. ":per2124MapControl"} = $per2124MapControl;
+				if ($contaminRateControl{$controlIndex} && $per2124MapControl ne '0') {
+					$results{$sample}{"control"}{$controlIndex. ":contaminRate"}   = $per2124MapControl/$contaminRateControl{$controlIndex};
 				} else {
-					$results{$sample}{"control"}{contaminRate}   = 'NA';
+					$results{$sample}{"control"}{$controlIndex. ":contaminRate"}   = 0;
 				}
 			}
 		}
@@ -260,7 +273,7 @@ sub print_summary0 {
 		$file = basename($file);
 
 		my $fileBlast = catfile($dir ,"result_$file" , "blastxn.tab");
-		# print STDERR $fileBlast ."\n";
+		
 		if (-e -s $fileBlast){
 			
 			open FILE5, "$fileBlast" or warn;
@@ -290,7 +303,7 @@ sub print_summary0 {
 			}
 		}
 	}
-	my %dataFileBlastFiltered = get_max_by_genus('depthFormLen', %dataFileBlast);
+	my %dataFileBlastFiltered = get_max_by_genus('depthNor', %dataFileBlast);
 
 	while (my ($sample, $genuses) = each %dataFileBlastFiltered) {
 		$sample =~ s/\.clean\.fastq$//g;
@@ -304,7 +317,7 @@ sub print_summary0 {
     }
 
     #add coverageCutoff according to virus. This is done in a second round since it uses previous results
-	my ($cutoff) = get_samples_stats($controlSample,%results);
+	my $cutoff = get_samples_stats($controlSample,%results);
 	if($cutoff){
 		my %virusCutoff = get_virus_summary($cutoff,%dataFileBlastFiltered);
 
@@ -318,7 +331,9 @@ sub print_summary0 {
 		    			my $virusName = lc @{$arrayEntries}[$i]->{description};
 		    			$virusName =~ s/\.$//g;
 		    			if($virusCutoff{$virusName}){
-		    				$results{$sample}{'blast'}[$i]{coverageCutoff} = $virusCutoff{$virusName}{coverageCutoff};
+		    				foreach my $key (keys %$cutoff){
+		    					$results{$sample}{'blast'}[$i]{$key. ':coverageCutoff'} = $virusCutoff{$virusName}{$key. ':coverageCutoff'};
+		    				}
 		    			}
 		    		}
 	    		}
@@ -364,30 +379,36 @@ sub get_samples_stats {
 	my $control = shift;
     my (%data) = @_;
     my %table;
-	my ($sd,$average,$cutoff);
-	my $array;
+	my ($sd0,$average0,$sd1,$average1);
+	my %cutoff;
+	my $array0;
+	my $array1;
 
 	$control =~ s/\.clean\.fastq$//g;
 	$control =~ s/\.clean\.fq$//g;
 	$control =~ s/\.clean$//g;
 	$control =~ s/\.fastq$//g;
 	$control =~ s/\.fq$//g;
-   
+
    if(%data) {
 	    while (my ($sample, $control1) = each %data) {
 	    	if($sample ne $control){
-	    		next if (! $control1->{control}->{contaminRate});
-	    		push @$array, $control1->{control}->{contaminRate};
+	    		next if (! $control1->{control}->{"0:contaminRate"});
+	    		push @$array0, $control1->{control}->{"0:contaminRate"};
+	    		push @$array1, $control1->{control}->{"1:contaminRate"};
 	    	}
 		}
-		$average = average($array);
-		$sd = stdev($array);
-		$cutoff = cutoff($average,$sd,2);
+		$average0 = average($array0);
+		$average1 = average($array1);
+		$sd0 = stdev($array0);
+		$sd1 = stdev($array1);
+		$cutoff{0} = cutoff($average0,$sd0,2);
+		$cutoff{1} = cutoff($average1,$sd1,2);
 	}
-	if($cutoff ne $cutoff + 0 ){
+	if( ($cutoff{0} ne $cutoff{0} + 0) || ($cutoff{1} ne $cutoff{1} + 0) ){
 		return;
 	}
-	return ($cutoff,$sd,$average);
+	return \%cutoff;
 
 }
 
@@ -406,11 +427,15 @@ sub get_virus_summary {
     		#filter by highest if duplicated
     		if (not defined $table{$virus}{'maxDepthNorm'} ) {
 		        $table{$virus}{'maxDepthNorm'} = $rows->{'depthNor'};
-		        $table{$virus}{'maxDepthNorm'} = $rows->{'depthNor'}*$cutoff;
+		        foreach my $key (keys %$cutoff){
+		        	$table{$virus}{$key. ':coverageCutoff'} = $rows->{'depthNor'}*$cutoff->{$key};
+		    	}
 		    }
 		    if ($table{$virus}{'maxDepthNorm'} < $rows->{'depthNor'}) {		        	
 		        $table{$virus}{'maxDepthNorm'} = $rows->{'depthNor'};
-		        $table{$virus}{'coverageCutoff'} = $rows->{'depthNor'}*$cutoff;
+		        foreach my $key (keys %$cutoff){
+		        	$table{$virus}{$key. ':coverageCutoff'} = $rows->{'depthNor'}*$cutoff->{$key};
+		    	}
 		    }
 		}
 	}
@@ -423,8 +448,8 @@ sub print_summaryR {
 	my $spikeList = shift;	
 	my $samples = shift;	
 	my $localdir = shift;
-	my (%data) = @_; #same as results
 
+	my (%data) = @_;
 
 	#read columns to print 
 	open(FILE, '<', catfile($localdir,"perl","variables.tsv")) or warn $!;
@@ -489,14 +514,15 @@ sub print_summaryR {
 		$sample =~ s/\.fastq$//g;
 		$sample =~ s/\.fq$//g;
 
-		for my $rows (@{$resultsformatted{$sample}}) {
+		foreach my $rows (@{$resultsformatted{$sample}}) {
 			print FH $sample . "\t";
 			foreach (@columns){
 				my @variable = keys %{$_};
 
 				#print normal columns 
 				if ($variable[0] ne 'spike'){
-					if($rows->{$variable[0]}){
+					my $columnVar = qq|$variable[0]|;
+					if(exists($rows->{$columnVar})  ){
 						print FH $rows->{$variable[0]} ."\t";
 					} else {
 						print FH "NA\t";
@@ -532,34 +558,5 @@ sub uniq {
     grep !$seen{$_}++, @_;
 }
 
-###borrar:
-
-sub average{
-	my $data = shift;
-	if (not @$data) {
-		warn("Empty array!");
-		return 0;
-	}
-	my $total = 0;
-	foreach (@$data) {
-			$total += $_;
-	}
-	my $average = $total / @$data;
-	return $average;
-}
-
-sub stdev{
-	my $data = shift;
-	if(@$data == 1){
-			return 0;
-	}
-	my $average = &average($data);
-	my $sqtotal = 0;
-	foreach(@$data) {
-			$sqtotal += ($average-$_) ** 2;
-	}
-	my $std = ($sqtotal / (@$data-1)) ** 0.5;
-	return $std;
-}
 
 1;
