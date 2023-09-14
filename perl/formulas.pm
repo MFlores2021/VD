@@ -6,7 +6,7 @@ use Data::Dumper;
 
 sub average{
 	my $data = shift;
-	if (not @$data) {
+	if (!$data || not @$data ) {
 		warn("Empty array!");
 		return 0;
 	}
@@ -20,7 +20,7 @@ sub average{
 
 sub stdev{
 	my $data = shift;
-	if(@$data == 1){
+	if(!$data || @$data == 1){
 			return 0;
 	}
 	my $average = &average($data);

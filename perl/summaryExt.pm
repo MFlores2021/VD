@@ -121,10 +121,14 @@ sub print_summary0 {
 						$results{$sample}{"sRNA"}{$field[0]} = trim($column); 
 						$results{$sample}{"sRNA"}{'sum21-24'} += trim($column);
 					}
+					#In case it was not cleaned then assumes all reads correspond to 21-24
+					if ($results{$sample}{"sRNA"}{'sum21-24'} < 1) {
+						$results{$sample}{"sRNA"}{'sum21-24'} = $results{$sample}{"trimming"}{clean};
+					}
 					if($results{$sample}{"trimming"}{clean} && $results{$sample}{"sRNA"}{'sum21-24'} && $results{$sample}{"trimming"}{clean} >0 ){
 						$results{$sample}{"sRNA"}{'sumClean'} = $results{$sample}{"sRNA"}{'sum21-24'}/$results{$sample}{"trimming"}{clean};
 					} else {
-						$results{$sample}{"sRNA"}{'sumClean'} = 'NA';
+						$results{$sample}{"sRNA"}{'sumClean'} = '1';
 					}
 				}
 				$i++;

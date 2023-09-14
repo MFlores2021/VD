@@ -394,6 +394,11 @@ create_html($dir,$spike,\@array_files,$control_cutoff,$av,$sd,$controlconst);
 
 # # Delete partial results
 Util::print_user_submessage("Deleting intermediate files and compressing files\n",$dir);
+foreach my $cleanfile (@clean_files){
+	if( -e -s $cleanfile) {
+		compress_file($cleanfile, $localdir);
+	}
+}
 foreach my $file ( glob catfile($dir,'*') ) {
 
 	
@@ -401,14 +406,9 @@ foreach my $file ( glob catfile($dir,'*') ) {
 	# if ($file =~ "\.spike\.txt") {unlink $file;}
 	# if ($file =~ "control\.tsv") {unlink $file;}
 	# if ($file =~ "spikeSummary\.txt") {unlink $file;}
-	 if (! -d $file  && ($file =~ /\.fastq$/ || $file =~ /\.fq$/ ) ) {unlink $file;}	
-
-	foreach my $cleanfile (@clean_files){
-		if( -e -s $cleanfile) {
-			compress_file($cleanfile, $localdir);
-		}
-	}
+	 if (! -d $file  && !($file =~ /\.clean.fq$/) && ($file =~ /\.fastq$/ || $file =~ /\.fq$/ ) ) {unlink $file;}	
 }
+
 
 closedir(DIR); 
 
