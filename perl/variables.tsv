@@ -22,11 +22,11 @@ idenMax	%identity Max
 idenMin	%identity Min 
 depthFormLen	Depth (Nor) *(%Coverage/100)*length 
 depthForm	Depth (Nor) *(%Coverage/100)
-0:numMapControl	# reads mapped to control 
-0:per2124MapControl	%Mapped reads (21-24nts) to control 
-0:contaminRate	Contamination rate 
-0:coverageCutoff	Virus specific contamination cutoff 
-1:numMapControl	# reads mapped to control 
-1:per2124MapControl	%Mapped reads (21-24nts) to control 
-1:contaminRate	Contamination rate 
-1:coverageCutoff	Virus specific contamination cutoff
+0:numMapControl	0:# reads mapped to control 
+0:per2124MapControl	0:%Mapped reads (21-24nts) to control 
+0:contaminRate	0:Contamination rate 
+0:coverageCutoff	0:Virus specific contamination cutoff 
+1:numMapControl	1:# reads mapped to control 
+1:per2124MapControl	1:%Mapped reads (21-24nts) to control 
+1:contaminRate	1:Contamination rate 
+1:coverageCutoff	1:Virus specific contamination cutoff

@@ -483,6 +483,7 @@ sub print_summary {
 
 	#Get control results
 	my %dataFile1;
+	my @controlNamesList;
 
 	if (-e -s $control){
 	
@@ -492,20 +493,26 @@ sub print_summary {
 			my @field = split /\t/, $line1;
 			   if (length(trim($field[0])) > 0){
 			   	#Control sequence coverage
-				$dataFile1{trim($field[0])}{concov}   = trim($field[3]); 
+				$dataFile1{trim($field[0])}{trim($field[1])}{concov}   = trim($field[3]); 
 				#Norm deph
-				$dataFile1{trim($field[0])}{depth}   = trim($field[5]);  
+				$dataFile1{trim($field[0])}{trim($field[1])}{depth}   = trim($field[5]);  
 				#Norm deph kb
-				$dataFile1{trim($field[0])}{kb}   = trim($field[6]);
+				$dataFile1{trim($field[0])}{trim($field[1])}{kb}   = trim($field[6]);
 				##Mapped reads to control
-				$dataFile1{trim($field[0])}{map}   = trim($field[8]);
+				$dataFile1{trim($field[0])}{trim($field[1])}{map}   = trim($field[8]);
 				#%Mapped reads to control
-				$dataFile1{trim($field[0])}{permap}   = trim($field[9]);
+				$dataFile1{trim($field[0])}{trim($field[1])}{permap}   = trim($field[9]);
 				##Raw reads
+				$dataFile1{trim($field[0])}{trim($field[1])}{raw}   = trim($field[7]);
 				$dataFile1{trim($field[0])}{raw}   = trim($field[7]);
+				if(trim($field[1]) ne "Control sequence name") {
+					push @controlNamesList,trim($field[1]);
+				}
 			}
 		}
 	}
+	my %seen = ();
+	my @controlNames = grep { ! $seen{$_} ++ } @controlNamesList;
 
 	#Get spike in results
 	my %dataFile2;
@@ -555,7 +562,15 @@ sub print_summary {
 	foreach my $spk (@spikes) {
 		$out = $out . "Norm. Spike: ". $spk. "\t"."# Spikes: ". $spk. "\t";
 	}
-	$out = $out ."Control coverage\tNormalized control depth\tNormalized depth/kb control coverage\t#Mapped to control\t%Mapped to control\n";
+	#$out = $out ."Control coverage\tNormalized control depth\tNormalized depth/kb control coverage\t#Mapped to control\t%Mapped to control\n";
+	foreach (@controlNames){
+		$out = $out . "Control coverage " . $_ .
+				"\tNormalized control depth " . $_ .
+				"\tNormalized depth/kb control coverage " . $_ .
+				"\t#Mapped to control" . $_ .
+				"\t%Mapped to control" . $_ . "\t";
+	}
+	$out = $out . "\n";
 
 	## Body
 	foreach my $file (@array_files) { 
@@ -606,18 +621,19 @@ sub print_summary {
 		}
 
 		#control
-		if($dataFile1{$file}{concov}){ 
-			#Control sequence coverage,Norm deph,Norm deph kb,#Mapped reads to control,%Mapped reads to control
-			my $normDeph = 'NA';
-			if($dataFile1{$file}{depth} ne 'NA') { $normDeph = sprintf("%.2f", ($dataFile1{$file}{depth}/$clean*1000000)); }
-			my $normDephKb = 'NA';
-			if($dataFile1{$file}{kb} ne 'NA') { $normDeph = sprintf("%.6f", $dataFile1{$file}{kb}*1000); }
+		foreach (@controlNames){
+			if($dataFile1{$file}{$_}{concov}){ 
+				#Control sequence coverage,Norm deph,Norm deph kb,#Mapped reads to control,%Mapped reads to control
+				my $normDeph = 'NA';
+				if($dataFile1{$file}{$_}{depth} ne 'NA') { $normDeph = sprintf("%.2f", ($dataFile1{$file}{$_}{depth}/$clean*1000000)); }
+				my $normDephKb = 'NA';
+				if($dataFile1{$file}{$_}{kb} ne 'NA') { $normDeph = sprintf("%.6f", $dataFile1{$file}{$_}{kb}*1000); }
 
-			$out = $out . $dataFile1{$file}{concov}."\t". $normDeph ."\t". $normDephKb . "\t". $dataFile1{$file}{map}. "\t". $dataFile1{$file}{permap}."\t";
-		} else {
-			$out = $out . "NA\tNA\tNA\tNA\tNA\t";
+				$out = $out . $dataFile1{$file}{$_}{concov}."\t". $normDeph ."\t". $normDephKb . "\t". $dataFile1{$file}{$_}{map}. "\t". $dataFile1{$file}{$_}{permap}."\t";
+			} else {
+				$out = $out . "NA\tNA\tNA\tNA\tNA\t";
+			}
 		}
-
 		$out = $out ."\n";
 	}
 

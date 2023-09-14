@@ -318,6 +318,7 @@ sub print_summary0 {
 
     #add coverageCutoff according to virus. This is done in a second round since it uses previous results
 	my $cutoff = get_samples_stats($controlSample,%results);
+	my %controlNames;
 	if($cutoff){
 		my %virusCutoff = get_virus_summary($cutoff,%dataFileBlastFiltered);
 
@@ -333,6 +334,7 @@ sub print_summary0 {
 		    			if($virusCutoff{$virusName}){
 		    				foreach my $key (keys %$cutoff){
 		    					$results{$sample}{'blast'}[$i]{$key. ':coverageCutoff'} = $virusCutoff{$virusName}{$key. ':coverageCutoff'};
+		    					$controlNames{$key} = $results{$sample}{'control'}{$key. ':name'};
 		    				}
 		    			}
 		    		}
@@ -341,7 +343,7 @@ sub print_summary0 {
 	    }
 	}
 
-	print_summaryR(catfile($dir,"Summary_analisis_table.tsv"), \@spikes,\@array_files, $localdir, %results);
+	print_summaryR(catfile($dir,"Summary_analisis_table.tsv"), \@spikes,\@array_files, $localdir,\%controlNames, %results);
 
 }
 
@@ -448,8 +450,10 @@ sub print_summaryR {
 	my $spikeList = shift;	
 	my $samples = shift;	
 	my $localdir = shift;
-
+	my $controlNames = shift;
 	my (%data) = @_;
+	
+	my %controlNames = %{$controlNames};
 
 	#read columns to print 
 	open(FILE, '<', catfile($localdir,"perl","variables.tsv")) or warn $!;
@@ -502,7 +506,13 @@ sub print_summaryR {
 				print FH "spike " . $spike . "\t";
 			}
 		} else {
-			print FH $header[0] . "\t";
+			#Print control names
+			my @field = split /:/, $header[0];
+			if ($controlNames{$field[0]} ){
+				print FH $field[1] . " - " . $controlNames{$field[0]} . "\t"; 
+			} else {
+				print FH $header[0] . "\t";
+			}
 		}
 	}
 
