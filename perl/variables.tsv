@@ -9,6 +9,7 @@ sumClean	Library quality (21-24) ntd %
 spike	spike
 host_removed	Removed Host Reads
 denovo_ctg	Contigs
+directory	directory
 reference	Reference
 description	sRSA Results(Virus) 
 genus	Viral genus detect

@@ -343,7 +343,7 @@ sub print_summary0 {
 	    }
 	}
 
-	print_summaryR(catfile($dir,"Summary_analisis_table.tsv"), \@spikes,\@array_files, $localdir,\%controlNames, %results);
+	print_summaryR($dir, \@spikes,\@array_files, $localdir,\%controlNames, %results);
 
 }
 
@@ -446,7 +446,7 @@ sub get_virus_summary {
 }
 
 sub print_summaryR {
-	my $filename =shift;
+	my $dir =shift;
 	my $spikeList = shift;	
 	my $samples = shift;	
 	my $localdir = shift;
@@ -454,6 +454,7 @@ sub print_summaryR {
 	my (%data) = @_;
 	
 	my %controlNames = %{$controlNames};
+	my $filename = catfile($dir,"Summary_analisis_table.tsv");
 
 	#read columns to print 
 	open(FILE, '<', catfile($localdir,"perl","variables.tsv")) or warn $!;
@@ -518,6 +519,7 @@ sub print_summaryR {
 
 	print FH "\n";
 	for my $sample (@{$samples}){
+		my $resultsDir = catfile($dir ,"result_$sample");
 		$sample =~ s/\.clean\.fastq$//g;
 		$sample =~ s/\.clean\.fq$//g;
 		$sample =~ s/\.clean$//g;
@@ -531,11 +533,15 @@ sub print_summaryR {
 
 				#print normal columns 
 				if ($variable[0] ne 'spike'){
-					my $columnVar = qq|$variable[0]|;
-					if(exists($rows->{$columnVar})  ){
-						print FH $rows->{$variable[0]} ."\t";
+					if (trim($variable[0]) eq 'directory') {
+						print FH $resultsDir ."\t";
 					} else {
-						print FH "NA\t";
+						my $columnVar = qq|$variable[0]|;
+						if(exists($rows->{$columnVar})  ){
+							print FH $rows->{$variable[0]} ."\t";
+						} else {
+							print FH "NA\t";
+						}
 					}
 				#print spikes
 				} else {
