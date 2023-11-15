@@ -474,7 +474,7 @@ USAGE: $0 -s adapter_sequence -l minimum_length -m maximum_length sRNA1 sRNA2 ..
 			if ($label =~ m/3p_unmatch/ && $read_len > 45) {
 
 				print $out1 "@".$id1."\n".$seq."\n".$id2."\n".$qul."\n";
-
+				$clean_num++;
 			}
 
 
