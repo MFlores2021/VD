@@ -1,9 +1,9 @@
 raw	Total reads
-clean	Cleaned Reads 
+clean	Clean reads 
 21	21nt reads
 22	22nt reads
 23	23nt reads
-24	24 nt reads
+24	24nt reads
 sum21-24	Library quality (21-24) ntd 
 sumClean	Library quality (21-24) ntd %
 spike	spike
@@ -27,7 +27,11 @@ depthForm	Depth (Nor) *(%Coverage/100)
 0:per2124MapControl	0:%Mapped reads (21-24nts) to control 
 0:contaminRate	0:Contamination rate 
 0:coverageCutoff	0:Virus specific contamination cutoff 
+0:averageCutoff	0:Virus average cutoff 
+0:finalResult	0:Final result
 1:numMapControl	1:# reads mapped to control 
 1:per2124MapControl	1:%Mapped reads (21-24nts) to control 
 1:contaminRate	1:Contamination rate 
 1:coverageCutoff	1:Virus specific contamination cutoff
+1:averageCutoff	1:Virus average cutoff 
+1:finalResult	1:Final result
