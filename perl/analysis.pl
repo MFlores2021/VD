@@ -132,13 +132,17 @@ if($adaptor ne 'NA' && $length ne 'NA'){
 	    $clean =~ s/\.fastq$/\.clean\.fq/;
 		
 		my $cleanfile = catfile($dir,$clean);
-		if(-e -s $cleanfile && ($file ne $clean)){
+		if ( -z $cleanfile ) {
+			unlink $cleanfile or warn;
+			$cleanfile = catfile($dir,$file);
+		}
+		if(-e -s $cleanfile){ # && ($file ne $clean)){
 			
-			push @clean_files,  catfile($dir,$clean);
+			push @clean_files, $cleanfile;
 		}
 	}
+	
 }
-
 
 my @array_files;
 #Loop through the array printing out the filenames
@@ -344,6 +348,7 @@ foreach my $file1 (@files) {
 		$i++;
 		}
 	}
+	
 	# Delete temp folders
 	Util::print_user_submessage("Deleting temp files\n",$dir);
 	if (-e catfile($localdir,$file1."_temp")){
@@ -418,7 +423,7 @@ sub compress_file {
 	my $localdir = shift;
 	
 	my $tooldir = catfile($localdir,'VD', 'bin','gzip.exe ');
-    my $commrun = $tooldir . " -k " . $file;
+    my $commrun = $tooldir . " " . $file;
 
 	system($commrun) == 0
 		or warn "Error: $commrun . $?";
