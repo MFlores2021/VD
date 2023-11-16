@@ -125,6 +125,9 @@ sub print_summary0 {
 					$dataFile3{trim($listFq[$i]).".clean.fastq"}{$field[0]} = trim($column); 
 					$dataFile3{trim($listFq[$i]).".fastq"}{$field[0]} = trim($column);
 					
+					#my $data_type = eval { Util::detect_DataType($sample)}  || 'NA';
+					#if ( $data_type eq "mRNA") Store raw
+					
 					if (($field[0]+0 >20) && ($field[0]+0 <25)){
 						$results{$sample}{"sRNA"}{$field[0]} = trim($column); 
 						$results{$sample}{"sRNA"}{'sum21-24'} += trim($column);
@@ -138,16 +141,23 @@ sub print_summary0 {
 		}
 	}
 	# #In case it was not cleaned then assumes all reads correspond to 21-24
-	foreach my $sample (@array_files) {
-		#If mRNA then instead of counting reads by size. it uses all
-		my $data_type = eval { Util::detect_DataType($sample)}  || 'NA';
+	while (my ($sample, $fields) = each %results) {
 
-		if ( $data_type eq "mRNA" || $results{$sample}{"sRNA"}{'sum21-24'} < 1 ) {
-			$results{$sample}{"sRNA"}{'sum21-24'} = $results{$sample}{"trimming"}{clean};
-			$results{$sample}{"sRNA"}{'sumClean'} = '1';
-		}
-		
-	}
+    	while (my ($fieldType, $rows) = each %$fields) {
+			if($fieldType eq "sRNA"){
+				#foreach my $row (@$rows) {
+				while (my ($row, $value) = each %$rows) {
+					if($row eq "sum21-24"){
+						if (!$results{$sample}{"sRNA"}{'sum21-24'} || $results{$sample}{"sRNA"}{'sum21-24'} < 1 ){
+							$results{$sample}{"sRNA"}{'sum21-24'} = $results{$sample}{"trimming"}{clean};
+							$results{$sample}{"sRNA"}{'sumClean'} = '1';
+						}
+					}
+				}
+			}
+    	}
+    }
+	
 
 	#Get control results
 	my %dataFile1;
